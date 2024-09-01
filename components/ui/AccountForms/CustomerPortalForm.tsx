@@ -56,7 +56,7 @@ export default function CustomerPortalForm({ subscription }: Props) {
           <p className="pb-4 sm:pb-0">Manage your subscription on Stripe.</p>
           <button
             onClick={handleStripePortalRequest}
-            loading={isSubmitting}
+            // loading={isSubmitting}
           >
             Open customer portal
           </button>

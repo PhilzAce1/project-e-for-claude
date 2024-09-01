@@ -32,7 +32,7 @@ export default function NameForm({ userName }: { userName: string }) {
           <button
                         type="submit"
             form="nameForm"
-            loading={isSubmitting}
+            // loading={isSubmitting}
           >
             Update Name
           </button>

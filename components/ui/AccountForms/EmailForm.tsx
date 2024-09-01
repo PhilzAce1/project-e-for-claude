@@ -38,7 +38,7 @@ export default function EmailForm({
           <button
             type="submit"
             form="emailForm"
-            loading={isSubmitting}
+            // loading={isSubmitting}
           >
             Update Email
           </button>

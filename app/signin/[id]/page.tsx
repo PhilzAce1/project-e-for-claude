@@ -8,7 +8,6 @@ import {
   getDefaultSignInView,
   getRedirectMethod
 } from '@/utils/auth-helpers/settings';
-import Card from '@/components/ui/Card';
 import PasswordSignIn from '@/components/ui/AuthForms/PasswordSignIn';
 import EmailSignIn from '@/components/ui/AuthForms/EmailSignIn';
 import Separator from '@/components/ui/AuthForms/Separator';
@@ -55,22 +54,22 @@ export default async function SignIn({
   }
 
   return (
-    <div className="flex justify-center height-screen-helper">
-      <div className="flex flex-col justify-between max-w-lg p-3 m-auto w-80 ">
-        <div className="flex justify-center pb-12 ">
-          <Logo width="64px" height="64px" />
-        </div>
-        <Card
-          title={
-            viewProp === 'forgot_password'
-              ? 'Reset Password'
-              : viewProp === 'update_password'
-                ? 'Update Password'
-                : viewProp === 'signup'
-                  ? 'Sign Up'
-                  : 'Sign In'
-          }
-        >
+    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <Logo width="64" height="120" className="mx-auto w-auto" />
+        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+          {viewProp === 'forgot_password'
+            ? 'Reset Password'
+            : viewProp === 'update_password'
+            ? 'Update Password'
+            : viewProp === 'signup'
+            ? 'Sign Up'
+            : 'Sign in to your account'}
+        </h2>
+      </div>
+
+      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
+        <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
           {viewProp === 'password_signin' && (
             <PasswordSignIn
               allowEmail={allowEmail}
@@ -97,15 +96,20 @@ export default async function SignIn({
           {viewProp === 'signup' && (
             <SignUp allowEmail={allowEmail} redirectMethod={redirectMethod} />
           )}
-          {viewProp !== 'update_password' &&
-            viewProp !== 'signup' &&
-            allowOauth && (
-              <>
-                <Separator text="Third-party sign-in" />
-                <OauthSignIn />
-              </>
-            )}
-        </Card>
+
+          {viewProp !== 'update_password' && viewProp !== 'signup' && allowOauth && (
+            <OauthSignIn />
+          )}
+        </div>
+
+        {viewProp === 'password_signin' && (
+          <p className="mt-10 text-center text-sm text-gray-500">
+            Not a member?{' '}
+            <a href="/signin/signup" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+              Start a 14 day free trial
+            </a>
+          </p>
+        )}
       </div>
     </div>
   );

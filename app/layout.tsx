@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Toaster } from '@/components/ui/Toasts/toaster';
 import { PropsWithChildren, Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import 'styles/main.css';
 
 const title = 'Next.js Subscription Starter';
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <Suspense>
           <Toaster />
         </Suspense>
+        <SpeedInsights/>
       </body>
     </html>
   );

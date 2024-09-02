@@ -7,6 +7,7 @@ import { useState } from 'react';
 type OAuthProviders = {
   name: Provider;
   displayName: string;
+  redirectTo: string;
   icon: JSX.Element;
 };
 
@@ -15,6 +16,7 @@ export default function OauthSignIn() {
     {
       name: 'google',
       displayName: 'Google',
+      redirectTo: `https://go-espy.vercelapp.com/auth/callback`,
       icon: (
         <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
           <path

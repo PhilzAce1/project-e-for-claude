@@ -1,8 +1,8 @@
-
 'use client';
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
+import { User } from '@supabase/supabase-js';
 
 const CustomerPortalForm = dynamic(
   () => import('@/components/ui/AccountForms/CustomerPortalForm'),
@@ -19,8 +19,12 @@ const NameForm = dynamic(
   { ssr: false }
 );
 
-export default function AccountContent({ user, userDetails, subscription }) {
-    console.log('user', user,   userDetails, subscription)
+export default function AccountContent({ user, userDetails, subscription }: {
+  user: User; // Replace 'User' with the actual type of your user object
+  userDetails: any; // Replace 'any' with the actual type of userDetails
+  subscription: any; // Replace 'any' with the actual type of subscription
+}) {
+    console.log('user', user, userDetails, subscription)
   return (
     <section className="mb-32">
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10">

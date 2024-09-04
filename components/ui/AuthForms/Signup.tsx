@@ -75,16 +75,9 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
         <p className="text-sm text-gray-500">
           Already have an account?{' '}
           <Link href="/signin/password_signin" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Sign in with email and password
+            Sign in
           </Link>
         </p>
-        {allowEmail && (
-          <p className="mt-1 text-sm text-gray-500">
-            <Link href="/signin/email_signin" className="font-semibold text-indigo-600 hover:text-indigo-500">
-              Sign in via magic link
-            </Link>
-          </p>
-        )}
       </div>
     </form>
   );

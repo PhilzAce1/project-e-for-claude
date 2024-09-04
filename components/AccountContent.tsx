@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 const CustomerPortalForm = dynamic(
   () => import('@/components/ui/AccountForms/CustomerPortalForm'),
@@ -24,7 +26,14 @@ export default function AccountContent({ user, userDetails, subscription }: {
   userDetails: any; // Replace 'any' with the actual type of userDetails
   subscription: any; // Replace 'any' with the actual type of subscription
 }) {
-    console.log('user', user, userDetails, subscription)
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/'); // Redirect to home page after logout
+  };
+
   return (
     <section className="mb-32">
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10">
@@ -36,11 +45,19 @@ export default function AccountContent({ user, userDetails, subscription }: {
             Manage your subscription and account details.
           </p>
         </div>
+        <div className="p-8">
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+          >
+            Logout
+          </button>
+        </div>
       </div>
       <div className="w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8 py-16 mt-8">
-        <CustomerPortalForm subscription={subscription} />
+        {/* <CustomerPortalForm subscription={subscription} />
         
-        <div className="border-t border-gray-200 my-16" aria-hidden="true" />
+        <div className="border-t border-gray-200 my-16" aria-hidden="true" /> */}
         
         <NameForm userName={user?.user_metadata?.full_name ?? ''} />
         

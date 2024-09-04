@@ -97,7 +97,7 @@ export default async function SignIn({
             <SignUp allowEmail={allowEmail} redirectMethod={redirectMethod} />
           )}
 
-          {viewProp !== 'update_password' && viewProp !== 'signup' && allowOauth && (
+          {viewProp !== 'update_password'  && allowOauth && (
             <OauthSignIn />
           )}
         </div>

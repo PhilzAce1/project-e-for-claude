@@ -1,24 +1,17 @@
-import Pricing from '@/components/ui/Pricing/Pricing';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import {
-  getProducts,
-  getSubscription,
-  getUser
-} from '@/utils/supabase/queries';
 
-export default async function PricingPage() {
+export default async function Home() {
   const supabase = createClient();
-  const [user, products, subscription] = await Promise.all([
-    getUser(supabase),
-    getProducts(supabase),
-    getSubscription(supabase)
-  ]);
+  const { data: { user } } = await supabase.auth.getUser();
 
-  return (
-    <Pricing
-      user={user}
-      products={products ?? []}
-      subscription={subscription}
-    />
-  );
+  if (user) {
+    redirect('/dashboard');
+  } else {
+    redirect('/signin');
+  }
+
+  // This part will never be reached due to the redirects above
+  // but we'll keep it for TypeScript to be happy
+  return null;
 }

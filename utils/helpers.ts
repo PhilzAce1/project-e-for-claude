@@ -131,3 +131,7 @@ export const getErrorRedirect = (
     disableButton,
     arbitraryParams
   );
+
+export function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ')
+}

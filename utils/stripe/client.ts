@@ -13,3 +13,20 @@ export const getStripe = () => {
 
   return stripePromise;
 };
+
+export async function createStripePortal(currentPath: string) {
+  const res = await fetch('/api/create-stripe-portal', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ currentPath }),
+  });
+  
+  if (!res.ok) {
+    throw new Error('Failed to create Stripe portal session');
+  }
+
+  const data = await res.json();
+  return data.url;
+}

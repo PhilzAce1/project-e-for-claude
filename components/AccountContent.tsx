@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -19,6 +20,7 @@ const NameForm = dynamic(
 );
 
 export default function AccountContent({ user, userDetails, subscription }) {
+    console.log('user', user,   userDetails, subscription)
   return (
     <section className="mb-32">
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10">
@@ -36,7 +38,7 @@ export default function AccountContent({ user, userDetails, subscription }) {
         
         <div className="border-t border-gray-200 my-16" aria-hidden="true" />
         
-        <NameForm userName={userDetails?.full_name ?? ''} />
+        <NameForm userName={user?.user_metadata?.full_name ?? ''} />
         
         <div className="border-t border-gray-200 my-16" aria-hidden="true" />
         

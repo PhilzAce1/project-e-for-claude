@@ -4,6 +4,7 @@ import { PropsWithChildren, Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 import 'styles/main.css';
 
 const title = 'Next.js Subscription Starter';

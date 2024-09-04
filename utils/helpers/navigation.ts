@@ -3,6 +3,6 @@ import {
   } from '@heroicons/react/24/outline'
   
   export const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: true },
+    { name: 'Dashboard', href: '/', icon: HomeIcon},
   ]
   

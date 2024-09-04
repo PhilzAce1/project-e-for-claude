@@ -1,20 +1,25 @@
-import Link from 'next/link'
-import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
-import { Fragment } from 'react'
-import Logo from '@/components/icons/Logo'
-import { navigation } from '@/utils/helpers/navigation'
-import { classNames } from '@/utils/helpers'
-import { User } from '@supabase/supabase-js'
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Dialog, Transition } from '@headlessui/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { Fragment } from 'react';
+import Logo from '@/components/icons/Logo';
+import { navigation } from '@/utils/helpers/navigation';
+import { classNames } from '@/utils/helpers';
 
 interface SidebarProps {
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
-  user: User;
-  userDetails: any; // Replace 'any' with a more specific type if available
+  user: any;
+  userDetails: any;
 }
 
-export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails }: SidebarProps) {
+export default function Sidebar({ user, userDetails }: SidebarProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const isAccountPage = pathname === '/account';
+
   return (
     <>
       <Transition.Root show={sidebarOpen} as={Fragment}>
@@ -71,7 +76,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails
                               <Link
                                 href={item.href}
                                 className={classNames(
-                                  item.current
+                                  pathname === item.href
                                     ? 'bg-gray-50 text-indigo-600'
                                     : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
                                   'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
@@ -79,7 +84,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails
                               >
                                 <item.icon
                                   className={classNames(
-                                    item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
+                                    pathname === item.href ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
                                     'h-6 w-6 shrink-0'
                                   )}
                                   aria-hidden="true"
@@ -92,16 +97,21 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails
                       </li>
                       <li className="-mx-6 mt-auto">
                         <Link
-                          href="/dashboard/account"
-                          className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50"
+                          href="/account"
+                          className={classNames(
+                            isAccountPage
+                              ? 'bg-gray-50 text-indigo-600'
+                              : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                            'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6'
+                          )}
                         >
                           <img
                             className="h-8 w-8 rounded-full bg-gray-50"
-                            src={user.user_metadata.avatar_url || `https://ui-avatars.com/api/?name=${userDetails?.full_name || user.email}`}
+                            src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user.user_metadata?.full_name || user?.email || 'User'}`}
                             alt=""
                           />
                           <span className="sr-only">Your profile</span>
-                          <span aria-hidden="true">{userDetails?.full_name || user.email}</span>
+                          <span aria-hidden="true">{user.user_metadata?.full_name || user?.email || 'User'}</span>
                         </Link>
                       </li>
                     </ul>
@@ -128,7 +138,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails
                       <Link
                         href={item.href}
                         className={classNames(
-                          item.current
+                          pathname === item.href
                             ? 'bg-gray-50 text-indigo-600'
                             : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
                           'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
@@ -136,7 +146,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails
                       >
                         <item.icon
                           className={classNames(
-                            item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
+                            pathname === item.href ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
                             'h-6 w-6 shrink-0'
                           )}
                           aria-hidden="true"
@@ -149,16 +159,21 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails
               </li>
               <li className="mt-auto">
                 <Link
-                  href="/dashboard/account"
-                  className="flex items-center gap-x-4 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50"
+                  href="/account"
+                  className={classNames(
+                    isAccountPage
+                      ? 'bg-gray-50 text-indigo-600'
+                      : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
+                    'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 rounded-md'
+                  )}
                 >
                   <img
                     className="h-8 w-8 rounded-full bg-gray-50"
-                    src={user.user_metadata.avatar_url || `https://ui-avatars.com/api/?name=${userDetails?.full_name || user.email}`}
+                    src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user.user_metadata?.full_name || user?.email || 'User'}`}
                     alt=""
                   />
                   <span className="sr-only">Your profile</span>
-                  <span aria-hidden="true">{userDetails?.full_name || user.email}</span>
+                  <span aria-hidden="true">{user.user_metadata?.full_name || user?.email || 'User'}</span>
                 </Link>
               </li>
             </ul>
@@ -166,59 +181,5 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, userDetails
         </div>
       </div>
     </>
-  )
-}
-
-function SidebarContent() {
-  return (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
-      <div className="flex h-16 shrink-0 items-center">
-        <Logo classNames="h-10 w-auto" />
-      </div>
-      <nav className="flex flex-1 flex-col">
-        <ul role="list" className="flex flex-1 flex-col gap-y-7">
-          <li>
-            <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className={classNames(
-                      item.current
-                        ? 'bg-gray-50 text-indigo-600'
-                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                      'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                    )}
-                  >
-                    <item.icon
-                      className={classNames(
-                        item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
-                        'h-6 w-6 shrink-0'
-                      )}
-                      aria-hidden="true"
-                    />
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </li>
-          <li className="mt-auto">
-            <Link
-              href="#"
-              className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-            >
-              <img
-                className="h-8 w-8 rounded-full bg-gray-50"
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt=""
-              />
-              <span className="sr-only">Your profile</span>
-              <span aria-hidden="true">Tom Cook</span>
-            </Link>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  )
+  );
 }

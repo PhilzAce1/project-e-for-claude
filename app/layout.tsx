@@ -3,12 +3,10 @@ import { Toaster } from '@/components/ui/Toasts/toaster';
 import { PropsWithChildren, Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
 import 'styles/main.css';
 
-const title = 'Next.js Subscription Starter';
-const description = 'Brought to you by Vercel, Stripe, and Supabase.';
+const title = 'Espy Go - Your SEO Professional';
+const description = 'Brought to you by Elysium Studios';
 
 export const metadata: Metadata = {
   metadataBase: new URL(getURL()),

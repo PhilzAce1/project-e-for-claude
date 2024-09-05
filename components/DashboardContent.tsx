@@ -1,4 +1,5 @@
 import { ArrowPathIcon, CloudArrowUpIcon, LockClosedIcon } from '@heroicons/react/20/solid'
+import { User } from '@supabase/supabase-js';
 export default function DashboardContent({ user, userDetails }: {
     user: User; // Replace 'User' with the actual type of your user object
     userDetails: any; // Replace 'any' with the actual type of userDetails

@@ -21,7 +21,7 @@ async function initiateExternalSEOCrawl(domain: string) {
     const password = process.env.DATAFORSEO_PASSWORD
     const pingbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback/`
 
-    const authFetch = createAuthenticatedFetch(username, password)
+    const authFetch = createAuthenticatedFetch(username ?? '', password ?? '')
     const onPageApi = new client.OnPageApi("https://api.dataforseo.com", { fetch: authFetch })
 
     const task = new client.OnPageTaskRequestInfo()
@@ -83,7 +83,11 @@ export async function POST(request: Request) {
         const externalApiData = await initiateExternalSEOCrawl(domain)
         console.log('External API response:', externalApiData)
 
-        const crawlData = await recordSEOCrawl(userId, domain, externalApiData?.id)
+        if (!externalApiData?.id) {
+            throw new Error('External API did not return a valid job ID')
+        }
+
+        const crawlData = await recordSEOCrawl(userId, domain, externalApiData.id)
 
         return NextResponse.json({ message: 'SEO crawl initiated successfully', data: crawlData }, { status: 200 })
     } catch (error) {

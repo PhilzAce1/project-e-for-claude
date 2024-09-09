@@ -64,19 +64,9 @@ export default function DashboardContent({ user, userDetails }: {
         setError(null)
 
         try {
-            console.log('Inserting domain into database...')
-            // Insert domain into the database
-            const { data, error } = await supabase
-                .from('business_information')
-                .insert([{ user_id: user.id, domain }])
-                .select()
 
-            if (error) throw error
-
-            console.log('Business added:', data)
-
-            console.log('Calling Edge Function...')
-            // Call the Edge Function to initiate SEO crawl
+            console.log('Initiating SEO crawl...')
+            // Call the API route to initiate SEO crawl
             const response = await fetch('/api/init-seo-crawl', {
                 method: 'POST',
                 headers: {
@@ -85,14 +75,12 @@ export default function DashboardContent({ user, userDetails }: {
                 body: JSON.stringify({ domain, userId: user.id }),
             })
 
-            console.log('Edge Function response:', response)
-
             if (!response.ok) {
                 throw new Error('Failed to initiate SEO crawl')
             }
 
             const responseData = await response.json()
-            console.log('Edge Function response data:', responseData)
+            console.log('SEO crawl initiated:', responseData)
 
             setDomain('')
             setExistingDomain(domain)

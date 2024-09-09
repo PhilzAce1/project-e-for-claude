@@ -11,18 +11,18 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getUser();
 
   // If the user is authenticated and trying to access the signin page, redirect to dashboard
-  if (user && req.nextUrl.pathname === '/signin') {
+  if (user && req.nextUrl.pathname === '/signin/password_signin') {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
   // If the user is not authenticated and trying to access a protected route, redirect to signin
   if (!user && (req.nextUrl.pathname === '/' || req.nextUrl.pathname === '/account')) {
-    return NextResponse.redirect(new URL('/signin', req.url));
+    return NextResponse.redirect(new URL('/signin/password_signin', req.url));
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ['/', '/account', '/signin', '/site-audit'],
+  matcher: ['/', '/account', '/signin', '/signin/password_signin', '/site-audit'],
 };

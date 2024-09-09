@@ -29,7 +29,7 @@ export async function SignOut(formData: FormData) {
     );
   }
 
-  return '/signin';
+  return '/signin/password_signin';
 }
 
 export async function signInWithEmail(formData: FormData) {

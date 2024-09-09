@@ -50,7 +50,7 @@ export default async function SignIn({
   if (user && viewProp !== 'update_password') {
     return redirect('/');
   } else if (!user && viewProp === 'update_password') {
-    return redirect('/signin');
+    return redirect('/signin/password_signin');
   }
 
   return (

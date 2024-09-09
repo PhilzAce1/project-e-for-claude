@@ -9,7 +9,7 @@ export default async function SiteAuditPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/signin');
+    redirect('/signin/password_signin');
   }
 
   const userDetails = await getUserDetails(supabase);

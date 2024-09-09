@@ -67,13 +67,93 @@ export default function SiteAuditContent({ user, userDetails }: {
     function renderTabContent(tabName: string) {
         switch (tabName) {
             case 'Performance':
-                return <p>Detailed performance metrics and suggestions go here.</p>
+                return (
+                    <>
+                    <div className="border-b border-gray-200 pb-5">
+                        <h2 className="text-xl font-bold leading-6 text-gray-900">Performance</h2>
+                        <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
+                    </div>
+                    <ul className='divide-y divide-gray-200'>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                    </ul>
+                    </>)
             case 'Accessibility':
-                return <p>Accessibility audit results and recommendations go here.</p>
+                return (
+                    <>
+                    <div className="border-b border-gray-200 pb-5">
+                        <h2 className="text-xl font-bold leading-6 text-gray-900">Accessibility</h2>
+                        <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
+                    </div>
+                    <ul className='divide-y divide-gray-200'>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                    </ul>
+                    </>)
             case 'Best Practices':
-                return <p>Best practices adherence details go here.</p>
+                return (
+                    <>
+                    <div className="border-b border-gray-200 pb-5">
+                        <h2 className="text-xl font-bold leading-6 text-gray-900">Best Practices</h2>
+                        <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
+                    </div>
+                    <ul className='divide-y divide-gray-200'>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                    </ul>
+                    </>)
             case 'SEO':
-                return <p>SEO optimization suggestions and details go here.</p>
+                return (
+                    <>
+                    <div className="border-b border-gray-200 pb-5">
+                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO</h2>
+                        <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
+                    </div>
+                    <ul className='divide-y divide-gray-200'>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
+                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                        </li>
+                    </ul>
+                    </>)
             default:
                 return <p>Select a category to see detailed information.</p>
         }

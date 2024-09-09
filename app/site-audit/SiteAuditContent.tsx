@@ -4,11 +4,21 @@ import { User } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
+// Define the type for your audit items
+type Audit = {
+  // Add the properties of your audit object here
+  // For example:
+  id: number;
+  name: string;
+  domain: string;
+  // ... other properties
+};
+
 export default function SiteAuditContent({ user, userDetails }: {
     user: User;
     userDetails: any;
 }) {
-    const [audits, setAudits] = useState([]);
+    const [audits, setAudits] = useState<Audit[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Performance');
     const supabase = createClientComponentClient();
@@ -38,7 +48,7 @@ export default function SiteAuditContent({ user, userDetails }: {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            setAudits(data || []);
+            setAudits(data as Audit[] || []);
         } catch (error) {
             console.error('Error fetching audits:', error);
         } finally {

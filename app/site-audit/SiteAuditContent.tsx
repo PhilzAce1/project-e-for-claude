@@ -18,7 +18,30 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     user: User | null;
     seoCrawlData: any;
 }) {
+    if (!user) {
+        return <div>Please sign in to view your site audit.</div>;
+    }
+
+    if (!seoCrawlData) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64">
+                <Spinner />
+                <p className="mt-4 text-gray-600">Loading your site audit data...</p>
+            </div>
+        );
+    }
+
     const { onpage_score, lighthouse_data } = seoCrawlData;
+
+    if (!onpage_score || !lighthouse_data) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64">
+                <Spinner />
+                <p className="mt-4 text-gray-600">We're still working on your site audit. We'll email you when it's ready.</p>
+            </div>
+        );
+    }
+
     const { categories } = lighthouse_data;
     const [audits, setAudits] = useState<Audit[]>([]);
     const [loading, setLoading] = useState(true);
@@ -122,19 +145,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
             default:
                 return <p>Select a category to see detailed information.</p>
         }
-    }
-
-    if (!user) {
-        return <div>Please sign in to view your site audit.</div>;
-    }
-
-    if (!seoCrawlData || !seoCrawlData.onpage_score) {
-        return (
-            <div className="flex flex-col items-center justify-center h-64">
-                <Spinner />
-                <p className="mt-4 text-gray-600">We're still working on your site audit. We'll email you when it's ready.</p>
-            </div>
-        );
     }
 
     return (

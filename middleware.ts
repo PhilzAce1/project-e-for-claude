@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // Define public paths that don't require authentication
-const publicPaths = ['/signin/password_signin', '/signin/signup', '/auth/callback']
+const publicPaths = ['/signin/password_signin', '/signin/update_password', '/signin/forgot_password', '/signin/signup', '/auth/callback']
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()

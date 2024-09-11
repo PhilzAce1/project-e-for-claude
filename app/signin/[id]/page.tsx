@@ -26,6 +26,12 @@ export default async function SignIn({
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
+  const authToken =
+    cookies().get('sb-aryklmppwuliidmvzwpo-auth-token-code-verifier')?.value || null;
+
+  if(authToken) {
+    console.log('authToken', authToken)
+  }
 
   // Declare 'viewProp' and initialize with the default value
   let viewProp: string;

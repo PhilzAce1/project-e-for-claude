@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    console.log('auth exchangeCodeForSession', error)
 
     if (error) {
       return NextResponse.redirect(
@@ -24,6 +25,8 @@ export async function GET(request: NextRequest) {
       );
     }
   }
+
+  console.log('auth go straight throug?', requestUrl.origin)
 
   // URL to redirect to after sign in process completes
   return NextResponse.redirect(

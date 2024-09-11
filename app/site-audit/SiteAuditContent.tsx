@@ -25,8 +25,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     if (!seoCrawlData) {
         return (
             <div className="flex flex-col items-center justify-center h-64">
-                <Spinner />
-                <p className="mt-4 text-gray-600">Loading your site audit data...</p>
+                <p className="mt-4 text-gray-600">You haven't started your site audit yet.</p>
             </div>
         );
     }

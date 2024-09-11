@@ -58,16 +58,9 @@ export default function ForgotPassword({
       <div className="mt-6 space-y-2">
         <p className="text-sm text-gray-500">
           <Link href="/signin/password_signin" className="font-semibold text-orange-600 hover:text-orange-500">
-            Sign in with email and password
+            Sign in 
           </Link>
         </p>
-        {allowEmail && (
-          <p className="text-sm text-gray-500">
-            <Link href="/signin/email_signin" className="font-semibold text-orange-600 hover:text-orange-500">
-              Sign in via magic link
-            </Link>
-          </p>
-        )}
         <p className="text-sm text-gray-500">
           <Link href="/signin/signup" className="font-semibold text-orange-600 hover:text-orange-500">
             Don't have an account? Sign up

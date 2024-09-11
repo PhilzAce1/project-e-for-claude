@@ -24,8 +24,8 @@ async function insertBusinessInformation(userId: string, domain: string) {
 async function initiateExternalSEOCrawl(domain: string) {
     const username = process.env.DATAFORSEO_LOGIN
     const password = process.env.DATAFORSEO_PASSWORD
-    // const pingbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback/`
-    const pingbackUrl = `https://7964-2a0d-3344-11a-7c10-f844-384a-3629-27b6.ngrok-free.app/api/pageforseo/pingback/?id=$id&tag=$tag`
+    const pingbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback/`
+    // const pingbackUrl = `https://7964-2a0d-3344-11a-7c10-f844-384a-3629-27b6.ngrok-free.app/api/pageforseo/pingback/?id=$id&tag=$tag`
     
 
     const authFetch = createAuthenticatedFetch(username ?? '', password ?? '')
@@ -61,13 +61,13 @@ async function initiateLighthouseTask(domain: string) {
     const password = process.env.DATAFORSEO_PASSWORD
     const authFetch = createAuthenticatedFetch(username ?? '', password ?? '')
     const onPageApi = new client.OnPageApi("https://api.dataforseo.com", { fetch: authFetch })
-    const pingbackUrl = `https://7964-2a0d-3344-11a-7c10-f844-384a-3629-27b6.ngrok-free.app/api/pageforseo/pingback/?id=$id&tag=$tag`
+    // const pingbackUrl = `https://7964-2a0d-3344-11a-7c10-f844-384a-3629-27b6.ngrok-free.app/api/pageforseo/pingback/?id=$id&tag=$tag`
 
     const task = new client.OnPageTaskRequestInfo()
     task.url = domain
     task.for_mobile = true
     task.tag = "lighthouse_audit"
-    task.pingback_url = pingbackUrl || `${process.env.NEXT_PUBLIC_BASE_URL}/api/dataforseo/pingback/?id=$id&tag=$tag`
+    task.pingback_url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/dataforseo/pingback/?id=$id&tag=$tag`
 
     try {
         const response = await onPageApi.lighthouseTaskPost([task])

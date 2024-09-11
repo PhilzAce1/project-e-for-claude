@@ -39,9 +39,6 @@ async function initiateExternalSEOCrawl(domain: string) {
     task.pingback_url = pingbackUrl
     task.lighthouse = true // Enable Lighthouse audit
 
-    const response = await onPageApi.taskPost([task])
-    const taskId = response?.tasks?.[0]?.id
-
     try {
         const response = await onPageApi.taskPost([task])
         console.log('DataForSEO API response:', response)

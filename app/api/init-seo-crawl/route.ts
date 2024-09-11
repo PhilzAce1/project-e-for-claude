@@ -64,7 +64,7 @@ async function initiateLighthouseTask(domain: string) {
     task.url = domain
     task.for_mobile = true
     task.tag = "lighthouse_audit"
-    task.pingback_url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/dataforseo/pingback/?id=$id&tag=$tag`
+    task.pingback_url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback/?id=$id&tag=$tag`
 
     try {
         const response = await onPageApi.lighthouseTaskPost([task])

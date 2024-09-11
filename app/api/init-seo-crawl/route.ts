@@ -33,7 +33,7 @@ async function initiateExternalSEOCrawl(domain: string) {
 
     const task = new client.OnPageTaskRequestInfo()
     task.target = domain
-    task.max_crawl_pages = 1
+    task.max_crawl_pages = 0
     task.load_resources = true
     task.enable_javascript = true
     task.pingback_url = pingbackUrl

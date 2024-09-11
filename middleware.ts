@@ -2,6 +2,9 @@ import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Define public paths that don't require authentication
+const publicPaths = ['/signin/password_signin', '/signup', '/auth/callback']
+
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
@@ -10,15 +13,16 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Check if the current path is /auth/callback
-  if (req.nextUrl.pathname === '/auth/callback') {
-    // If it's the callback URL, don't redirect
+  const path = req.nextUrl.pathname
+
+  // Allow access to public paths without authentication
+  if (publicPaths.includes(path)) {
     return res
   }
 
-  // For all other routes, apply your existing logic
-  if (!user && req.nextUrl.pathname !== '/') {
-    return NextResponse.redirect(new URL('/', req.url))
+  // If user is not authenticated and trying to access a protected route, redirect to login
+  if (!user && !publicPaths.includes(path)) {
+    return NextResponse.redirect(new URL('/signin/password_signin', req.url))
   }
 
   return res

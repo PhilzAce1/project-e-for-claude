@@ -16,24 +16,24 @@ export async function GET(request: NextRequest) {
     console.log('auth exchangeCodeForSession', error)
 
     if (error) {
-      return NextResponse.redirect(
-        getErrorRedirect(
-          `${requestUrl.origin}/signin`,
-          error.name,
-          "Sorry, we weren't able to log you in. Please try again."
-        )
-      );
+      // return NextResponse.redirect(
+      //   getErrorRedirect(
+      //     `${requestUrl.origin}/signin`,
+      //     error.name,
+      //     "Sorry, we weren't able to log you in. Please try again."
+      //   )
+      // );
     }
   }
 
   console.log('auth go straight throug?', requestUrl.origin)
 
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(
-    getStatusRedirect(
-      `${requestUrl.origin}`,
-      'Success!',
-      'You are now signed in.'
-    )
-  );
+  // return NextResponse.redirect(
+  //   getStatusRedirect(
+  //     `${requestUrl.origin}`,
+  //     'Success!',
+  //     'You are now signed in.'
+  //   )
+  // );
 }

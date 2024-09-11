@@ -1,28 +1,29 @@
-import { createClient } from '@/utils/supabase/middleware';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const { supabase, response } = createClient(req);
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
-  // If the user is authenticated and trying to access the signin page, redirect to dashboard
-  if (user && req.nextUrl.pathname === '/signin/password_signin') {
-    return NextResponse.redirect(new URL('/', req.url));
+  // Check if the current path is /auth/callback
+  if (req.nextUrl.pathname === '/auth/callback') {
+    // If it's the callback URL, don't redirect
+    return res
   }
 
-  // If the user is not authenticated and trying to access a protected route, redirect to signin
-  if (!user && (req.nextUrl.pathname === '/' || req.nextUrl.pathname === '/account')) {
-    return NextResponse.redirect(new URL('/signin/password_signin', req.url));
+  // For all other routes, apply your existing logic
+  if (!user && req.nextUrl.pathname !== '/') {
+    return NextResponse.redirect(new URL('/', req.url))
   }
 
-  return response;
+  return res
 }
 
 export const config = {
-  matcher: ['/', '/account', '/signin', '/signin/password_signin', '/site-audit'],
-};
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+}

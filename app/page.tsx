@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   }
 
   const [userDetails, subscription] = await Promise.all([
-    getUserDetails(supabase),
+    getUserDetails(supabase, user.id),
     getSubscription(supabase)
   ]);
 

@@ -65,7 +65,7 @@ export default function PasswordSignIn({
             id="remember-me"
             name="remember-me"
             type="checkbox"
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+            className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-indigo-600"
           />
           <label htmlFor="remember-me" className="ml-3 block text-sm leading-6 text-gray-900">
             Remember me
@@ -73,7 +73,7 @@ export default function PasswordSignIn({
         </div>
 
         <div className="text-sm leading-6">
-          <Link href="/signin/forgot_password" className="font-semibold text-indigo-600 hover:text-indigo-500">
+          <Link href="/signin/forgot_password" className="font-semibold text-orange-600 hover:text-orange-500">
             Forgot password?
           </Link>
         </div>
@@ -83,7 +83,7 @@ export default function PasswordSignIn({
         <button
           type="submit"
           // loading={isSubmitting}
-          className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Sign in
         </button>

@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.parsedown {
+    a {
+        @apply text-orange-600;
+        text-decoration: underline;
+    }
+}

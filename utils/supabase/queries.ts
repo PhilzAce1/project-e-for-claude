@@ -30,10 +30,17 @@ export const getProducts = cache(async (supabase: SupabaseClient) => {
   return products;
 });
 
-export const getUserDetails = cache(async (supabase: SupabaseClient) => {
-  const { data: userDetails } = await supabase
+export const getUserDetails = cache(async (supabase: SupabaseClient, userId: string) => {
+  const { data: userDetails, error } = await supabase
     .from('users')
     .select('*')
+    .eq('id', userId)
     .single();
+
+  if (error) {
+    console.error('Error fetching user details:', error);
+    return null;
+  }
+
   return userDetails;
 });

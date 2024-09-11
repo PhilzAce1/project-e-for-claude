@@ -48,7 +48,7 @@ export default function ForgotPassword({
       <div>
         <button
           type="submit"
-          className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          className="flex w-full justify-center rounded-md bg-orange-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           disabled={isSubmitting || disableButton}
         >
           {isSubmitting ? 'Sending...' : 'Send reset email'}
@@ -57,19 +57,19 @@ export default function ForgotPassword({
 
       <div className="mt-6 space-y-2">
         <p className="text-sm text-gray-500">
-          <Link href="/signin/password_signin" className="font-semibold text-indigo-600 hover:text-indigo-500">
+          <Link href="/signin/password_signin" className="font-semibold text-orange-600 hover:text-orange-500">
             Sign in with email and password
           </Link>
         </p>
         {allowEmail && (
           <p className="text-sm text-gray-500">
-            <Link href="/signin/email_signin" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            <Link href="/signin/email_signin" className="font-semibold text-orange-600 hover:text-orange-500">
               Sign in via magic link
             </Link>
           </p>
         )}
         <p className="text-sm text-gray-500">
-          <Link href="/signin/signup" className="font-semibold text-indigo-600 hover:text-indigo-500">
+          <Link href="/signin/signup" className="font-semibold text-orange-600 hover:text-orange-500">
             Don't have an account? Sign up
           </Link>
         </p>

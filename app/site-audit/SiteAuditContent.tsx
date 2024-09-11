@@ -3,36 +3,32 @@
 import { User } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import Spinner from '@/components/ui/Spinner';
+import LighthouseAudits from '@/components/ui/LighthouseAudits';
 
 // Define the type for your audit items
 type Audit = {
   // Add the properties of your audit object here
-  // For example:
   id: number;
-  name: string;
   domain: string;
   // ... other properties
 };
 
-export default function SiteAuditContent({ user, userDetails }: {
-    user: User;
-    userDetails: any;
+export default function SiteAuditContent({ user, seoCrawlData }: {
+    user: User | null;
+    seoCrawlData: any;
 }) {
+    const { onpage_score, lighthouse_data } = seoCrawlData;
+    const { categories } = lighthouse_data;
     const [audits, setAudits] = useState<Audit[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Performance');
     const supabase = createClientComponentClient();
-    const stats = [
-        { id: 1, name: 'On Page SEO Score', value: '99' },
-        { id: 2, name: 'Organic Monthly Traffic', value: '1250' },
-        { id: 3, name: 'Organic Keywords', value: '35' },
-        { id: 4, name: 'Backlinks', value: '66' },
-    ]
     const lighthouseStats = [
-        { id: 1, name: 'Performance', value: '62' },
-        { id: 2, name: 'Accessibility', value: '90' },
-        { id: 3, name: 'Best Practices', value: '100' },
-        { id: 4, name: 'SEO', value: '85' },
+        { id: 1, name: 'Performance', value: categories.performance.score * 100 },
+        { id: 2, name: 'Accessibility', value: categories.accessibility.score * 100 },
+        { id: 3, name: 'Best Practices', value: categories['best-practices'].score * 100 },
+        { id: 4, name: 'SEO', value: categories.seo.score * 100},
     ]
 
     useEffect(() => {
@@ -44,7 +40,7 @@ export default function SiteAuditContent({ user, userDetails }: {
             const { data, error } = await supabase
                 .from('seo_crawls')
                 .select('*')
-                .eq('user_id', user.id)
+                .eq('user_id', user?.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -83,20 +79,10 @@ export default function SiteAuditContent({ user, userDetails }: {
                         <h2 className="text-xl font-bold leading-6 text-gray-900">Performance</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
                     </div>
-                    <ul className='divide-y divide-gray-200'>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                    </ul>
+                        <LighthouseAudits 
+                            lighthouseData={lighthouse_data} 
+                            category="performance" // or "accessibility", "best-practices", "seo", etc.
+                        />
                     </>)
             case 'Accessibility':
                 return (
@@ -104,21 +90,11 @@ export default function SiteAuditContent({ user, userDetails }: {
                     <div className="border-b border-gray-200 pb-5">
                         <h2 className="text-xl font-bold leading-6 text-gray-900">Accessibility</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
-                    </div>
-                    <ul className='divide-y divide-gray-200'>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                    </ul>
+                    </div>                        
+                    <LighthouseAudits 
+                            lighthouseData={lighthouse_data} 
+                            category="accessibility" // or "accessibility", "best-practices", "seo", etc.
+                        />
                     </>)
             case 'Best Practices':
                 return (
@@ -126,21 +102,10 @@ export default function SiteAuditContent({ user, userDetails }: {
                     <div className="border-b border-gray-200 pb-5">
                         <h2 className="text-xl font-bold leading-6 text-gray-900">Best Practices</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
-                    </div>
-                    <ul className='divide-y divide-gray-200'>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                    </ul>
+                    </div>                        <LighthouseAudits 
+                            lighthouseData={lighthouse_data} 
+                            category="best-practices" // or "accessibility", "best-practices", "seo", etc.
+                        />
                     </>)
             case 'SEO':
                 return (
@@ -149,53 +114,51 @@ export default function SiteAuditContent({ user, userDetails }: {
                         <h2 className="text-xl font-bold leading-6 text-gray-900">SEO</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
                     </div>
-                    <ul className='divide-y divide-gray-200'>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
-                        </li>
-                    </ul>
+                    <LighthouseAudits 
+                            lighthouseData={lighthouse_data} 
+                            category="seo" // or "accessibility", "best-practices", "seo", etc.
+                        />
                     </>)
             default:
                 return <p>Select a category to see detailed information.</p>
         }
     }
 
+    if (!user) {
+        return <div>Please sign in to view your site audit.</div>;
+    }
+
+    if (!seoCrawlData || !seoCrawlData.onpage_score) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64">
+                <Spinner />
+                <p className="mt-4 text-gray-600">We're still working on your site audit. We'll email you when it's ready.</p>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-                <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Site Audit: <a href={audits[0]?.domain} className='text-indigo-600 hover:text-indigo-500'>{audits[0]?.domain}</a></h1>
+                <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Site Audit: <a href={seoCrawlData?.domain} className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.domain}</a></h1>
             </div>
-            {loading ? (
-                <p>Loading audits...</p>
-            ) : audits.length > 0 ? (
-            <dl className="mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4 ring-slate-900/10 ring-1">
-                {stats.map((stat) => (
-                  <div key={stat.id} className="flex flex-col bg-white p-8">
-                    <dt className="text-sm font-semibold leading-6 text-gray-600 ">{stat.name}</dt>
-                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900">{stat.value}</dd>
+            <dl className="mt-8 flex overflow-hidden  bg-white divide-x items-center rounded-2xl text-center ring-slate-900/10 ring-1">
+                  <div className=" p-8 flex-grow">
+                  <dd className={`order-first p-8 text-6xl inline-block font-semibold tracking-tight rounded-xl mb-4 ${getScoreBGColor(parseInt(onpage_score))} ${getScoreColor(parseInt(onpage_score))}`}>{parseInt(onpage_score) }</dd>
+                    <dt className="text-sm font-semibold  leading-6 text-gray-600 ">On Page SEO Score</dt>
                   </div>
-                ))}
-              </dl>
-            ) : (
-                <p>No audits found. Start a new audit from the dashboard.</p>
-            )}
+                  <div className='aspect-video overflow-auto flex-grow-0'>
+                    <img src={seoCrawlData.lighthouse_data.fullPageScreenshot.screenshot.data} />
+                  </div>
+            </dl>
             <div className="mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl  ring-slate-900/10 ring-1 sm:grid-cols-2 lg:grid-cols-2 ">
                   <div className="flex flex-col bg-white p-8 relative pb-20">
                     
                     <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
                         <h2 className="text-xl font-bold leading-6 text-gray-900">Pages Discovered</h2>
                     </div>
-                    <p className="mt-4 text-3xl font-bold">61</p>
-                    <p className="mt-2 text-sm text-gray-500">We've crawled 61 pages and found 0 blocked pages for a total of 61 pages discovered.</p>
+                    <p className="mt-4 text-3xl font-bold">{seoCrawlData?.total_pages || 'N/A'}</p>
+                    <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.crawl_status?.pages_crawled || 'N/A'} pages and found {seoCrawlData?.page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
                     
                     <div className="border-b mt-8 border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold leading-6 text-gray-900">Page Status</h3>
@@ -203,53 +166,54 @@ export default function SiteAuditContent({ user, userDetails }: {
                     <ul className='mt-4'>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-green-500 rounded-full inline-block'></span>
-                            Successful: <strong>59</strong>
+                            Successful: <strong>{seoCrawlData?.total_pages - (seoCrawlData?.page_metrics?.is_4xx_code || 0) - (seoCrawlData?.page_metrics?.is_5xx_code || 0) - (seoCrawlData?.page_metrics?.is_redirect || 0) || 'N/A'}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-teal-500 rounded-full inline-block'></span>
-                            Redirects: <strong>0</strong>
+                            Redirects: <strong>{seoCrawlData?.page_metrics?.is_redirect || 0}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-orange-500 rounded-full inline-block'></span>
-                            Broken: <strong>2</strong>
+                            Broken: <strong>{(seoCrawlData?.page_metrics?.is_4xx_code || 0) + (seoCrawlData?.page_metrics?.is_5xx_code || 0)}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-red-500 rounded-full inline-block'></span>
-                            Blocked: <strong>0</strong>
+                            Blocked: <strong>{seoCrawlData?.page_metrics?.non_indexable || 0}</strong>
                         </li>
                     </ul>
                     <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
-                        <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500 p-4 my-4 ">
+                        <a href="#" className="font-medium text-orange-600 hover:text-orange-500 p-4 my-4 ">
                             View All Pages
                         </a>
                     </div>
                   </div>
                   <div className="flex flex-col bg-white p-8 relative">
                     
-                    <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
-                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
+                    <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
                     </div>
-                    <p className="mt-4 text-3xl font-bold">12</p>
+                    <p className="mt-4 text-3xl font-bold">
+                      {Object.values(seoCrawlData?.page_metrics?.checks as Record<string, number> || {}).reduce((a, b) => a + b, 0).toString()}
+                    </p>
                     
                     <div className="border-b border-gray-200 mt-8 pb-5 sm:flex sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold leading-6 text-gray-900">Top SEO Issues</h3>
                     </div>
                     <ul className='divide-y divide-gray-200'>
                         <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> without a H1 heading
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                            <a href="#" className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.page_metrics?.checks?.no_h1_tag || 0} pages</a> without a H1 heading
+                            <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
                         </li>
                         <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>1 pages</a> with broken links
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                            <a href="#" className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.page_metrics?.broken_links || 0} pages</a> with broken links
+                            <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
                         </li>
                         <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500'>26 pages</a> with no meta description
-                            <a href="#" className='text-indigo-600 hover:text-indigo-500 float-right'>View Details</a>
+                            <a href="#" className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.page_metrics?.checks?.no_description || 0} pages</a> with no meta description
+                            <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
                         </li>
                     </ul>
                     <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
-                        <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+                        <a href="#" className="font-medium text-orange-600 hover:text-orange-500">
                             View All Issues
                         </a>
                     </div>
@@ -272,8 +236,8 @@ export default function SiteAuditContent({ user, userDetails }: {
                                 <dt className="text-sm font-semibold leading-6 text-gray-600">{stat.name}</dt>
                                 <dd className={`rounded-lg p-4 order-first text-3xl font-semibold tracking-tight 
                                     ${activeTab === stat.name 
-                                        ? getActiveScoreColor(parseInt(stat.value))
-                                        : `${getScoreBGColor(parseInt(stat.value))} ${getScoreColor(parseInt(stat.value))}`
+                                        ? getActiveScoreColor(parseInt(stat.value.toString()))
+                                        : `${getScoreBGColor(parseInt(stat.value.toString()))} ${getScoreColor(parseInt(stat.value.toString()))}`
                                     }`}
                                 >
                                     {stat.value}

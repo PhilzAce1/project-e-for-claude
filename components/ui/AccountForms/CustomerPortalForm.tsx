@@ -74,7 +74,7 @@ export default function CustomerPortalForm({ subscription }: Props) {
               {subscription ? (
                 `${subscriptionPrice}/${subscription?.prices?.interval}`
               ) : (
-                <Link href="/" className="text-indigo-600 hover:text-indigo-500">
+                <Link href="/" className="text-orange-600 hover:text-orange-500">
                   Choose your plan
                 </Link>
               )}
@@ -90,7 +90,7 @@ export default function CustomerPortalForm({ subscription }: Props) {
               <button
                 onClick={handleStripePortalRequest}
                 disabled={isSubmitting}
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 {isSubmitting ? 'Loading...' : 'Open customer portal'}
               </button>

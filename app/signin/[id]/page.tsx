@@ -105,7 +105,7 @@ export default async function SignIn({
         {viewProp === 'password_signin' && (
           <p className="mt-10 text-center text-sm text-gray-500">
             Not a member?{' '}
-            <a href="/signin/signup" className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">
+            <a href="/signin/signup" className="font-semibold leading-6 text-orange-600 hover:text-orange-500">
               Start a 14 day free trial
             </a>
           </p>

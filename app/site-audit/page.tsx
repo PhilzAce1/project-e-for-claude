@@ -1,22 +1,36 @@
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
-import AuthenticatedLayout from '../authenticated-layout';
 import { getUserDetails } from '@/utils/supabase/queries';
 import SiteAuditContent from './SiteAuditContent';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import AuthenticatedLayout from '../authenticated-layout';
 
 export default async function SiteAuditPage() {
-  const supabase = createClient();
+  const supabase = createServerComponentClient({ cookies });
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/signin/password_signin');
-  }
+  let userDetails = null;
+  let seoCrawlData = null;
 
-  const userDetails = await getUserDetails(supabase);
+  if (user) {
+    userDetails = await getUserDetails(supabase, user.id);
+
+    const { data, error } = await supabase
+      .from('seo_crawls')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('Error fetching SEO crawl data:', error);
+    } else {
+      seoCrawlData = data;
+    }
+  }
 
   return (
     <AuthenticatedLayout user={user} userDetails={userDetails}>
-      <SiteAuditContent user={user} userDetails={userDetails} />
-    </AuthenticatedLayout>
-  );
+        <SiteAuditContent user={user} seoCrawlData={seoCrawlData} />
+    </AuthenticatedLayout>)
 }

@@ -15,8 +15,10 @@ export default async function AccountPage() {
     redirect('/signin/password_signin');
   }
 
+  const userId = user?.id as string;
+
   const [userDetails, subscription] = await Promise.all([
-    getUserDetails(supabase),
+    getUserDetails(supabase, userId),
     getSubscription(supabase)
   ]);
 

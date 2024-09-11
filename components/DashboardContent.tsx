@@ -64,8 +64,6 @@ export default function DashboardContent({ user, userDetails }: {
         setError(null)
 
         try {
-
-            console.log('Initiating SEO crawl...')
             // Call the API route to initiate SEO crawl
             const response = await fetch('/api/init-seo-crawl', {
                 method: 'POST',
@@ -80,7 +78,6 @@ export default function DashboardContent({ user, userDetails }: {
             }
 
             const responseData = await response.json()
-            console.log('SEO crawl initiated:', responseData)
 
             setDomain('')
             setExistingDomain(domain)
@@ -130,7 +127,7 @@ export default function DashboardContent({ user, userDetails }: {
                             <button
                               type="submit"
                               disabled={isSubmitting || !!existingDomain}
-                              className="block w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                              className="block w-full rounded-md bg-orange-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
                             >
                               {isSubmitting ? 'Submitting...' : 'Start Audit'}
                             </button>
@@ -144,7 +141,7 @@ export default function DashboardContent({ user, userDetails }: {
             <div className="bg-white py-16 sm:py-32 rounded-xl">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <div className="mx-auto max-w-2xl lg:text-center">
-                    <h2 className="text-base font-semibold leading-7 text-indigo-600">Climb the rankings faster whilst you wait</h2>
+                    <h2 className="text-base font-semibold leading-7 text-orange-600">Climb the rankings faster whilst you wait</h2>
                     <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                         We're on the cusp of revolutionising your SEO strategy
                     </p>
@@ -158,7 +155,7 @@ export default function DashboardContent({ user, userDetails }: {
                         {features.map((feature, count) => (
                         <div key={feature.name} className="flex flex-col">
                             <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-                            <span aria-hidden="true" className="flex-none bg-indigo-600 w-16 h-16 content-center text-center text-4xl text-white rounded-full">{count + 1}</span>
+                            <span aria-hidden="true" className="flex-none bg-orange-600 w-16 h-16 content-center text-center text-4xl text-white rounded-full">{count + 1}</span>
                             {feature.name}
                             </dt>
                             <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">

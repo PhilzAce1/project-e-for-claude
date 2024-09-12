@@ -13,10 +13,13 @@ import { classNames } from '@/utils/helpers';
 interface SidebarProps {
   user: any;
   userDetails: any;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
 }
 
-export default function Sidebar({ user, userDetails }: SidebarProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+export default function Sidebar({ user, userDetails, sidebarOpen, setSidebarOpen }: SidebarProps) {
+  // Remove the local state management
+  // const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const isAccountPage = pathname === '/account';
 

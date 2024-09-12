@@ -30,7 +30,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         );
     }
 
-    const { onpage_score, lighthouse_data } = seoCrawlData;
+    const { onpage_score, lighthouse_data, page_metrics } = seoCrawlData;
 
     if (!onpage_score || !lighthouse_data) {
         return (
@@ -42,7 +42,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     }
 
     const { categories } = lighthouse_data;
-    const [audits, setAudits] = useState<Audit[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Performance');
     const supabase = createClientComponentClient();
@@ -52,6 +51,8 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         { id: 3, name: 'Best Practices', value: categories['best-practices'].score * 100 },
         { id: 4, name: 'SEO', value: categories.seo.score * 100},
     ]
+
+    console.log(onpage_score, seoCrawlData)
 
     useEffect(() => {
         fetchAudits();
@@ -167,7 +168,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                         <h2 className="text-xl font-bold leading-6 text-gray-900">Pages Discovered</h2>
                     </div>
                     <p className="mt-4 text-3xl font-bold">{seoCrawlData?.total_pages || 'N/A'}</p>
-                    <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.crawl_status?.pages_crawled || 'N/A'} pages and found {seoCrawlData?.page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
+                    <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.crawl_status?.pages_crawled || 'N/A'} pages and found {page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
                     
                     <div className="border-b mt-8 border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold leading-6 text-gray-900">Page Status</h3>
@@ -175,19 +176,19 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                     <ul className='mt-4'>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-green-500 rounded-full inline-block'></span>
-                            Successful: <strong>{seoCrawlData?.total_pages - (seoCrawlData?.page_metrics?.is_4xx_code || 0) - (seoCrawlData?.page_metrics?.is_5xx_code || 0) - (seoCrawlData?.page_metrics?.is_redirect || 0) || 'N/A'}</strong>
+                            Successful: <strong>{seoCrawlData?.total_pages - (page_metrics?.checks?.is_broken || 0) - (page_metrics?.checks?.is_4xx_code || 0) - (page_metrics?.checks?.is_5xx_code || 0) - (page_metrics?.checks?.is_redirect || 0) || 'N/A'}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-teal-500 rounded-full inline-block'></span>
-                            Redirects: <strong>{seoCrawlData?.page_metrics?.is_redirect || 0}</strong>
+                            Redirects: <strong>{page_metrics?.is_redirect || 0}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-orange-500 rounded-full inline-block'></span>
-                            Broken: <strong>{(seoCrawlData?.page_metrics?.is_4xx_code || 0) + (seoCrawlData?.page_metrics?.is_5xx_code || 0)}</strong>
+                            Broken: <strong>{(page_metrics?.checks?.is_broken || 0) + (page_metrics?.checks?.is_4xx_code || 0) + (page_metrics?.checks?.is_5xx_code || 0)}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-red-500 rounded-full inline-block'></span>
-                            Blocked: <strong>{seoCrawlData?.page_metrics?.non_indexable || 0}</strong>
+                            Blocked: <strong>{page_metrics?.non_indexable || 0}</strong>
                         </li>
                     </ul>
                     <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
@@ -201,7 +202,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                     <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
                     </div>
                     <p className="mt-4 text-3xl font-bold">
-                      {Object.values(seoCrawlData?.page_metrics?.checks as Record<string, number> || {}).reduce((a, b) => a + b, 0).toString()}
+                      {Object.values(page_metrics?.checks as Record<string, number> || {}).reduce((a, b) => a + b, 0).toString()}
                     </p>
                     
                     <div className="border-b border-gray-200 mt-8 pb-5 sm:flex sm:items-center sm:justify-between">
@@ -209,15 +210,15 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                     </div>
                     <ul className='divide-y divide-gray-200'>
                         <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.page_metrics?.checks?.no_h1_tag || 0} pages</a> without a H1 heading
+                            <a href="#" className='text-orange-600 hover:text-orange-500'>{page_metrics?.checks?.no_h1_tag || 0} pages</a> without a H1 heading
                             <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
                         </li>
                         <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.page_metrics?.broken_links || 0} pages</a> with broken links
+                            <a href="#" className='text-orange-600 hover:text-orange-500'>{page_metrics?.checks?.broken_links || 0} pages</a> with broken links
                             <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
                         </li>
                         <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.page_metrics?.checks?.no_description || 0} pages</a> with no meta description
+                            <a href="#" className='text-orange-600 hover:text-orange-500'>{page_metrics?.checks?.no_description || 0} pages</a> with no meta description
                             <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
                         </li>
                     </ul>

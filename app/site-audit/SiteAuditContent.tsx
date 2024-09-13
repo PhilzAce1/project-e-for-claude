@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Spinner from '@/components/ui/Spinner';
 import LighthouseAudits from '@/components/ui/LighthouseAudits';
+import { siteAuditDictionary, siteAutitPriority } from '@/utils/helpers/site-audit-dictionary';
 
 // Define the type for your audit items
 type Audit = {
@@ -147,6 +148,33 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         }
     }
 
+    const getMessage = (key: string, value: number) => {
+        const baseMessage = siteAuditDictionary[key] || `have an issue with ${key}`;
+        return `${value} pages ${baseMessage}`;
+    };
+
+    // Create a map of priorities for quick lookup
+    const priorityMap = new Map(siteAutitPriority.map((item, index) => [item.key, index]));
+
+    // Add this array of checks to exclude
+    const excludedChecks = ['is_https', 'has_meta_viewport', 'canonical', 'is_www', 'is_redirect'];
+
+    // Modify the filteredChecks definition
+    const filteredChecks = Object.entries(page_metrics?.checks || {})
+        .filter(([key, value]) => value > 0 && !excludedChecks.includes(key))
+        .sort(([keyA, valueA], [keyB, valueB]) => {
+            // First, sort by priority
+            const priorityA = priorityMap.get(keyA) ?? Infinity;
+            const priorityB = priorityMap.get(keyB) ?? Infinity;
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
+            }
+            // If priority is the same, sort by number of affected pages
+            return (valueB as number) - (valueA as number);
+        });
+        
+    const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as number), 0);
+
     return (
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
@@ -168,7 +196,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                         <h2 className="text-xl font-bold leading-6 text-gray-900">Pages Discovered</h2>
                     </div>
                     <p className="mt-4 text-3xl font-bold">{seoCrawlData?.total_pages || 'N/A'}</p>
-                    <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.crawl_status?.pages_crawled || 'N/A'} pages and found {page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
+                    <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.total_pages || 'N/A'} pages and found {page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
                     
                     <div className="border-b mt-8 border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold leading-6 text-gray-900">Page Status</h3>
@@ -192,38 +220,37 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                         </li>
                     </ul>
                     <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
-                        <a href="#" className="font-medium text-orange-600 hover:text-orange-500 p-4 my-4 ">
+                        <a href="/site-audit/pages" className="font-medium text-orange-600 hover:text-orange-500 p-4 my-4 ">
                             View All Pages
                         </a>
                     </div>
                   </div>
-                  <div className="flex flex-col bg-white p-8 relative">
+                  <div className="flex flex-col bg-white p-8 relative pb-20">
                     
-                    <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
+                    <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">                        
+                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
                     </div>
                     <p className="mt-4 text-3xl font-bold">
-                      {Object.values(page_metrics?.checks as Record<string, number> || {}).reduce((a, b) => a + b, 0).toString()}
+                        {totalIssues}
                     </p>
                     
                     <div className="border-b border-gray-200 mt-8 pb-5 sm:flex sm:items-center sm:justify-between">
                         <h3 className="text-base font-semibold leading-6 text-gray-900">Top SEO Issues</h3>
                     </div>
                     <ul className='divide-y divide-gray-200'>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-orange-600 hover:text-orange-500'>{page_metrics?.checks?.no_h1_tag || 0} pages</a> without a H1 heading
-                            <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
+                    {filteredChecks.slice(0, 4).map(([key, value]) => (
+                        <li key={key} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0'>
+                            <a href={`/site-audit/issues/${key}`}  className='text-orange-600 hover:text-orange-500'>
+                                {value} pages
+                            </a>
+                            {' '}
+                            {siteAuditDictionary[key as keyof typeof siteAuditDictionary] || `have an issue with ${key}`}
+                            <a href={`/site-audit/issues/${key}`}  className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
                         </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-orange-600 hover:text-orange-500'>{page_metrics?.checks?.broken_links || 0} pages</a> with broken links
-                            <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
-                        </li>
-                        <li className='whitespace-nowrap py-4 pl-4 pr-3 text-sm  text-gray-900 sm:pl-0'>
-                            <a href="#" className='text-orange-600 hover:text-orange-500'>{page_metrics?.checks?.no_description || 0} pages</a> with no meta description
-                            <a href="#" className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
-                        </li>
+                    ))}
                     </ul>
                     <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
-                        <a href="#" className="font-medium text-orange-600 hover:text-orange-500">
+                        <a href="/site-audit/issues" className="font-medium text-orange-600 hover:text-orange-500">
                             View All Issues
                         </a>
                     </div>

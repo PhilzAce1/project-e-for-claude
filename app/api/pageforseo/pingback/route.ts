@@ -95,23 +95,12 @@ async function fetchScrapedPages(taskId: string) {
     }
 
     const data = await response.json()
-    console.log('Scraped pages data:', data.tasks[0].result)
+    console.log('Scraped pages data:', data, data.tasks[0].result)
     return data.tasks[0].result
 }
 
 async function saveSEOCrawlData(taskId: string, summaryData: any, scrapedPagesData: any) {
     const { crawl_progress, domain_info, page_metrics } = summaryData
-
-    const scrapedPagesSummary = scrapedPagesData.map((page: any) => ({
-        url: page.url,
-        status_code: page.status_code,
-        page_content_encoding: page.page_content_encoding,
-        size: page.size,
-        total_dom_size: page.total_dom_size,
-        content_type: page.content_type,
-        checks: page.checks,
-        // Add any other relevant fields you want to store
-    }));
 
     console.log('Attempting to update row with external_job_id:', taskId)
 
@@ -121,7 +110,7 @@ async function saveSEOCrawlData(taskId: string, summaryData: any, scrapedPagesDa
             total_pages: domain_info.total_pages,
             onpage_score: page_metrics.onpage_score,
             page_metrics: page_metrics,
-            scraped_pages: scrapedPagesSummary
+            scraped_pages: scrapedPagesData[0].items
         })
         .eq('external_job_id', taskId.toString())
 

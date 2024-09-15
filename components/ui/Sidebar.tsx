@@ -18,10 +18,15 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ user, userDetails, sidebarOpen, setSidebarOpen }: SidebarProps) {
-  // Remove the local state management
-  // const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const isAccountPage = pathname === '/account';
+
+  // Function to check if the current path is active
+  const isActivePath = (path: string) => {
+    if (path === '/') {
+      return pathname === path;
+    }
+    return pathname.startsWith(path);
+  };
 
   return (
     <>
@@ -73,36 +78,36 @@ export default function Sidebar({ user, userDetails, sidebarOpen, setSidebarOpen
                   <nav className="flex flex-1 flex-col">
                     <ul role="list" className="flex flex-1 flex-col gap-y-7">
                       <li>
-                        <ul role="list" className="-mx-2 space-y-1">
-                          {navigation.map((item) => (
-                            <li key={item.name}>
-                              <Link
-                                href={item.href}
-                                className={classNames(
-                                  pathname === item.href
-                                    ? 'bg-gray-50 text-orange-600'
-                                    : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
-                                  'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                )}
-                              >
-                                <item.icon
-                                  className={classNames(
-                                    pathname === item.href ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
-                                    'h-6 w-6 shrink-0'
-                                  )}
-                                  aria-hidden="true"
-                                />
-                                {item.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
+                      <ul role="list" className="-mx-2 space-y-1">
+                  {navigation.map((item) => (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href}
+                        className={classNames(
+                          isActivePath(item.href)
+                            ? 'bg-gray-50 text-orange-600'
+                            : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
+                          'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                        )}
+                      >
+                        <item.icon
+                          className={classNames(
+                            isActivePath(item.href) ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
+                            'h-6 w-6 shrink-0'
+                          )}
+                          aria-hidden="true"
+                        />
+                        {item.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
                       </li>
                       <li className="-mx-6 mt-auto">
                         <Link
                           href="/account"
                           className={classNames(
-                            isAccountPage
+                            true
                               ? 'bg-gray-50 text-orange-600'
                               : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
                             'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6'
@@ -141,7 +146,7 @@ export default function Sidebar({ user, userDetails, sidebarOpen, setSidebarOpen
                       <Link
                         href={item.href}
                         className={classNames(
-                          pathname === item.href
+                          isActivePath(item.href)
                             ? 'bg-gray-50 text-orange-600'
                             : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
                           'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
@@ -149,7 +154,7 @@ export default function Sidebar({ user, userDetails, sidebarOpen, setSidebarOpen
                       >
                         <item.icon
                           className={classNames(
-                            pathname === item.href ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
+                            isActivePath(item.href) ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
                             'h-6 w-6 shrink-0'
                           )}
                           aria-hidden="true"
@@ -164,7 +169,7 @@ export default function Sidebar({ user, userDetails, sidebarOpen, setSidebarOpen
                 <Link
                   href="/account"
                   className={classNames(
-                    isAccountPage
+                    true
                       ? 'bg-gray-50 text-orange-600'
                       : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
                     'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 rounded-md'

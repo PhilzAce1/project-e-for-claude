@@ -1,7 +1,7 @@
 "use client"
 
 import { User } from '@supabase/supabase-js';
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Spinner from '@/components/ui/Spinner';
 import LighthouseAudits from '@/components/ui/LighthouseAudits';
@@ -55,26 +55,28 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
 
     console.log(onpage_score, seoCrawlData)
 
+    const [audits, setAudits] = useState<Audit[]>([]);
+
     useEffect(() => {
+        async function fetchAudits() {
+            try {
+                const { data, error } = await supabase
+                    .from('seo_crawls')
+                    .select('*')
+                    .eq('user_id', user?.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setAudits(data as Audit[] || []);
+            } catch (error) {
+                console.error('Error fetching audits:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
         fetchAudits();
     }, []);
-
-    async function fetchAudits() {
-        try {
-            const { data, error } = await supabase
-                .from('seo_crawls')
-                .select('*')
-                .eq('user_id', user?.id)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setAudits(data as Audit[] || []);
-        } catch (error) {
-            console.error('Error fetching audits:', error);
-        } finally {
-            setLoading(false);
-        }
-    }
 
     function getScoreColor(score: number): string {
         if (score >= 86) return 'text-green-500';
@@ -149,7 +151,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     }
 
     const getMessage = (key: string, value: number) => {
-        const baseMessage = siteAuditDictionary[key] || `have an issue with ${key}`;
+        const baseMessage = (siteAuditDictionary as Record<string, string>)[key] || `have an issue with ${key}`;
         return `${value} pages ${baseMessage}`;
     };
 
@@ -160,8 +162,8 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     const excludedChecks = ['is_https', 'has_meta_viewport', 'canonical', 'is_www', 'is_redirect'];
 
     // Modify the filteredChecks definition
-    const filteredChecks = Object.entries(page_metrics?.checks || {})
-        .filter(([key, value]) => value > 0 && !excludedChecks.includes(key))
+    const filteredChecks = Object.entries(page_metrics?.checks || {} as Record<string, number>)
+        .filter(([key, value]: [string, unknown]) => typeof value === 'number' && value > 0 && !excludedChecks.includes(key))
         .sort(([keyA, valueA], [keyB, valueB]) => {
             // First, sort by priority
             const priorityA = priorityMap.get(keyA) ?? Infinity;
@@ -241,7 +243,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                     {filteredChecks.slice(0, 4).map(([key, value]) => (
                         <li key={key} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0'>
                             <a href={`/site-audit/issues/${key}`}  className='text-orange-600 hover:text-orange-500'>
-                                {value} pages
+                                {String(value)} pages
                             </a>
                             {' '}
                             {siteAuditDictionary[key as keyof typeof siteAuditDictionary] || `have an issue with ${key}`}

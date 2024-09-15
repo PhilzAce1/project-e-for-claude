@@ -14,6 +14,16 @@ function removeDomain(url: string): string {
   }
 }
 
+interface ScrapedPage {
+  checks: {
+    [key: string]: boolean;
+  };
+  // Add other properties of the page object if needed
+}
+type PageType = {
+  url: string;
+  // Add other properties that your page object might have
+};
 
 export default async function SiteAuditIssuesPage({
   params
@@ -60,7 +70,7 @@ export default async function SiteAuditIssuesPage({
   const { scraped_pages } = seoCrawlData;
 
   // Filter pages based on the issue
-  const filteredPages = scraped_pages.filter(page => page.checks[issue] === true);
+  const filteredPages = scraped_pages.filter((page: ScrapedPage) => page.checks[issue] === true);
 
   const breadcrumbPages = [
     { name: 'Site Audit', href: '/site-audit', current: false },
@@ -90,7 +100,7 @@ export default async function SiteAuditIssuesPage({
           </div>
           <div className="flex flex-col bg-white px-8 py-4">
             <ul className='divide-y divide-gray-200'>
-              {filteredPages.map((page, index) => (
+              {filteredPages.map((page: PageType, index: number) => (
                 <li key={index} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0 flex justify-between items-center'>
                   <a href={page.url} className='text-orange-600 hover:text-orange-500' target='_blank'>{removeDomain(page.url)}</a>
                 </li>

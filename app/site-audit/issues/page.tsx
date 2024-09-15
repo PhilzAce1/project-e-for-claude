@@ -60,7 +60,7 @@ const excludedChecks = ['is_https', 'has_meta_viewport', 'canonical', 'is_www', 
 
 // Modify the filteredChecks definition
 const filteredChecks = Object.entries(page_metrics?.checks || {})
-    .filter(([key, value]) => value > 0 && !excludedChecks.includes(key))
+    .filter(([key, value]) => typeof value === 'number' && value > 0 && !excludedChecks.includes(key))
     .sort(([keyA, valueA], [keyB, valueB]) => {
         // First, sort by priority
         const priorityA = priorityMap.get(keyA) ?? Infinity;
@@ -97,7 +97,7 @@ const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as n
                     {filteredChecks.map(([key, value]) => (
                         <li key={key} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0'>
                             <a href={`/site-audit/issues/${key}`} className='text-orange-600 hover:text-orange-500'>
-                                {value} pages
+                                {String(value)} pages
                             </a>
                             {' '}
                             {siteAuditDictionary[key as keyof typeof siteAuditDictionary] || `have an issue with ${key}`}

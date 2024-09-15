@@ -98,6 +98,7 @@ export default function DashboardContent({ user, userDetails }: {
                         <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl text-center">
                            We're creating your SEO audit!
                         </h1>
+                        <p className='mt-4 text-lg text-center'>We will drop you an email as soon as it's ready</p>
                         <p className="mt-4 text-lg text-green-600 text-center">Your registered domain: {existingDomain}</p>
                         </>
                     ) : (

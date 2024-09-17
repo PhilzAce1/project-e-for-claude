@@ -187,7 +187,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                   <dd className={`order-first p-8 text-6xl inline-block font-semibold tracking-tight rounded-xl mb-4 ${getScoreBGColor(parseInt(onpage_score))} ${getScoreColor(parseInt(onpage_score))}`}>{parseInt(onpage_score) }</dd>
                     <dt className="text-sm font-semibold  leading-6 text-gray-600 ">On Page SEO Score</dt>
                   </div>
-                  <div className='aspect-video overflow-auto flex-grow-0 relative'>
+                  <div className='h-96 overflow-auto flex-grow-0 relative'>
                     <img src={seoCrawlData.lighthouse_data.fullPageScreenshot.screenshot.data} />
                   </div>
             </dl>

@@ -1,7 +1,9 @@
+'use client'
+
 import { PostHogProvider } from 'posthog-js/react'
 import posthog from 'posthog-js'
 import { useEffect } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 
 if (typeof window !== 'undefined') {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {

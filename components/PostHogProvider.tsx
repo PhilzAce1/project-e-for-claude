@@ -1,3 +1,5 @@
+'use client';
+
 import { PostHogProvider } from 'posthog-js/react'
 import { ReactNode } from 'react'
 

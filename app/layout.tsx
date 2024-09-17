@@ -3,6 +3,8 @@ import { Toaster } from '@/components/ui/Toasts/toaster';
 import { PropsWithChildren, Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import PHProvider from '../components/PostHogProvider'
+
 import 'styles/main.css';
 
 const title = 'Espy Go - Your SEO Professional';
@@ -21,6 +23,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en">
+      <PHProvider>
       <body className="bg-gray-50">
         <main
           id="skip"
@@ -33,6 +36,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         </Suspense>
         <SpeedInsights/>
       </body>
+      </PHProvider>
     </html>
   );
 }

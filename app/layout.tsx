@@ -4,7 +4,7 @@ import { PropsWithChildren, Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import PHProvider from '../components/PostHogProvider'
-import { GoogleTagManager, GoogleTagManagerNoScript } from '@/components/GoogleTagManager';
+import { GoogleTagManager, GoogleTagManagerNoScript } from '../components/GoogleTagManager';
 
 import 'styles/main.css';
 

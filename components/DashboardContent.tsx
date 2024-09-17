@@ -137,7 +137,11 @@ export default function DashboardContent({ user, userDetails }: {
                         </>
                     )}
                 </div>
-                <div className='bg-white p-8 rounded-xl flex-1 flex-grow'></div>
+                <div className='bg-white p-8 rounded-xl flex-1 flex-grow content-center'>
+                    <div className='aspect-w-16 aspect-h-9'>
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/ZtpiYRahKAg?si=uyR_mHJgyQQTYoQT" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                </div>
             </div>
             <div className="bg-white py-16 sm:py-32 rounded-xl">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">

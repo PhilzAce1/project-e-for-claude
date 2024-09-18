@@ -16,6 +16,7 @@ export default function ConfirmEmailContent() {
         setEmail(user.email || null);
       } else {
         // If no user is found, we'll keep the generic message
+        setEmail(null);
       }
     };
 

@@ -207,7 +207,7 @@ export async function signUp(formData: FormData) {
     );
   } else if (data.user) {
     redirectPath = getStatusRedirect(
-      '/',
+      '/signin/confirm_email',
       'Success!',
       'Please check your email for a confirmation link. You may now close this tab.'
     );
@@ -218,7 +218,7 @@ export async function signUp(formData: FormData) {
       'You could not be signed up.'
     );
   }
-
+  console.log('SIGNED UP GO HERE', redirectPath);
   return redirectPath;
 }
 

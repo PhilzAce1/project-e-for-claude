@@ -25,6 +25,7 @@ export const getViewTypes = () => {
     viewTypes = [
       ...viewTypes,
       'password_signin',
+      'confirm_email',
       'forgot_password',
       'update_password',
       'signup'

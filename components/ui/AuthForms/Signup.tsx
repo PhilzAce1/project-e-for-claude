@@ -14,6 +14,8 @@ interface SignUpProps {
 }
 
 export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
+  console.log('allowEmail', allowEmail);
+  console.log('redirectMethod', redirectMethod);
   const router = redirectMethod === 'client' ? useRouter() : null;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -24,7 +26,7 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
   };
 
   return (
-    <form className="space-y-6" onSubmit={(e) => handleSubmit(e)}>
+    <form target='/signin/confirm_email' className="space-y-6" onSubmit={(e) => handleSubmit(e)}>
       {/* Email input */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">

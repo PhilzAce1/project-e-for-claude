@@ -7,7 +7,7 @@ import DashboardContent from '@/components/DashboardContent';
 export default async function DashboardPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
+  console.log('user', user);
   if (!user) {
     redirect('/signin/password_signin');
   }

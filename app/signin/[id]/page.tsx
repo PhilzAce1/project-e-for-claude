@@ -15,6 +15,7 @@ import OauthSignIn from '@/components/ui/AuthForms/OauthSignIn';
 import ForgotPassword from '@/components/ui/AuthForms/ForgotPassword';
 import UpdatePassword from '@/components/ui/AuthForms/UpdatePassword';
 import SignUp from '@/components/ui/AuthForms/Signup';
+import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
 
 export default async function SignIn({
   params,
@@ -26,7 +27,7 @@ export default async function SignIn({
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
-
+  console.log('params in this fucker', params);
   // Declare 'viewProp' and initialize with the default value
   let viewProp: string;
 
@@ -62,6 +63,8 @@ export default async function SignIn({
             ? 'Reset Password'
             : viewProp === 'update_password'
             ? 'Update Password'
+            : viewProp === 'confirm_email'
+            ? 'Confirm Email'
             : viewProp === 'signup'
             ? 'Sign Up'
             : 'Sign in to your account'}
@@ -97,8 +100,11 @@ export default async function SignIn({
             <SignUp allowEmail={allowEmail} redirectMethod={redirectMethod} />
           )}
 
-          {viewProp !== 'update_password'  && allowOauth && (
+{viewProp !== 'update_password' && viewProp !== 'confirm_email'  && allowOauth && (
             <OauthSignIn />
+          )}
+          {viewProp === 'confirm_email' && (
+            <ConfirmEmailContent />
           )}
         </div>
 

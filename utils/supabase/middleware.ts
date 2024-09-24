@@ -62,23 +62,35 @@ export const createClient = (request: NextRequest) => {
 
 export const updateSession = async (request: NextRequest) => {
   try {
-    // This `try/catch` block is only here for the interactive tutorial.
-    // Feel free to remove once you have Supabase connected.
     const { supabase, response } = createClient(request);
 
-    // This will refresh session if expired - required for Server Components
-    // https://supabase.com/docs/guides/auth/server-side/nextjs
-    await supabase.auth.getUser();
+    // Attempt to refresh the session
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error('Error refreshing session:', error);
+      // If there's an error refreshing the session, clear it
+      await supabase.auth.signOut();
+      return NextResponse.redirect(new URL('/signin/password_signin', request.url));
+    }
+
+    if (!session) {
+      // If there's no session, redirect to sign in
+      return NextResponse.redirect(new URL('/signin/password_signin', request.url));
+    }
+
+    // If we have a valid session, refresh it
+    const { error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError) {
+      console.error('Error refreshing session:', refreshError);
+      // If there's an error refreshing the session, clear it and redirect
+      await supabase.auth.signOut();
+      return NextResponse.redirect(new URL('/signin/password_signin', request.url));
+    }
 
     return response;
   } catch (e) {
-    // If you are here, a Supabase client could not be created!
-    // This is likely because you have not set up environment variables.
-    // Check out http://localhost:3000 for Next Steps.
-    return NextResponse.next({
-      request: {
-        headers: request.headers
-      }
-    });
+    console.error('Error in updateSession:', e);
+    return NextResponse.redirect(new URL('/signin/password_signin', request.url));
   }
 };

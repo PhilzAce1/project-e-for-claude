@@ -44,3 +44,23 @@ export const getUserDetails = cache(async (supabase: SupabaseClient, userId: str
 
   return userDetails;
 });
+
+export async function getLatestSeoCrawl(supabase: SupabaseClient, userId: string) {
+  const { data, error } = await supabase
+    .from('seo_crawls')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error('Error fetching SEO crawl data:', error);
+    return false;
+  }
+
+  // Check if all required fields are present and not null/undefined
+  const requiredFields = [ 'lighthouse_data', 'total_pages', 'page_metrics', 'scraped_pages'];
+  const isComplete = requiredFields.every(field => data && data[field] != null);
+  return isComplete;
+}

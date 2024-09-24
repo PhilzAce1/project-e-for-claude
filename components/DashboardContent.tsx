@@ -3,10 +3,12 @@
 import { User } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import Link from 'next/link';
 
-export default function DashboardContent({ user, userDetails }: {
+export default function DashboardContent({ user, userDetails, isSeoCrawlComplete }: {
     user: User;
     userDetails: any;
+    isSeoCrawlComplete: boolean;
 }) {
     const [domain, setDomain] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -100,6 +102,14 @@ export default function DashboardContent({ user, userDetails }: {
                         </h1>
                         <p className='mt-4 text-lg text-center'>We will drop you an email as soon as it's ready</p>
                         <p className="mt-4 text-lg text-green-600 text-center">Your registered domain: {existingDomain}</p>
+
+                    {isSeoCrawlComplete && (
+                        <p className='text-center mt-4'>
+                            <Link href="/site-audit" className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                    Review Your Audit
+                            </Link>
+                        </p>
+                    )}
                         </>
                     ) : (
                         <>

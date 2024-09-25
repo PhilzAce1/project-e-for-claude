@@ -93,7 +93,7 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
 
     return (
         <div>
-            <div className='flex flex-row flex-nowrap  gap-8 mb-8'>
+            <div className='flex flex-col sm:flex-col xl:flex-row  gap-8 mb-8'>
                 <div className='bg-white p-8 rounded-xl flex-1 flex-grow'>
                     {existingDomain ? (
                         <>

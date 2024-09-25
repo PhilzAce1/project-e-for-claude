@@ -2,7 +2,13 @@
 
 import Script from 'next/script';
 
+const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
+
 export function GoogleTagManager({ gtmId }: { gtmId: string }) {
+  if (!isProduction) {
+    return null;
+  }
+  
   return (
     <>
       <Script
@@ -23,6 +29,10 @@ export function GoogleTagManager({ gtmId }: { gtmId: string }) {
 }
 
 export function GoogleTagManagerNoScript({ gtmId }: { gtmId: string }) {
+  if (!isProduction) {
+    return null;
+  }
+
   return (
     <noscript>
       <iframe

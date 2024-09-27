@@ -4,12 +4,16 @@ import { User } from '@supabase/supabase-js';
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';  // Changed from 'next/router';
 
 export default function DashboardContent({ user, userDetails, isSeoCrawlComplete }: {
     user: User;
     userDetails: any;
     isSeoCrawlComplete: boolean;
 }) {
+    const router = useRouter();
+
+
     const [domain, setDomain] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -31,9 +35,20 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
           description:
             "Transform your outline into SEO-optimised content that ranks. Our AI assistant will guide you through creating engaging, high-quality content designed to dominate search results.",
         },
-      ]
+    ]
 
     useEffect(() => {
+        if (user.created_at) {
+            const createdAt = new Date(user.created_at);
+            const now = new Date();
+            const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
+            
+            if (createdAt > twoMinutesAgo) {
+                router.push('/?newUser=true');
+            } else {
+                router.push('/')
+            }
+        }
         checkExistingDomain()
     }, [])
 
@@ -66,7 +81,6 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
         setError(null)
 
         try {
-            // Call the API route to initiate SEO crawl
             const response = await fetch('/api/init-seo-crawl', {
                 method: 'POST',
                 headers: {
@@ -79,7 +93,7 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
                 throw new Error('Failed to initiate SEO crawl')
             }
 
-            const responseData = await response.json()
+            await response.json()
 
             setDomain('')
             setExistingDomain(domain)

@@ -58,7 +58,7 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
                     const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
                     
                     if (createdAt > twoMinutesAgo && pathname !== '/welcome') {
-                        router.push('/welcome');
+                        window.location.href = '/welcome';
                     }
                 }
             } else {

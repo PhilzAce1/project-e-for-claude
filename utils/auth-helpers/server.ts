@@ -218,7 +218,6 @@ export async function signUp(formData: FormData) {
       'You could not be signed up.'
     );
   }
-  console.log('SIGNED UP GO HERE', redirectPath);
   return redirectPath;
 }
 

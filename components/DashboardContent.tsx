@@ -15,13 +15,13 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
 }) {
     const router = useRouter();
     const pathname = usePathname();
+    const supabase = createClientComponentClient()
     
     const [domain, setDomain] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [existingDomain, setExistingDomain] = useState<string | null>(null)
     const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false)
-    const supabase = createClientComponentClient()
 
     const features = [
         {
@@ -38,17 +38,41 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
         },
     ]
 
-    const checkNewUser = useCallback(() => {
-        if (user.created_at) {
-            const createdAt = new Date(user.created_at);
-            const now = new Date();
-            const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
-            
-            if (createdAt > twoMinutesAgo && pathname !== '/welcome') {
-                router.push('/welcome');
+    useEffect(() => {
+        const checkWelcomeStatus = async () => {
+            // Check localStorage first
+            const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+            if (hasSeenWelcome) {
+                return;
             }
-        }
-    }, [user.created_at, router, pathname]);
+
+            if (error) {
+                console.error('Error fetching welcome status:', error);
+                return;
+            }
+
+            if (!hasSeenWelcome) {
+                if (user.created_at) {
+                    const createdAt = new Date(user.created_at);
+                    const now = new Date();
+                    const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
+                    
+                    if (createdAt > twoMinutesAgo && pathname !== '/welcome') {
+                        router.push('/welcome');
+                    }
+                }
+            } else {
+                // If user has seen welcome in database, update localStorage
+                localStorage.setItem('hasSeenWelcome', 'true');
+            }
+        };
+
+        checkWelcomeStatus();
+    }, [user.id, user.created_at, router, pathname, supabase]);
+
+    useEffect(() => {
+        setIsWelcomeModalOpen(pathname === '/welcome');
+    }, [pathname]);
 
     const checkExistingDomain = useCallback(async () => {
         try {
@@ -69,13 +93,8 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
     }, [supabase, user.id]);
 
     useEffect(() => {
-        checkNewUser();
         checkExistingDomain();
-    }, [checkNewUser, checkExistingDomain]);
-
-    useEffect(() => {
-        setIsWelcomeModalOpen(pathname === '/welcome');
-    }, [pathname]);
+    }, [checkExistingDomain]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -112,8 +131,22 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
         }
     }
 
-    const closeWelcomeModal = () => {
+    const closeWelcomeModal = async () => {
         setIsWelcomeModalOpen(false);
+        
+        // Update localStorage
+        localStorage.setItem('hasSeenWelcome', 'true');
+
+        // Update database
+        const { error } = await supabase
+            .from('users')
+            .update({ has_seen_welcome: true })
+            .eq('id', user.id);
+
+        if (error) {
+            console.error('Error updating welcome status:', error);
+        }
+
         router.push('/');
     };
 

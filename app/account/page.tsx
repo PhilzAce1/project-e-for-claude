@@ -23,7 +23,7 @@ export default async function AccountPage() {
   ]);
 
   return (
-    <AuthenticatedLayout user={user} userDetails={userDetails}>
+    <AuthenticatedLayout user={user} >
       <AccountContent user={user} userDetails={userDetails} subscription={subscription} />
     </AuthenticatedLayout>
   );

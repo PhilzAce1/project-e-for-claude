@@ -8,9 +8,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 
-export default function DashboardContent({ user, userDetails, isSeoCrawlComplete }: {
+export default function DashboardContent({ user, isSeoCrawlComplete }: {
     user: User;
-    userDetails: any;
     isSeoCrawlComplete: boolean;
 }) {
     const router = useRouter();

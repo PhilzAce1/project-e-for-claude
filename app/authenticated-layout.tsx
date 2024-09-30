@@ -7,12 +7,10 @@ import Logo from '@/components/icons/Logo';
 
 export default function AuthenticatedLayout({
   children,
-  user,
-  userDetails
+  user
 }: {
   children: React.ReactNode;
   user: any;
-  userDetails: any;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -20,7 +18,6 @@ export default function AuthenticatedLayout({
     <div className="min-h-screen bg-gray-100">
       <Sidebar 
         user={user} 
-        userDetails={userDetails} 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen}
       />

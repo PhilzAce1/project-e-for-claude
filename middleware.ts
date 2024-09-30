@@ -31,12 +31,14 @@ export async function middleware(req : NextRequest) {
         return res
     }
 
+
     // If user is not authenticated and trying to access a protected route, redirect
     // to login
     if (!user && !publicPaths.includes(path)) {
         return NextResponse.redirect(new URL('/signin/password_signin', req.url))
     }
 
+    console.log('redirecting?', res)
     return res
 }
 

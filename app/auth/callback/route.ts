@@ -4,36 +4,31 @@ import { NextRequest } from 'next/server';
 import { getErrorRedirect, getStatusRedirect } from '@/utils/helpers';
 
 export async function GET(request: NextRequest) {
-  // The `/auth/callback` route is required for the server-side auth flow implemented
-  // by the `@supabase/ssr` package. It exchanges an auth code for the user's session.
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
 
   if (code) {
     const supabase = createClient();
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    console.log('auth exchangeCodeForSession', error)
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
       return NextResponse.redirect(
         getErrorRedirect(
-          `${requestUrl.origin}/signin`,
+          `${requestUrl.origin}/signin/password_signin`,
           error.name,
           "Sorry, we weren't able to log you in. Please try again."
         )
       );
     }
+
+    // If the exchange was successful, the user is now signed in
+    if (data.session) {
+      // Redirect to the dashboard or home page
+      return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+    }
   }
 
-  console.log('auth go straight throug?', requestUrl.origin)
-
-  // URL to redirect to after sign in process completes
-  return NextResponse.redirect(
-    getStatusRedirect(
-      `${requestUrl.origin}`,
-      'Success!',
-      'You are now signed in.'
-    )
-  );
+  // If there's no code or the exchange wasn't successful, redirect to the sign-in page
+  return NextResponse.redirect(`${requestUrl.origin}/signin/password_signin`);
 }

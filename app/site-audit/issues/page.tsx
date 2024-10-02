@@ -83,7 +83,7 @@ const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as n
         
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-                <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
                   SEO Issues Discovered - {totalIssues}
                 </h1>
             </div>

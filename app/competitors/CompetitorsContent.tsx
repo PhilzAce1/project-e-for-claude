@@ -58,10 +58,15 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    addCompetitor();
+  };
+
   return (
     <div className="container mx-auto">
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-        <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Your Competitors</h1>
+        <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Your Competitors</h1>
         <button onClick={() => setIsModalOpen(true)} className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
           Add Competitor
         </button>
@@ -150,26 +155,29 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
                       <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
                         Add New Competitor
                       </Dialog.Title>
-                      <div className="mt-2">
+                      <form onSubmit={handleSubmit} className="mt-2">
+                        <label htmlFor="competitor-url" className="sr-only">
+                          Competitor URL
+                        </label>
                         <input
                           type="text"
+                          id="competitor-url"
                           value={newCompetitor}
                           onChange={(e) => setNewCompetitor(e.target.value)}
                           placeholder="Enter competitor url (e.g. example.com)"
                           className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         />
-                        {inputError && <p className="mt-2 text-sm text-red-600">{inputError}</p>}
-                      </div>
+                        {inputError && <p className="mt-2 text-sm text-red-600" role="alert">{inputError}</p>}
+                        <div className="mt-5 sm:mt-6 text-right">
+                          <button
+                            type="submit"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                          >
+                            Add Competitor
+                          </button>
+                        </div>
+                      </form>
                     </div>
-                  </div>
-                  <div className="mt-2 sm:mt-2 text-right">
-                    <button
-                      type="button"
-                      className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                      onClick={addCompetitor}
-                    >
-                      Add Competitor
-                    </button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

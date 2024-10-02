@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     // If the exchange was successful, the user is now signed in
     if (data.session) {
       // Redirect to the dashboard or home page
-      return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+      return NextResponse.redirect(`${requestUrl.origin}/`);
     }
   }
 

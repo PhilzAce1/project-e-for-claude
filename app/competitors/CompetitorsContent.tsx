@@ -1,25 +1,44 @@
 'use client';
 
 import { User } from '@supabase/supabase-js';
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface CompetitorsContentProps {
   user: User;
 }
 
 export default function CompetitorsContent({ user }: CompetitorsContentProps) {
-  const [competitors, setCompetitors] = useState<{ url: string, current: boolean}[]>([]);
+  const [competitors, setCompetitors] = useState<{ id: string, domain: string }[]>([]);
   const [newCompetitor, setNewCompetitor] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputError, setInputError] = useState('');
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    fetchCompetitors();
+  }, []);
+
+  async function fetchCompetitors() {
+    const { data, error } = await supabase
+      .from('competitors')
+      .select('id, domain')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching competitors:', error);
+    } else {
+      setCompetitors(data.map(comp => ({ ...comp, current: false })));
+    }
+  }
 
   function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
   }
 
   const validateUrl = (url: string) => {
-    // This regex allows URLs without protocol
     const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
@@ -40,15 +59,32 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     return urlObj.href;
   }
 
-  const addCompetitor = () => {
+  const addCompetitor = async () => {
     if (newCompetitor.trim()) {
       if (validateUrl(newCompetitor)) {
         try {
           const normalizedUrl = normalizeUrl(newCompetitor.trim());
-          setCompetitors([...competitors, { url: normalizedUrl, current: false }]);
-          setNewCompetitor('');
-          setIsModalOpen(false);
-          setInputError('');
+          
+          if (competitors.length >= 3) {
+            setInputError('You can only add up to 3 competitors. Upgrade to add more.');
+            return;
+          }
+
+          const { data, error } = await supabase
+            .from('competitors')
+            .insert({ user_id: user.id, domain: normalizedUrl })
+            .select()
+            .single();
+
+          if (error) {
+            setInputError('Error adding competitor. Please try again.');
+            console.error('Error adding competitor:', error);
+          } else {
+            setCompetitors([...competitors, { id: data.id, domain: data.url }]);
+            setNewCompetitor('');
+            setIsModalOpen(false);
+            setInputError('');
+          }
         } catch (error) {
           setInputError('Invalid URL format. Please enter a valid URL.');
         }
@@ -86,11 +122,11 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
               <select
                 id="competitors"
                 name="competitors"
-                defaultValue={competitors.find((competitor) => competitor.current)?.url}
+                defaultValue={competitors.find((competitor) => competitor)?.domain}
                 className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
               >
                 {competitors.map((competitor) => (
-                  <option key={competitor.url}>{new URL(competitor.url).hostname}</option>
+                  <option key={competitor.domain}>{new URL(competitor.domain).hostname}</option>
                 ))}
               </select>
             </div>
@@ -98,21 +134,21 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
               <nav aria-label="Tabs" className="isolate flex divide-x divide-gray-200 rounded-lg shadow">
                 {competitors.map((competitor, competitorIdx) => (
                   <a
-                    key={competitor.url}
-                    href={competitor.url}
-                    aria-current={competitor.current ? 'page' : undefined}
+                    key={competitor.domain}
+                    href={competitor.domain}
+                    aria-current={competitor ? 'page' : undefined}
                     className={classNames(
-                      competitor.current ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
+                      competitor ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
                       competitorIdx === 0 ? 'rounded-l-lg' : '',
                       competitorIdx === competitors.length - 1 ? 'rounded-r-lg' : '',
                       'group relative min-w-0 flex-1 overflow-hidden bg-white px-4 py-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10',
                     )}
                   >
-                    <span>{new URL(competitor.url).hostname}</span>
+                    <span>{new URL(competitor.domain).hostname}</span>
                     <span
                       aria-hidden="true"
                       className={classNames(
-                        competitor.current ? 'bg-indigo-500' : 'bg-transparent',
+                        competitor ? 'bg-indigo-500' : 'bg-transparent',
                         'absolute inset-x-0 bottom-0 h-0.5',
                       )}
                     />

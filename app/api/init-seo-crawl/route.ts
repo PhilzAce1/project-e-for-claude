@@ -18,7 +18,30 @@ async function insertBusinessInformation(userId: string, domain: string) {
 
     if (error) throw error
     console.log('Business added:', data)
+
+    // Call get-ranked-keywords endpoint
+    fetchRankedKeywords(userId, domain)
+
     return data
+}
+
+async function fetchRankedKeywords(userId: string, domain: string) {
+    try {
+        // Remove http:// or https:// from the domain
+        const cleanDomain = domain.replace(/^https?:\/\//, '')
+
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/get-ranked-keywords`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_id: userId, domain: cleanDomain }),
+        })
+        console.log('Ranked keywords fetch triggered for:', cleanDomain)
+    } catch (error) {
+        console.error('Error triggering ranked keywords fetch:', error)
+        // Note: We're not throwing the error here to prevent it from blocking the main flow
+    }
 }
 
 async function initiateExternalSEOCrawl(domain: string) {

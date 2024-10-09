@@ -8,9 +8,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 
-export default function DashboardContent({ user, userDetails, isSeoCrawlComplete }: {
+export default function DashboardContent({ user, isSeoCrawlComplete }: {
     user: User;
-    userDetails: any;
     isSeoCrawlComplete: boolean;
 }) {
     const router = useRouter();
@@ -157,7 +156,7 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
                     <div className='bg-white p-8 rounded-xl flex-1 flex-grow'>
                         {existingDomain ? (
                             <>
-                            <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl text-center">
+                            <h1 className="font-serif mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl text-center">
                                We're creating your SEO audit!
                             </h1>
                             <p className='mt-4 text-lg text-center'>We will drop you an email as soon as it's ready</p>
@@ -173,7 +172,7 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
                             </>
                         ) : (
                             <>
-                            <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl text-center">
+                            <h1 className="font-serif mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl text-center">
                                 Let's get your SEO Audit underway
                             </h1>
                             <form onSubmit={handleSubmit} className="mx-auto mt-8 max-w-xl ">
@@ -217,7 +216,7 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
                     <div className="mx-auto max-w-7xl px-6 lg:px-8">
                         <div className="mx-auto max-w-2xl lg:text-center">
                         <h2 className="text-base font-semibold leading-7 text-orange-600">Climb the rankings faster whilst you wait</h2>
-                        <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                        <p className="font-serif mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                             We're on the cusp of revolutionising your SEO strategy
                         </p>
                         <p className="mt-6 text-lg leading-8 text-gray-600">
@@ -225,7 +224,7 @@ export default function DashboardContent({ user, userDetails, isSeoCrawlComplete
                         </p>
                         </div>
                         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-                            <h2 className="text-center mb-8 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">It's as simple as</h2>
+                            <h2 className="font-serif text-center mb-8 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">It's as simple as</h2>
                         <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
                             {features.map((feature, count) => (
                             <div key={feature.name} className="flex flex-col">

@@ -12,12 +12,11 @@ import { classNames } from '@/utils/helpers';
 
 interface SidebarProps {
   user: any;
-  userDetails: any;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
 }
 
-export default function Sidebar({ user, userDetails, sidebarOpen, setSidebarOpen }: SidebarProps) {
+export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarProps) {
   const pathname = usePathname();
 
   // Function to check if the current path is active

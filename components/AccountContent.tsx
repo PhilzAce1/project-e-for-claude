@@ -38,7 +38,7 @@ export default function AccountContent({ user, userDetails, subscription }: {
     <section className="mb-32">
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10">
         <div className="min-w-0 flex-1 p-8">
-          <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+          <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
             Account
           </h1>
           <p className="mt-5 text-xl text-zinc-700 sm:text-2xl">

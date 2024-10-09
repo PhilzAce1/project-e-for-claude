@@ -30,7 +30,7 @@ export default async function SiteAuditPage() {
   }
 
   return (
-    <AuthenticatedLayout user={user} userDetails={userDetails}>
+    <AuthenticatedLayout user={user} >
         <SiteAuditContent user={user} seoCrawlData={seoCrawlData} />
     </AuthenticatedLayout>)
 }

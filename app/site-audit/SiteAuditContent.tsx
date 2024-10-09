@@ -102,7 +102,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                 return (
                     <>
                     <div className="border-b border-gray-200 pb-5">
-                        <h2 className="text-xl font-bold leading-6 text-gray-900">Performance</h2>
+                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Performance</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
                     </div>
                         <LighthouseAudits 
@@ -114,7 +114,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                 return (
                     <>
                     <div className="border-b border-gray-200 pb-5">
-                        <h2 className="text-xl font-bold leading-6 text-gray-900">Accessibility</h2>
+                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Accessibility</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
                     </div>                        
                     <LighthouseAudits 
@@ -126,7 +126,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                 return (
                     <>
                     <div className="border-b border-gray-200 pb-5">
-                        <h2 className="text-xl font-bold leading-6 text-gray-900">Best Practices</h2>
+                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Best Practices</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
                     </div>                        <LighthouseAudits 
                             lighthouseData={lighthouse_data} 
@@ -137,7 +137,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                 return (
                     <>
                     <div className="border-b border-gray-200 pb-5">
-                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO</h2>
+                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">SEO</h2>
                         <h3 className="text-l leading-6 text-gray-900">Improvements required (In priority order)</h3>
                     </div>
                     <LighthouseAudits 
@@ -180,12 +180,12 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     return (
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-                <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Site Audit: <a href={seoCrawlData?.domain} className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.domain}</a></h1>
+                <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Site Audit: <a href={seoCrawlData?.domain} className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.domain}</a></h1>
             </div>
             <dl className="mt-8 flex overflow-hidden  bg-white divide-x items-center rounded-2xl text-center ring-slate-900/10 ring-1">
                   <div className=" p-8 flex-grow">
                   <dd className={`order-first p-8 text-6xl inline-block font-semibold tracking-tight rounded-xl mb-4 ${getScoreBGColor(parseInt(onpage_score))} ${getScoreColor(parseInt(onpage_score))}`}>{parseInt(onpage_score) }</dd>
-                    <dt className="text-sm font-semibold  leading-6 text-gray-600 ">On Page SEO Score</dt>
+                    <dt className="font-serif text-sm font-semibold  leading-6 text-gray-600 ">On Page SEO Score</dt>
                   </div>
                   <div className='h-96 overflow-auto flex-grow-0 relative'>
                     <img src={seoCrawlData.lighthouse_data.fullPageScreenshot.screenshot.data} />
@@ -195,13 +195,13 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                   <div className="flex flex-col bg-white p-8 relative pb-20">
                     
                     <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
-                        <h2 className="text-xl font-bold leading-6 text-gray-900">Pages Discovered</h2>
+                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Pages Discovered</h2>
                     </div>
                     <p className="mt-4 text-3xl font-bold">{seoCrawlData?.total_pages || 'N/A'}</p>
                     <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.total_pages || 'N/A'} pages and found {page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
                     
                     <div className="border-b mt-8 border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
-                        <h3 className="text-base font-semibold leading-6 text-gray-900">Page Status</h3>
+                        <h3 className=" text-base font-semibold leading-6 text-gray-900">Page Status</h3>
                     </div>
                     <ul className='mt-4'>
                         <li className='flex items-center gap-2'>
@@ -230,7 +230,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                   <div className="flex flex-col bg-white p-8 relative pb-20">
                     
                     <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">                        
-                        <h2 className="text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
+                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
                     </div>
                     <p className="mt-4 text-3xl font-bold">
                         {totalIssues}
@@ -259,7 +259,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                   </div>
             </div>
             <div className="bg-white mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl  ring-slate-900/10 ring-1 p-8">
-                <h2 className="text-xl font-bold leading-6 text-gray-900">Site Speed - Powered by Google Lighthouse</h2>                   
+                <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Site Speed - Powered by Google Lighthouse</h2>                   
             </div>
             {loading ? (
                 <p>Loading audits...</p>

@@ -26,6 +26,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     <html lang="en">
       <head>
         <GoogleTagManager gtmId="GTM-NJXB6P95" />
+        <script async src="https://cdn.tolt.io/tolt.js" data-tolt="6dc3be35-e666-4227-82f0-42713dfa3e77"></script>
         {/* Other head elements */}
       </head>
       <PHProvider>

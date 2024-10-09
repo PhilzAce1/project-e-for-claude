@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import AuthenticatedLayout from './authenticated-layout';
-import { getUserDetails, getSubscription, getLatestSeoCrawl } from '@/utils/supabase/queries';
+import { getSubscription, getLatestSeoCrawl } from '@/utils/supabase/queries';
 import DashboardContent from '@/components/DashboardContent';
 
 export default async function DashboardPage() {
@@ -12,15 +12,14 @@ export default async function DashboardPage() {
     redirect('/signin/password_signin');
   }
 
-  const [userDetails, subscription, isSeoCrawlComplete] = await Promise.all([
-    getUserDetails(supabase, user.id),
+  const [subscription, isSeoCrawlComplete] = await Promise.all([
     getSubscription(supabase),
     getLatestSeoCrawl(supabase, user.id)
   ]);
 
   return (
-    <AuthenticatedLayout user={user} userDetails={userDetails}>
-      <DashboardContent user={user} userDetails={userDetails} isSeoCrawlComplete={isSeoCrawlComplete} />
+    <AuthenticatedLayout user={user} >
+      <DashboardContent user={user} isSeoCrawlComplete={isSeoCrawlComplete} />
     </AuthenticatedLayout>
   );
 }

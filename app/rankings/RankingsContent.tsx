@@ -9,9 +9,73 @@ const Doughnut = dynamic(() => import('react-chartjs-2').then((mod) => mod.Dough
 });
 Chart.register(ArcElement, Title, Tooltip, Legend, Colors);
 
+interface Metrics {
+  pos_1: number;
+  pos_2_3: number;
+  pos_4_10: number;
+  pos_11_20: number;
+  pos_21_30: number;
+  pos_31_40: number;
+  pos_41_50: number;
+  pos_51_60: number;
+  pos_61_70: number;
+  pos_71_80: number;
+  pos_81_90: number;
+  pos_91_100: number;
+  etv: number;
+  impressions_etv: number;
+  count: number;
+  estimated_paid_traffic_cost: number;
+  is_new: number;
+  is_up: number;
+  is_down: number;
+  is_lost: number;
+}
+
+interface KeywordInfo {
+  search_volume: number;
+  competition_level: string;
+}
+
+interface SearchIntentInfo {
+  main_intent: string;
+}
+
+interface RankChanges {
+  is_new: boolean;
+  is_up: boolean;
+  is_down: boolean;
+}
+
+interface SerpItem {
+  rank_absolute: number;
+  rank_changes: RankChanges;
+  relative_url: string;
+}
+
+interface Item {
+  keyword_data: {
+    keyword: string;
+    keyword_info: KeywordInfo;
+    search_intent_info: SearchIntentInfo;
+  };
+  ranked_serp_element: {
+    serp_item: SerpItem;
+  };
+}
+
+interface RankingsData {
+  total_count: number;
+  metrics: {
+    organic: Metrics;
+    paid: Metrics;
+  };
+  items: Item[];
+}
+
 interface RankingsContentProps {
   user: User;
-  rankingsData: any;
+  rankingsData: RankingsData;
 }
 
 export default function RankingsContent({ user, rankingsData }: RankingsContentProps) {
@@ -36,7 +100,7 @@ export default function RankingsContent({ user, rankingsData }: RankingsContentP
     },
   };
 
-  const getKeywordMetrics = (type: String) => {
+  const getKeywordMetrics = (type: 'organic' | 'paid') => {
     return  {
       labels: ['1', '2/3', '4-10', '11-20', '21-30', '31-40', '41-100'],
       datasets: [

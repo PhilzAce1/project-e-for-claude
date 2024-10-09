@@ -15,12 +15,6 @@ export default async function WelcomePage() {
     redirect('/signin');
   }
 
-  const { data: userDetails } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-
   const { data: latestCrawl } = await supabase
     .from('seo_crawls')
     .select('*')
@@ -32,10 +26,9 @@ export default async function WelcomePage() {
   const isSeoCrawlComplete = latestCrawl && latestCrawl.status === 'completed';
 
   return (
-    <AuthenticatedLayout user={user} userDetails={userDetails}>
+    <AuthenticatedLayout user={user} >
         <DashboardContent
         user={user}
-        userDetails={userDetails}
         isSeoCrawlComplete={isSeoCrawlComplete}
         />
     </AuthenticatedLayout>

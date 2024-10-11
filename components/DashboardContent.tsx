@@ -21,6 +21,7 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
     const [error, setError] = useState<string | null>(null)
     const [existingDomain, setExistingDomain] = useState<string | null>(null)
     const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false)
+    const [isMetadataUpdated, setIsMetadataUpdated] = useState(false)
 
     const features = [
         {
@@ -148,6 +149,35 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
 
         router.push('/');
     };
+
+    useEffect(() => {
+        const updateUserMetadata = async () => {
+            if (typeof window === "undefined" || !window.tolt_referral) {
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .upsert({ 
+                        user_id: user.id,
+                        referral_code: window.tolt_referral
+                    }, { 
+                        onConflict: 'user_id',
+                        update: { referral_code: window.tolt_referral }
+                    })
+                    .select()
+
+                if (error) throw error
+
+                console.log('User referral data updated successfully')
+            } catch (error) {
+                console.error('Error updating user referral data:', error)
+            }
+        }
+
+        updateUserMetadata()
+    }, [supabase, user.id]) // Only run once when component mounts
 
     return (
         <>
@@ -299,4 +329,11 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
             </Transition>
         </>
     )
+}
+
+// Add this type declaration at the end of the file
+declare global {
+    interface Window {
+        tolt_referral?: any;
+    }
 }

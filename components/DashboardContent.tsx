@@ -163,8 +163,7 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
                         user_id: user.id,
                         referral_code: window.tolt_referral
                     }, { 
-                        onConflict: 'user_id',
-                        update: { referral_code: window.tolt_referral }
+                        onConflict: 'user_id'
                     })
                     .select()
 

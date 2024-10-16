@@ -1,20 +1,27 @@
 'use client';
 
-import { User } from '@supabase/supabase-js';
+import { Subscription, User } from '@supabase/supabase-js';
 import { useState, Fragment, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import Pricing from '@/components/ui/Pricing/Pricing';
 
 interface CompetitorsContentProps {
   user: User;
+  products: Product[];
+  subscription: Subscription;
 }
 
-export default function CompetitorsContent({ user }: CompetitorsContentProps) {
+export default function CompetitorsContent({ user, products, subscription }: CompetitorsContentProps) {
   const [competitors, setCompetitors] = useState<{ id: string, domain: string }[]>([]);
   const [newCompetitor, setNewCompetitor] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputError, setInputError] = useState('');
   const supabase = createClientComponentClient();
+
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(0);
 
   useEffect(() => {
     fetchCompetitors();
@@ -30,7 +37,10 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     if (error) {
       console.error('Error fetching competitors:', error);
     } else {
-      setCompetitors(data.map(comp => ({ ...comp, current: false })));
+      setCompetitors(data);
+      if (data.length === 0) {
+        setShowOnboarding(true);
+      }
     }
   }
 
@@ -99,6 +109,40 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     addCompetitor();
   };
 
+  const onboardingSteps = [
+    {
+      title: "Welcome to Competitor Analysis!",
+      content: "Let's get started by adding your top competitors. This will help us provide better insights for your SEO strategy.",
+    },
+    {
+      title: "Add Your First Competitor",
+      content: "Enter the domain of your first competitor. This should be a website that directly competes with your business in search results.",
+    },
+    {
+      title: "Great Job!",
+      content: "You've added your first competitor. Let's add two more to get a comprehensive view of your competitive landscape.",
+    },
+    {
+      title: "Competitor Analysis Complete",
+      content: "Excellent! You've added your top competitors. We'll now analyze their SEO strategies to help improve your rankings.",
+    }
+  ];
+
+  const handleNextStep = () => {
+    if (onboardingStep < onboardingSteps.length - 1) {
+      setOnboardingStep(onboardingStep + 1);
+    } else {
+      setShowOnboarding(false);
+    }
+  };
+
+  const handleAddCompetitor = async () => {
+    await addCompetitor();
+    if (competitors.length === 0) {
+      handleNextStep();
+    }
+  };
+
   return (
     <div className="container mx-auto">
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
@@ -160,8 +204,8 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
         </>
       )}
 
-      <Transition.Root show={isModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={setIsModalOpen}>
+<Transition appear show={showOnboarding} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setShowOnboarding(false)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -171,56 +215,81 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
           </Transition.Child>
 
-          <div className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
-                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
                 leave="ease-in duration-200"
-                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
-                  <div>
-                    <div className="text-center">
-                      <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
-                        Add New Competitor
-                      </Dialog.Title>
-                      <form onSubmit={handleSubmit} className="mt-2">
-                        <label htmlFor="competitor-url" className="sr-only">
-                          Competitor URL
-                        </label>
-                        <input
-                          type="text"
-                          id="competitor-url"
-                          value={newCompetitor}
-                          onChange={(e) => setNewCompetitor(e.target.value)}
-                          placeholder="Enter competitor url (e.g. example.com)"
-                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                        {inputError && <p className="mt-2 text-sm text-red-600" role="alert">{inputError}</p>}
-                        <div className="mt-5 sm:mt-6 text-right">
-                          <button
-                            type="submit"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                          >
-                            Add Competitor
-                          </button>
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <div className="relative bg-gray-100">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:px-8">
+                      <div className="mx-auto max-w-2xl py-24 lg:max-w-none">
+                        <div className="lg:pr-16">
+                          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl xl:text-6xl">
+                            {onboardingStep === 0 && "Welcome to Competitor Analysis!"}
+                            {onboardingStep === 1 && "Add Your First Competitor"}
+                            {onboardingStep === 2 && "Great Job!"}
+                            {onboardingStep === 3 && "Competitor Analysis Complete"}
+                          </h1>
+                          <p className="mt-4 text-xl text-gray-600">
+                            {onboardingStep === 0 && "Let's get started by adding your top competitors. This will help us provide better insights for your SEO strategy."}
+                            {onboardingStep === 1 && "Enter the domain of your first competitor. This should be a website that directly competes with your business in search results."}
+                            {onboardingStep === 2 && "You've added your first competitor. Let's add two more to get a comprehensive view of your competitive landscape."}
+                            {onboardingStep === 3 && "Excellent! You've added your top competitors. We'll now analyze their SEO strategies to help improve your rankings."}
+                          </p>
+                          {(onboardingStep === 1 || onboardingStep === 2) && (
+                            <div className="mt-6">
+                              <input
+                                type="text"
+                                value={newCompetitor}
+                                onChange={(e) => setNewCompetitor(e.target.value)}
+                                placeholder="Enter competitor domain"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                              />
+                              <button
+                                onClick={handleAddCompetitor}
+                                className="mt-2 inline-block rounded-md border border-transparent bg-indigo-600 px-8 py-3 font-medium text-white hover:bg-indigo-700"
+                              >
+                                Add Competitor
+                              </button>
+                            </div>
+                          )}
+                          <div className="mt-6">
+                            <button
+                              onClick={handleNextStep}
+                              className="inline-block rounded-md border border-transparent bg-indigo-600 px-8 py-3 font-medium text-white hover:bg-indigo-700"
+                            >
+                              {onboardingStep < 3 ? "Next" : "Start analyzing competitors"}
+                            </button>
+                          </div>
                         </div>
-                      </form>
+                      </div>
                     </div>
+                  </div>
+                  <div className="h-48 w-full sm:h-64 lg:absolute lg:right-0 lg:top-0 lg:h-full lg:w-1/2">
+                    <img
+                      alt=""
+                      src="/competitor-image.webp"
+                      className="h-full w-full object-cover object-center"
+                    />
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition>
+
+      <Pricing user={user} products={products} subscription={subscription} />
     </div>
   );
 }

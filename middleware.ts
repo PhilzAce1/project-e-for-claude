@@ -38,7 +38,6 @@ export async function middleware(req : NextRequest) {
         return NextResponse.redirect(new URL('/signin/password_signin', req.url))
     }
 
-    console.log('redirecting?', res)
     return res
 }
 

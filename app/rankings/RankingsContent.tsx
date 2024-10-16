@@ -4,6 +4,10 @@ import { User } from '@supabase/supabase-js';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import dynamic from 'next/dynamic';
 import {Chart, ArcElement, Title, Tooltip, Legend, Colors} from 'chart.js'
+import { useState, useEffect, Fragment } from 'react';
+import Modal from '@/components/Modal'; // Assuming you have a Modal component
+import { Dialog, Transition } from '@headlessui/react';
+
 const Doughnut = dynamic(() => import('react-chartjs-2').then((mod) => mod.Doughnut), {
   ssr: false,
 });
@@ -78,9 +82,18 @@ interface RankingsContentProps {
   rankingsData: RankingsData;
 }
 
-export default function RankingsContent({ user, rankingsData }: RankingsContentProps) {
-  console.log('rankingsData', rankingsData);
+export default function RankingsContent({ user, rankingsData, lastCrawlDate }: RankingsContentProps) {
+  const [showNoKeywordsModal, setShowNoKeywordsModal] = useState(false);
   const {total_count, metrics, items} = rankingsData;
+
+  useEffect(() => {
+    console.log('total_count', total_count)
+    if (!total_count) {
+      setShowNoKeywordsModal(true);
+    }
+  }, [total_count]);
+
+  console.log('rankingsData', rankingsData);
   const stats = [
     { name: 'Total Keywords Ranking', stat: total_count || 0, change: ((metrics?.organic.is_new - metrics?.organic.is_lost) / metrics?.organic.count * 100).toFixed(2) + '%', changeType: 'increase' },
     { name: 'Total Organic No.1', stat: metrics?.organic.pos_1 || 0 },
@@ -129,7 +142,7 @@ export default function RankingsContent({ user, rankingsData }: RankingsContentP
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
         <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Keyword Rankings</h1>
       </div>
-      <h3 className="text-base font-semibold leading-6 text-gray-900 mt-6 ml-6">Last Crawled</h3>
+      <h3 className="text-base font-semibold leading-6 text-gray-900 mt-6 ml-6">Last Crawled - {new Date(lastCrawlDate).toLocaleDateString()}</h3>
       <dl className="mt-5 grid grid-cols-1 divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow md:grid-cols-3 md:divide-x md:divide-y-0">
         {stats.map((item) => (
           <div key={item.name} className="px-4 py-5 sm:p-6">
@@ -259,6 +272,72 @@ export default function RankingsContent({ user, rankingsData }: RankingsContentP
         </table>
       </div>
 
+      <Transition appear show={showNoKeywordsModal} as={Fragment}>
+        <Dialog as="div" className="relative z-50 " onClose={() => setShowNoKeywordsModal(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto ">
+            <div className="flex min-h-full items-center justify-center p-4 text-center ">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                
+          <div className="relative bg-gray-100">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:px-8">
+              <div className="mx-auto max-w-2xl py-24 lg:max-w-none lg:py-64">
+                <div className="lg:pr-16">
+                  <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl xl:text-6xl">
+                    Zero Keywords Ranking!
+                  </h1>
+                  <p className="mt-4 text-xl text-gray-600">
+                    This sucks, we know. 
+                  </p>
+                  <p className="mt-4 text-xl text-gray-600">
+                    Let's get you ranking for your first keywords.
+                  </p>
+                  <div className="mt-6">
+                    <a
+                      href="/competitors"
+                      className="inline-block rounded-md border border-transparent bg-indigo-600 px-8 py-3 font-medium text-white hover:bg-indigo-700"
+                    >
+                      Start Ranking now!
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="h-48 w-full sm:h-64 lg:absolute lg:right-0 lg:top-0 lg:h-full lg:w-1/2">
+            <img
+              alt=""
+              src="/rank-image.webp"
+              className="h-full w-full object-cover object-center"
+            />
+          </div>
+
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

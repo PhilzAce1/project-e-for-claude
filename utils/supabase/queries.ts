@@ -27,6 +27,7 @@ export const getProducts = cache(async (supabase: SupabaseClient) => {
     .order('metadata->index')
     .order('unit_amount', { referencedTable: 'prices' });
 
+    console.log('products', products)
   return products;
 });
 

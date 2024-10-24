@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react'
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import KeywordTable from './KeywordTable'
+import RankingsSummaryView from './RankingsSummaryView'
+import {Rankings} from '@/utils/helpers/ranking-data-types'
+import { classNames } from '@/utils/helpers'
 
-const CompetitorKeywordList = ({competitors}) => {
+const CompetitorKeywordList = ({competitors}: {competitors: Array<Rankings>}) => {
     const [selected, setSelected] = useState(null)
     const [isLoading, setIsLoading] = useState(true);
     const [keywords, setKeywords] = useState([]);
@@ -46,10 +49,13 @@ const CompetitorKeywordList = ({competitors}) => {
         return <div>Loading...</div>;
     }
 
+    const formattedDate = formatDate(selected?.rankings_updated_at);
+
     return (
         <div>
-            <div className='flex items-center gap-4 mb-4'>
-                <Listbox value={selected} onChange={handleCompetitorChange}>
+            <div className='justify-between flex'>
+                <div className='flex items-center gap-4 mb-4'>
+                    <Listbox value={selected} onChange={handleCompetitorChange}>
                     <Label className="block text-sm font-medium leading-6 text-gray-900">Show Competitor</Label>
                     <div className="relative mt-2">
                         <ListboxButton className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
@@ -80,9 +86,27 @@ const CompetitorKeywordList = ({competitors}) => {
                     </div>
                 </Listbox>
             </div>
+            Last Crawled: {formattedDate}
+            </div>
+            <RankingsSummaryView rankings={selected} />
             <KeywordTable keywords={keywords} />
         </div>
     )
 }
+function formatDate(timestamp: string): string {
+    const date = new Date(timestamp);
+    
+    // Use Intl.DateTimeFormat for localized date and time formatting
+    const formatter = new Intl.DateTimeFormat(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      timeZoneName: 'short'
+    });
+  
+    return formatter.format(date);
+  }
 
 export default CompetitorKeywordList

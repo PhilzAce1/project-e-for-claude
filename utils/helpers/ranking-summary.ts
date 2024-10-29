@@ -17,7 +17,7 @@ function generateRankingsSummary(rankings: Rankings): RankingSummary {
   const items = rankings.rankings_data.items;
 
   const summary: RankingSummary = {
-    totalKeywords: items.length,
+    totalKeywords: items?.length || 0,
     totalETV: 0,
     rankingDistribution: {},
     topKeywords: [],
@@ -31,7 +31,7 @@ function generateRankingsSummary(rankings: Rankings): RankingSummary {
 
   let totalBacklinks = 0;
 
-  items.forEach((item: RankingItem) => {
+  items?.forEach((item: RankingItem) => {
     const { keyword_data, ranked_serp_element } = item;
     const { serp_item } = ranked_serp_element;
     const rank = serp_item.rank_absolute;
@@ -96,7 +96,7 @@ function generateRankingsSummary(rankings: Rankings): RankingSummary {
   summary.trendingKeywords = summary.trendingKeywords.slice(0, 10);
 
   // Calculate average backlinks
-  summary.averageBacklinks = totalBacklinks / items.length;
+  summary.averageBacklinks = totalBacklinks / items?.length;
 
   return summary;
 }

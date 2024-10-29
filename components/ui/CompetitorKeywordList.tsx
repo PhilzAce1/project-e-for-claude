@@ -5,6 +5,7 @@ import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@h
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import KeywordTable from './KeywordTable'
 import RankingsSummaryView from './RankingsSummaryView'
+import CompetitorOverview from './CompetitorOverview'
 import {Rankings} from '@/utils/helpers/ranking-data-types'
 import { classNames } from '@/utils/helpers'
 
@@ -52,8 +53,11 @@ const CompetitorKeywordList = ({competitors}: {competitors: Array<Rankings>}) =>
     const formattedDate = formatDate(selected?.rankings_updated_at);
 
     return (
-        <div>
-            <div className='justify-between flex'>
+        <>
+            {/* Competition Overview */}
+            <CompetitorOverview competitorsRankings={competitors} />
+
+            <div className='justify-between flex mt-8'>
                 <div className='flex items-center gap-4 mb-4'>
                     <Listbox value={selected} onChange={handleCompetitorChange}>
                     <Label className="block text-sm font-medium leading-6 text-gray-900">Show Competitor</Label>
@@ -90,9 +94,10 @@ const CompetitorKeywordList = ({competitors}: {competitors: Array<Rankings>}) =>
             </div>
             <RankingsSummaryView rankings={selected} />
             <KeywordTable keywords={keywords} />
-        </div>
+        </>
     )
 }
+
 function formatDate(timestamp: string): string {
     const date = new Date(timestamp);
     

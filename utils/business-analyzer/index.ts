@@ -3,23 +3,12 @@ import { JSDOM } from 'jsdom';
 import Anthropic from '@anthropic-ai/sdk';
 
 interface WebsiteData {
-    dom: Document;
-    html: string;
-    text: string;
-    structuredData: any[];
-    links: Array<{
-        text: string;
-        href: string;
-    }>;
-    forms: Array<{
-        id: string;
-        action: string;
-        fields: string[];
-    }>;
+    url: string;
+    content: string;
     meta: {
         title: string;
-        description: string | undefined;
-        keywords: string | undefined;
+        description: string | null;
+        keywords: string | null;
     };
 }
 
@@ -43,7 +32,7 @@ export class BusinessInformationAnalyzer {
     private anthropic: Anthropic;
 
     constructor(domain: string) {
-        this.domain = domain;
+        this.domain = domain.replace(/^(https?:\/\/)/, '').trim();
         this.anthropic = new Anthropic({
             apiKey: process.env.ANTHROPIC_API_KEY
         });
@@ -52,17 +41,22 @@ export class BusinessInformationAnalyzer {
     async analyzeBusiness() {
         try {
             const websiteData = await this._gatherWebsiteData();
-            
+            if (!websiteData || websiteData.length === 0) {
+                throw new Error('No website data available');
+            }
+
             // Get initial findings
             const initialFindings = {
-                coreBusiness: await this._analyzeCoreBusiness(websiteData),
-                marketPosition: await this._analyzeMarketPosition(websiteData),
-                customerJourney: await this._analyzeCustomerJourney(websiteData),
-                technicalSpecifics: await this._analyzeTechnicalSpecifics(websiteData)
+                coreBusiness: await this._analyzeCoreBusiness(websiteData[0]),
+                marketPosition: await this._analyzeMarketPosition(websiteData[0]),
+                customerJourney: await this._analyzeCustomerJourney(websiteData[0]),
+                technicalSpecifics: await this._analyzeTechnicalSpecifics(websiteData[0])
             };
 
-            // Generate information needed and verification questions based on findings
+            // Generate information needed based on confidence scores
             const informationNeeded = await this._generateInformationNeeded(initialFindings);
+
+            // Generate verification questions for high-confidence findings
             const verificationQuestions = await this._createVerificationQuestions(initialFindings);
 
             return {
@@ -71,6 +65,7 @@ export class BusinessInformationAnalyzer {
                 verificationQuestions
             };
         } catch (error) {
+            console.error('Error in business analysis:', error);
             throw error;
         }
     }
@@ -129,10 +124,58 @@ export class BusinessInformationAnalyzer {
         return { critical, recommended };
     }
 
+    private _generateVerificationQuestion(category: string, field: string, value: any): string {
+        // Determine if it's a software/service business
+        const isSoftwareBusiness = value?.services?.some(s => 
+            s.toLowerCase().includes('software') || 
+            s.toLowerCase().includes('saas') ||
+            s.toLowerCase().includes('platform')
+        );
+
+        const questions: { [key: string]: { [key: string]: string } } = {
+            coreBusiness: {
+                offerings: "We identified these products and services. Have we missed any?",
+                targetCustomer: "Is this an accurate description of your target customers?",
+                geographicScope: value === "international"
+                    ? "Do you serve customers internationally?"
+                    : value === "national"
+                    ? "Do you serve customers nationwide? Any plans for international expansion?"
+                    : "We see you serve local customers. What geographic areas do you cover?",
+                painPoints: "Are these the main problems your customers are trying to solve?",
+                businessModel: value === "B2C" 
+                    ? "We see you're primarily B2C. Do you also serve business customers?"
+                    : "We see you're primarily B2B. Do you also serve consumer customers?",
+            },
+            marketPosition: {
+                uniqueFactors: "Are these your key differentiators in the market?",
+                pricePosition: "Would you describe your pricing as mid-range?",
+                credentials: "What other credentials or experience should we add?",
+                businessAge: "How long has your business been operating?"
+            },
+            customerJourney: {
+                buyingProcess: "Is this how customers typically discover and purchase from you?",
+                commonQuestions: "What other questions do customers frequently ask?",
+                objections: "What other concerns do customers typically raise?",
+                salesCycle: "Is this sales cycle length typical for your business?",
+                conversionPoints: "Are these the main ways customers engage with your business?"
+            },
+            technicalSpecifics: {
+                terminology: "Are these the key terms used in your industry?",
+                specifications: isSoftwareBusiness
+                    ? "What are the key technical requirements and integrations?"
+                    : "What are the key technical specifications of your products?",
+                seasonality: "How do seasons affect your business?",
+                regulations: "Are there other regulations that affect your business?",
+                industryTrends: "What other trends are you seeing in your industry?"
+            }
+        };
+
+        return questions[category]?.[field] || `We found the following ${field}. Is this correct?`;
+    }
+
     private async _createVerificationQuestions(findings: any) {
         const questions: any[] = [];
 
-        // Add verification questions for high-confidence findings
         Object.entries(findings).forEach(([section, data]: [string, any]) => {
             const scores = data.confidenceScores || {};
             
@@ -142,14 +185,13 @@ export class BusinessInformationAnalyzer {
                         category: section,
                         field: field,
                         currentValue: data[field],
-                        question: `We found the following ${field}. Is this correct?`,
+                        question: this._generateVerificationQuestion(section, field, data[field]),
                         confidence: score
                     });
                 }
             });
         });
 
-        // Sort by confidence score descending
         return questions.sort((a, b) => b.confidence - a.confidence);
     }
 
@@ -182,52 +224,81 @@ export class BusinessInformationAnalyzer {
         return questions[section]?.[field] || `Please provide more information about ${field}`;
     }
 
-    private async _gatherWebsiteData(): Promise<WebsiteData> {
-        const response = await fetch(`https://${this.domain}`);
-        const html = await response.text();
-        const dom = new JSDOM(html);
-        const document = dom.window.document;
-
-        // Extract structured data
-        const structuredData = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
-            .map(script => {
-                try {
-                    return JSON.parse(script.textContent || '');
-                } catch (e) {
-                    return null;
-                }
-            })
-            .filter(data => data !== null);
-
-        // Extract links
-        const links = Array.from(document.querySelectorAll('a'))
-            .map(a => ({
-                text: a.textContent?.trim() || '',
-                href: a.getAttribute('href') || ''
-            }))
-            .filter(link => link.text && link.href);
-
-        // Extract forms
-        const forms = Array.from(document.querySelectorAll('form'))
-            .map(form => ({
-                id: form.id,
-                action: form.action,
-                fields: Array.from(form.elements).map((e: any) => e.name).filter(Boolean)
-            }));
-
-        return {
-            dom: document,
-            html,
-            text: document.body?.textContent || '',
-            structuredData,
-            links,
-            forms,
-            meta: {
-                title: document.title,
-                description: document.querySelector('meta[name="description"]')?.getAttribute('content'),
-                keywords: document.querySelector('meta[name="keywords"]')?.getAttribute('content')
+    private async _gatherWebsiteData(): Promise<WebsiteData[]> {
+        try {
+            // Start with homepage
+            const response = await fetch(`https://${this.domain}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch website: ${response.statusText}`);
             }
-        };
+            
+            const html = await response.text();
+            
+            // Extract content with default values
+            const extracted = this._extractRelevantContent(html);
+            
+            return [{
+                url: this.domain,
+                content: extracted.content,
+                meta: {
+                    title: extracted.meta.title || this.domain, // Fallback to domain if no title
+                    description: extracted.meta.description,
+                    keywords: extracted.meta.keywords
+                }
+            }];
+
+        } catch (error) {
+            console.error('Error gathering website data:', error);
+            // Return minimal data structure if extraction fails
+            return [{
+                url: this.domain,
+                content: '',
+                meta: {
+                    title: this.domain,
+                    description: null,
+                    keywords: null
+                }
+            }];
+        }
+    }
+
+    private _extractRelevantContent(html: string) {
+        try {
+            // Remove script and style tags
+            html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+            html = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+            
+            // Extract meta information with fallbacks
+            const title = html.match(/<title[^>]*>(.*?)<\/title>/i)?.[1] || '';
+            const metaDescription = html.match(/<meta\s+name="description"\s+content="([^"]*)">/i)?.[1] || null;
+            const metaKeywords = html.match(/<meta\s+name="keywords"\s+content="([^"]*)">/i)?.[1] || null;
+            
+            // Extract main content with fallback
+            const bodyContent = html.match(/<body[^>]*>(.*?)<\/body>/si)?.[1] || html;
+            const content = bodyContent
+                .replace(/<[^>]*>/g, ' ') // Remove HTML tags
+                .replace(/\s+/g, ' ')     // Normalize whitespace
+                .trim() || 'No content found';
+
+            return {
+                meta: {
+                    title: title || this.domain,
+                    description: metaDescription,
+                    keywords: metaKeywords
+                },
+                content
+            };
+        } catch (error) {
+            console.error('Error extracting content:', error);
+            return {
+                meta: {
+                    title: this.domain,
+                    description: null,
+                    keywords: null
+                },
+                content: 'Error extracting content'
+            };
+        }
     }
 
     private async _analyzeCoreBusiness(websiteData: WebsiteData) {
@@ -257,8 +328,7 @@ export class BusinessInformationAnalyzer {
         Website Content to analyze:
         Title: ${websiteData.meta.title}
         Description: ${websiteData.meta.description}
-        Main Content: ${websiteData.text}
-        Links: ${JSON.stringify(websiteData.links.slice(0, 10))}`;
+        Main Content: ${websiteData.content}`;
 
         return this._analyzeSection('coreBusiness', analysisPrompt);
     }
@@ -297,8 +367,7 @@ export class BusinessInformationAnalyzer {
         Website Content to analyze:
         Title: ${websiteData.meta.title}
         Description: ${websiteData.meta.description}
-        Main Content: ${websiteData.text}
-        Structured Data: ${JSON.stringify(websiteData.structuredData)}`;
+        Main Content: ${websiteData.content}`;
 
         return this._analyzeSection('marketPosition', analysisPrompt);
     }
@@ -336,9 +405,7 @@ export class BusinessInformationAnalyzer {
         Website Content to analyze:
         Title: ${websiteData.meta.title}
         Description: ${websiteData.meta.description}
-        Main Content: ${websiteData.text}
-        Forms: ${JSON.stringify(websiteData.forms)}
-        Links: ${JSON.stringify(websiteData.links)}`;
+        Main Content: ${websiteData.content}`;
 
         return this._analyzeSection('customerJourney', analysisPrompt);
     }
@@ -379,8 +446,7 @@ export class BusinessInformationAnalyzer {
         Website Content to analyze:
         Title: ${websiteData.meta.title}
         Description: ${websiteData.meta.description}
-        Main Content: ${websiteData.text}
-        Structured Data: ${JSON.stringify(websiteData.structuredData)}`;
+        Main Content: ${websiteData.content}`;
 
         return this._analyzeSection('technicalSpecifics', analysisPrompt);
     }

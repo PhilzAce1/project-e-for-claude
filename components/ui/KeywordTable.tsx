@@ -10,6 +10,10 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
+  if (!keywords || keywords.length === 0) {
+    return null;
+  }
+
   const totalPages = Math.ceil(keywords.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {

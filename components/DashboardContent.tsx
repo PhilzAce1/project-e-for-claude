@@ -22,6 +22,8 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
     const [error, setError] = useState<string | null>(null)
     const [existingDomain, setExistingDomain] = useState<string | null>(null)
     const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false)
+    const [hasCompetitors, setHasCompetitors] = useState<boolean>(false);
+    const [hasCriticalInfo, setHasCriticalInfo] = useState<boolean>(true);
 
     const features = [
         {
@@ -143,6 +145,45 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
         updateUserMetadata()
     }, [supabase, user.id]) // Only run once when component mounts
 
+    useEffect(() => {
+        const checkProfileCompletion = async () => {
+            try {
+                // Get latest business analysis
+                const { data: analysis, error: analysisError } = await supabase
+                    .from('business_analyses')
+                    .select('information_needed')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (analysisError && analysisError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+                    throw analysisError;
+                }
+
+                // Check if there are any critical items
+                const hasCritical = analysis?.information_needed?.critical?.length > 0;
+                setHasCriticalInfo(!hasCritical); // Invert because we want to know if they've completed it
+
+                // Check competitors
+                const { data: competitors, error: competitorsError } = await supabase
+                    .from('competitors')
+                    .select('domain')
+                    .eq('user_id', user.id);
+
+                if (competitorsError) throw competitorsError;
+                setHasCompetitors(competitors && competitors.length > 0);
+
+            } catch (error) {
+                console.error('Error checking profile completion:', error);
+            }
+        };
+
+        checkProfileCompletion();
+    }, [supabase, user.id]);
+
+    const isProfileComplete = hasCompetitors && hasCriticalInfo;
+
     if (!existingDomain && !domain) {
         return (
             <ZeroStateHero 
@@ -160,7 +201,77 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
 
     return (
         <>
-            <h1>We've input a domain for you! {domain}</h1>
+            <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
+                <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                    {!isProfileComplete ? 'Complete your profile' : 'Profile Complete'}
+                </h1>
+            </div>
+            <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-6">
+                {!hasCriticalInfo && (
+                    <li className="relative isolate overflow-hidden bg-gray-900 px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
+                        <h2 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+                            Confirm your business information
+                        </h2>
+                        <p className="mx-auto mt-6 max-w-xl text-pretty text-lg/8 text-gray-300">
+                            To create a personalised SEO strategy, we need to know a more about your business.
+                        </p>
+                        <div className="mt-10 flex items-center justify-center gap-x-6">
+                            <Link
+                                href="/business-information"
+                                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                            >
+                                Complete Information
+                            </Link>
+                        </div>
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            aria-hidden="true"
+                            className="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2 [mask-image:radial-gradient(closest-side,white,transparent)]"
+                        >
+                            <circle r={512} cx={512} cy={512} fill="url(#827591b1-ce8c-4110-b064-fff)" fillOpacity="0.7" />
+                            <defs>
+                            <radialGradient id="827591b1-ce8c-4110-b064-fff">
+                                <stop stopColor="#7775D6" />
+                                <stop offset={1} stopColor="#DDEECF" />
+                            </radialGradient>
+                            </defs>
+                        </svg>
+                    </li>
+                )}
+
+                {!hasCompetitors && (
+                    <li className="relative isolate overflow-hidden bg-gray-900 px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
+                        <h2 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+                            Who are your competitors?
+                        </h2>
+                        <p className="mx-auto mt-6 max-w-xl text-pretty text-lg/8 text-gray-300">
+                            Let's find out who your competitors are, and how you can outrank them.
+                        </p>
+                        <div className="mt-10 flex items-center justify-center gap-x-6">
+                            <Link
+                                href="/competitors"
+                                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                            >
+                                Enter competitors
+                            </Link>
+                        </div>
+                        <svg
+                            viewBox="0 0 1024 1024"
+                            aria-hidden="true"
+                            className="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2 [mask-image:radial-gradient(closest-side,white,transparent)]"
+                        >
+                            <circle r={512} cx={512} cy={512} fill="url(#827591b1-ce8c-4110-b064-7cb85a0b1217)" fillOpacity="0.7" />
+                            <defs>
+                            <radialGradient id="827591b1-ce8c-4110-b064-7cb85a0b1217">
+                                <stop stopColor="#7775D6" />
+                                <stop offset={1} stopColor="#5745C2" />
+                            </radialGradient>
+                            </defs>
+                        </svg>
+                    </li>
+                )}
+            </ul>
+  
 
             <Transition appear show={isWelcomeModalOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-50" onClose={closeWelcomeModal}>

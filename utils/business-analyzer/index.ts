@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 import Anthropic from '@anthropic-ai/sdk';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface WebsiteData {
     url: string;
@@ -10,6 +11,7 @@ interface WebsiteData {
         description: string | null;
         keywords: string | null;
     };
+    rawHtml: string;
 }
 
 interface InformationNeeded {
@@ -30,42 +32,105 @@ interface InformationNeeded {
 export class BusinessInformationAnalyzer {
     private domain: string;
     private anthropic: Anthropic;
+    private analysisId: string;
+    private supabase: SupabaseClient;
 
-    constructor(domain: string) {
+    constructor(domain: string, analysisId: string, supabase: SupabaseClient) {
         this.domain = domain.replace(/^(https?:\/\/)/, '').trim();
+        this.analysisId = analysisId;
+        this.supabase = supabase;
         this.anthropic = new Anthropic({
             apiKey: process.env.ANTHROPIC_API_KEY
         });
     }
 
+    private async _updateAnalysis(updates: {
+        initial_findings?: any;
+        information_needed?: any;
+        verification_questions?: any;
+        status?: 'pending' | 'processing' | 'completed' | 'failed';
+        progress?: string;
+        error_message?: string;
+    }) {
+        const { error } = await this.supabase
+            .from('business_analyses')
+            .update(updates)
+            .eq('id', this.analysisId);
+
+        if (error) {
+            console.error('Error updating analysis:', error);
+        }
+    }
+
     async analyzeBusiness() {
         try {
+            await this._updateAnalysis({ 
+                status: 'processing',
+                progress: 'Gathering website data...'
+            });
+
             const websiteData = await this._gatherWebsiteData();
             if (!websiteData || websiteData.length === 0) {
                 throw new Error('No website data available');
             }
 
-            // Get initial findings
+            // Analyze each section sequentially and update the database
+            await this._updateAnalysis({ progress: 'Analyzing core business...' });
+            const coreBusiness = await this._analyzeCoreBusiness(websiteData[0]);
+            await this._updateAnalysis({ 
+                initial_findings: { coreBusiness },
+                progress: 'Analyzing market position...'
+            });
+
+            const marketPosition = await this._analyzeMarketPosition(websiteData[0]);
+            await this._updateAnalysis({ 
+                initial_findings: { coreBusiness, marketPosition },
+                progress: 'Analyzing customer journey...'
+            });
+
+            const customerJourney = await this._analyzeCustomerJourney(websiteData[0]);
+            await this._updateAnalysis({ 
+                initial_findings: { coreBusiness, marketPosition, customerJourney },
+                progress: 'Analyzing technical specifics...'
+            });
+
+            const technicalSpecifics = await this._analyzeTechnicalSpecifics(websiteData[0]);
             const initialFindings = {
-                coreBusiness: await this._analyzeCoreBusiness(websiteData[0]),
-                marketPosition: await this._analyzeMarketPosition(websiteData[0]),
-                customerJourney: await this._analyzeCustomerJourney(websiteData[0]),
-                technicalSpecifics: await this._analyzeTechnicalSpecifics(websiteData[0])
+                coreBusiness,
+                marketPosition,
+                customerJourney,
+                technicalSpecifics
             };
 
-            // Generate information needed based on confidence scores
-            const informationNeeded = await this._generateInformationNeeded(initialFindings);
+            await this._updateAnalysis({ 
+                initial_findings: initialFindings,
+                progress: 'Generating additional insights...'
+            });
 
-            // Generate verification questions for high-confidence findings
+            const informationNeeded = await this._generateInformationNeeded(initialFindings);
             const verificationQuestions = await this._createVerificationQuestions(initialFindings);
+
+            // Final update with all data
+            await this._updateAnalysis({
+                initial_findings: initialFindings,
+                information_needed: informationNeeded,
+                verification_questions: verificationQuestions,
+                status: 'completed',
+                progress: 'Analysis complete'
+            });
 
             return {
                 initialFindings,
                 informationNeeded,
                 verificationQuestions
             };
-        } catch (error) {
-            console.error('Error in business analysis:', error);
+
+        } catch (error: any) {
+            await this._updateAnalysis({
+                status: 'failed',
+                error_message: error.message,
+                progress: 'Analysis failed'
+            });
             throw error;
         }
     }
@@ -234,6 +299,15 @@ export class BusinessInformationAnalyzer {
             
             const html = await response.text();
             
+            // Store the raw HTML immediately
+            await this.supabase
+                .from('website_scrapes')
+                .update({ 
+                    raw_html: html,
+                    status: 'completed'
+                })
+                .eq('domain', this.domain);
+            
             // Extract content with default values
             const extracted = this._extractRelevantContent(html);
             
@@ -241,15 +315,24 @@ export class BusinessInformationAnalyzer {
                 url: this.domain,
                 content: extracted.content,
                 meta: {
-                    title: extracted.meta.title || this.domain, // Fallback to domain if no title
+                    title: extracted.meta.title || this.domain,
                     description: extracted.meta.description,
                     keywords: extracted.meta.keywords
-                }
+                },
+                rawHtml: html
             }];
 
         } catch (error) {
             console.error('Error gathering website data:', error);
-            // Return minimal data structure if extraction fails
+            // Update scrape status to failed if there's an error
+            await this.supabase
+                .from('website_scrapes')
+                .update({ 
+                    status: 'failed',
+                    error_message: error.message
+                })
+                .eq('domain', this.domain);
+
             return [{
                 url: this.domain,
                 content: '',
@@ -257,7 +340,8 @@ export class BusinessInformationAnalyzer {
                     title: this.domain,
                     description: null,
                     keywords: null
-                }
+                },
+                rawHtml: ''
             }];
         }
     }
@@ -452,14 +536,12 @@ export class BusinessInformationAnalyzer {
     }
 }
 
-// Single wrapper at the top level only
-export async function gatherBusinessInformation(domain: string): Promise<any> {
-    try {
-        const analyzer = new BusinessInformationAnalyzer(domain);
-        const rawData = await analyzer.analyzeBusiness();
-        
-        // Add single success wrapper
-        return rawData;
-    } catch (error) {
-       throw error;
+// Update the wrapper function
+export async function gatherBusinessInformation(
+    domain: string, 
+    analysisId: string, 
+    supabase: SupabaseClient
+): Promise<any> {
+    const analyzer = new BusinessInformationAnalyzer(domain, analysisId, supabase);
+    return await analyzer.analyzeBusiness();
 }

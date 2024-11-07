@@ -54,6 +54,9 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
       } else {
         console.log('API response:', data); // Log the response to see its structure
         setCompetitors(Array.isArray(data) ? data : []);
+        if(data.length === 0) {
+          setShowOnboarding(true);
+        }
       }
     }
   

@@ -1,5 +1,7 @@
+'use client'
 import React, { useState } from 'react';
 import { User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 interface ZeroStateHeroProps {
   title: string;
@@ -26,36 +28,73 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
     const [domain, setDomain] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-
         setIsSubmitting(true)
         setError(null)
-        domainHandler(domain)
-        // try {
-        //     const response = await fetch('/api/init-seo-crawl', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({ domain, userId: user.id }),
-        //     })
 
-        //     if (!response.ok) {
-        //         throw new Error('Failed to submit domain')
-        //     }
+        try {
+            // Clean up the domain - remove protocol, www, and trailing slashes
+            const cleanDomain = domain
+                .replace(/^(https?:\/\/)?(www\.)?/i, '') // Remove protocol and www
+                .replace(/\/.*$/, '') // Remove everything after the first slash
+                .trim(); // Remove any whitespace
 
-        //     await response.json()
+            // Validate domain format before submitting
+            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+            if (!domainRegex.test(cleanDomain)) {
+                throw new Error('Please enter a valid domain (e.g., example.com)');
+            }
 
-        //     setDomain('')
-        // } catch (error) {
-        //     console.error('Error:', error)
-        //     setError('Failed to submit domain. Please try again.')
-        // } finally {
-        //     setIsSubmitting(false)
-        // }
-    }
+            // Call both APIs in parallel
+            const [seoCrawlResponse, businessAnalysisResponse] = await Promise.all([
+                fetch('/api/init-seo-crawl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ domain: cleanDomain, userId: user.id }),
+                }),
+                fetch('/api/extract-business-information', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ domain: cleanDomain }),
+                })
+            ]);
+
+            // Handle responses...
+            if (!seoCrawlResponse.ok) {
+                const seoCrawlData = await seoCrawlResponse.json();
+                throw new Error(seoCrawlData.error || 'Failed to submit domain for SEO crawl');
+            }
+
+            if (!businessAnalysisResponse.ok) {
+                const businessData = await businessAnalysisResponse.json();
+                throw new Error(businessData.error || 'Failed to start business analysis');
+            }
+
+            const businessData = await businessAnalysisResponse.json();
+
+            // Call the domain handler for any additional processing
+            domainHandler(cleanDomain);
+
+            // Reset form
+            setDomain('');
+
+            // Redirect to business information page
+            router.push(`/business-information?id=${businessData.data.analysisId}`);
+
+        } catch (error: any) {
+            console.error('Error:', error);
+            setError(error.message || 'Failed to submit domain. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
   return (
     <div className=' bg-white relative p-8 rounded-xl overflow-hidden h-full sm:shadow ring-slate-900/10'>

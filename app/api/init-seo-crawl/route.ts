@@ -55,7 +55,7 @@ async function initiateExternalSEOCrawl(domain: string) {
     const onPageApi = new client.OnPageApi("https://api.dataforseo.com", { fetch: authFetch })
 
     const task = new client.OnPageTaskRequestInfo()
-    task.target = domain
+    task.target = `https://${domain}`
     task.max_crawl_pages = 100
     task.load_resources = true
     task.enable_javascript = true

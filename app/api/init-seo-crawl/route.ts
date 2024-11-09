@@ -84,7 +84,7 @@ async function initiateLighthouseTask(domain: string) {
     // const pingbackUrl = `https://7964-2a0d-3344-11a-7c10-f844-384a-3629-27b6.ngrok-free.app/api/pageforseo/pingback/?id=$id&tag=$tag`
 
     const task = new client.OnPageTaskRequestInfo()
-    task.url = domain
+    task.url = `https://${domain}`
     task.for_mobile = true
     task.tag = "lighthouse_audit"
     task.pingback_url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback/?id=$id&tag=$tag`

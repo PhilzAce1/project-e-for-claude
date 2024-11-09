@@ -147,9 +147,59 @@ export class BusinessInformationAnalyzer {
             }]
         });
 
-        // Parse and return raw data
+        // Parse the raw data
         const rawData = JSON.parse(message.content[0].text);
-        return rawData;
+        
+        // Standardize the data structure
+        return this._standardizeData(rawData);
+    }
+
+    private _standardizeData(data: any) {
+        const standardized = { ...data };
+        
+        // Helper function to ensure array values
+        const ensureArray = (value: any): string[] => {
+            if (value === null || value === undefined) return [];
+            if (Array.isArray(value)) return value.filter(item => item !== null);
+            if (typeof value === 'string') return [value];
+            return [];
+        };
+
+        // Helper function to standardize object values
+        const standardizeObjectValues = (obj: any) => {
+            const result: any = {};
+            Object.entries(obj).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    result[key] = ensureArray(value);
+                } else if (value === null || value === undefined) {
+                    result[key] = [];
+                } else if (typeof value === 'object') {
+                    result[key] = standardizeObjectValues(value);
+                } else if (typeof value === 'string') {
+                    result[key] = value;
+                } else {
+                    result[key] = [];
+                }
+            });
+            return result;
+        };
+
+        // Standardize each field in the data
+        Object.entries(data).forEach(([key, value]) => {
+            if (key === 'confidenceScores') return; // Skip confidence scores
+
+            if (Array.isArray(value)) {
+                standardized[key] = ensureArray(value);
+            } else if (typeof value === 'object' && value !== null) {
+                standardized[key] = standardizeObjectValues(value);
+            } else if (typeof value === 'string') {
+                standardized[key] = value;
+            } else if (value === null || value === undefined) {
+                standardized[key] = [];
+            }
+        });
+
+        return standardized;
     }
 
     private async _generateInformationNeeded(findings: any) {
@@ -246,10 +296,35 @@ export class BusinessInformationAnalyzer {
             
             Object.entries(scores).forEach(([field, score]: [string, number]) => {
                 if (score >= 0.7 && data[field]) {
+                    // Standardize the currentValue format
+                    let standardizedValue = data[field];
+                    
+                    // Convert to a consistent format based on the type
+                    if (Array.isArray(data[field])) {
+                        standardizedValue = {
+                            type: 'list',
+                            items: data[field]
+                        };
+                    } else if (typeof data[field] === 'object') {
+                        standardizedValue = {
+                            type: 'object',
+                            items: Object.entries(data[field]).map(([key, value]) => ({
+                                key,
+                                value: this._ensureArray(value)
+                            }))
+                        };
+                    } else {
+                        // Convert single values to arrays
+                        standardizedValue = {
+                            type: 'list',
+                            items: [data[field]].filter(Boolean)
+                        };
+                    }
+
                     questions.push({
                         category: section,
                         field: field,
-                        currentValue: data[field],
+                        currentValue: standardizedValue,
                         question: this._generateVerificationQuestion(section, field, data[field]),
                         confidence: score
                     });
@@ -258,6 +333,19 @@ export class BusinessInformationAnalyzer {
         });
 
         return questions.sort((a, b) => b.confidence - a.confidence);
+    }
+
+    private _ensureArray(value: any): string[] {
+        if (value === null || value === undefined) {
+            return [];
+        }
+        if (Array.isArray(value)) {
+            return value.filter(Boolean);
+        }
+        if (typeof value === 'string') {
+            return [value];
+        }
+        return [];
     }
 
     private _generateQuestion(section: string, field: string): string {

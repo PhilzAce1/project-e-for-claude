@@ -4,10 +4,158 @@ import { BusinessAnalysisData } from '../../types';
 import ConfidenceIndicator from './ConfidenceIndicators';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '@/types/supabase';
+import BusinessProgress from './ui/BusinessProgress';
+import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface BusinessAnalysisProps {
   analysisId: string;
 }
+
+interface VerificationFormProps {
+  questions: any[];
+  onSubmit: (updatedQuestions: any[]) => void;
+}
+
+export const VerificationForm: React.FC<VerificationFormProps> = ({ questions, onSubmit }) => {
+  const [formData, setFormData] = useState(questions);
+
+  const handleAddItem = (questionIndex: number, key?: string) => {
+    const updatedData = [...formData];
+    const question = updatedData[questionIndex];
+
+    if (question.currentValue.type === 'list') {
+      question.currentValue.items.push('');
+    } else if (question.currentValue.type === 'object' && key) {
+      const itemIndex = question.currentValue.items.findIndex((item: any) => item.key === key);
+      if (itemIndex !== -1) {
+        question.currentValue.items[itemIndex].value.push('');
+      }
+    }
+
+    setFormData(updatedData);
+  };
+
+  const handleRemoveItem = (questionIndex: number, itemIndex: number, key?: string) => {
+    const updatedData = [...formData];
+    const question = updatedData[questionIndex];
+
+    if (question.currentValue.type === 'list') {
+      question.currentValue.items.splice(itemIndex, 1);
+    } else if (question.currentValue.type === 'object' && key) {
+      const objIndex = question.currentValue.items.findIndex((item: any) => item.key === key);
+      if (objIndex !== -1) {
+        question.currentValue.items[objIndex].value.splice(itemIndex, 1);
+      }
+    }
+
+    setFormData(updatedData);
+  };
+
+  const handleUpdateItem = (questionIndex: number, itemIndex: number, value: string, key?: string) => {
+    const updatedData = [...formData];
+    const question = updatedData[questionIndex];
+
+    if (question.currentValue.type === 'list') {
+      question.currentValue.items[itemIndex] = value;
+    } else if (question.currentValue.type === 'object' && key) {
+      const objIndex = question.currentValue.items.findIndex((item: any) => item.key === key);
+      if (objIndex !== -1) {
+        question.currentValue.items[objIndex].value[itemIndex] = value;
+      }
+    }
+
+    setFormData(updatedData);
+  };
+
+  return (
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      onSubmit(formData);
+    }}>
+      {formData.map((question, questionIndex) => (
+        <div key={questionIndex} className="mb-8 border-b border-white/10 pb-8">
+          <h3 className="text-balance text-xl font-semibold tracking-tight text-white sm:text-xl mb-4">
+            {question.question}
+          </h3>
+
+          {question.currentValue.type === 'list' && (
+            <div className="space-y-2">
+              {question.currentValue.items.map((item: string, itemIndex: number) => (
+                <div key={itemIndex} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(e) => handleUpdateItem(questionIndex, itemIndex, e.target.value)}
+                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm/6"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem(questionIndex, itemIndex)}
+                    className="rounded-md bg-red-500/10 p-2 text-red-500 hover:bg-red-500/20"
+                  >
+                    <XMarkIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => handleAddItem(questionIndex)}
+                className="flex items-center gap-2 rounded-md bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10"
+              >
+                <PlusIcon className="h-4 w-4" /> Add Item
+              </button>
+            </div>
+          )}
+
+          {question.currentValue.type === 'object' && (
+            <div className="space-y-4">
+              {question.currentValue.items.map((item: any) => (
+                <div key={item.key} className="space-y-2">
+                  <h4 className="text-balance text-l font-semibold tracking-tight text-white sm:text-l mb-2">
+                    {item.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </h4>
+                  {item.value.map((value: string, valueIndex: number) => (
+                    <div key={valueIndex} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => handleUpdateItem(questionIndex, valueIndex, e.target.value, item.key)}
+                        className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm/6"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveItem(questionIndex, valueIndex, item.key)}
+                        className="rounded-md bg-red-500/10 p-2 text-red-500 hover:bg-red-500/20"
+                      >
+                        <XMarkIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => handleAddItem(questionIndex, item.key)}
+                    className="flex items-center gap-2 rounded-md bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10"
+                  >
+                    <PlusIcon className="h-4 w-4" /> Add {item.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+
+      <div className="mt-6 flex justify-end">
+        <button
+          type="submit"
+          className="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  );
+};
 
 export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }) => {
   const [data, setData] = useState<BusinessAnalysisData | null>(null);
@@ -73,6 +221,25 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     };
   }, [analysisId, supabase]);
 
+  const handleVerificationSubmit = async (updatedQuestions: any[]) => {
+    try {
+      const { error } = await supabase
+        .from('business_analyses')
+        .update({
+          verification_questions: updatedQuestions,
+          status: 'completed'
+        })
+        .eq('id', analysisId);
+
+      if (error) throw error;
+      
+      // Show success message
+    } catch (error) {
+      console.error('Error updating verification questions:', error);
+      // Show error message
+    }
+  };
+
   if (error) {
     return (
       <div className="container mx-auto p-4">
@@ -116,92 +283,41 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
         </h1>
         <div className="text-sm text-gray-500">{progress}</div>
       </div>
-
-      {/* Core Business Overview */}
-      <div className="mt-5 overflow-hidden rounded-lg bg-white shadow">
-        <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-semibold text-gray-900">Core Business Summary</h2>
-          <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Products & Services */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Products & Services</h3>
-              <ul className="mt-3 divide-y divide-gray-200">
-                {data.initial_findings.coreBusiness.offerings.products?.map(product => (
-                  <li key={product} className="py-3">{product}</li>
-                ))}
-                {data.initial_findings.coreBusiness.offerings.services?.map(service => (
-                  <li key={service} className="py-3">{service}</li>
-                ))}
-              </ul>
-              <ConfidenceIndicator score={data.initial_findings.coreBusiness.confidenceScores.offerings} />
+      <div className="grid grid-cols-3 gap-4">
+        <div className="mt-5 col-span-2 relative isolate overflow-hidden bg-gray-900 px-6 py-16 text-center shadow-2xl sm:rounded-xl sm:px-8">
+            <div className="border-b border-white/10 pb-8 mb-8">
+            <h2 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+                Confirm your business information
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl text-pretty text-lg/8 text-gray-300">
+                To create a personalised SEO strategy, we need to know more about your business. We tried to find out as much as we could, but we need you to confirm a few things.
+            </p>
             </div>
 
-            {/* Target Customer */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Target Customer</h3>
-              <div className="mt-3">
-                <h4 className="text-sm text-gray-700">Demographics:</h4>
-                <ul className="mt-2 divide-y divide-gray-200">
-                  {data.initial_findings.coreBusiness.targetCustomer.demographics.map(demo => (
-                    <li key={demo} className="py-3">{demo}</li>
-                  ))}
-                </ul>
-                <h4 className="mt-4 text-sm text-gray-700">Psychographics:</h4>
-                <ul className="mt-2 divide-y divide-gray-200">
-                  {data.initial_findings.coreBusiness.targetCustomer.psychographics.map(psycho => (
-                    <li key={psycho} className="py-3">{psycho}</li>
-                  ))}
-                </ul>
-                <ConfidenceIndicator score={data.initial_findings.coreBusiness.confidenceScores.targetCustomer} />
-              </div>
-            </div>
-          </div>
+            <VerificationForm 
+              questions={data.verification_questions} 
+              onSubmit={handleVerificationSubmit} 
+            />
+
+            <svg
+                viewBox="0 0 1024 1024"
+                aria-hidden="true"
+                className="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2 [mask-image:radial-gradient(closest-side,white,transparent)]"
+            >
+                <circle r={512} cx={512} cy={512} fill="url(#827591b1-ce8c-4110-b064-fff)" fillOpacity="0.7" />
+                <defs>
+                <radialGradient id="827591b1-ce8c-4110-b064-fff">
+                    <stop stopColor="#7775D6" />
+                    <stop offset={1} stopColor="#DDEECF" />
+                </radialGradient>
+                </defs>
+            </svg>
+        </div>
+        <div className="mt-5 overflow-hidden rounded-lg bg-white shadow  ring-slate-900/10 p-8">
+          <BusinessProgress />
         </div>
       </div>
 
-      {/* Market Position & Customer Journey */}
-      <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-        {/* Market Position */}
-        <div className="overflow-hidden rounded-lg bg-white shadow">
-          <div className="px-4 py-5 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900">Market Position</h2>
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-gray-500">Unique Factors</h3>
-              <ul className="mt-3 divide-y divide-gray-200">
-                {data.initial_findings.marketPosition.uniqueFactors.map(factor => (
-                  <li key={factor} className="py-3">{factor}</li>
-                ))}
-              </ul>
-              <ConfidenceIndicator score={data.initial_findings.marketPosition.confidenceScores.uniqueFactors} />
-            </div>
-          </div>
-        </div>
-
-        {/* Customer Journey */}
-        <div className="overflow-hidden rounded-lg bg-white shadow">
-          <div className="px-4 py-5 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900">Customer Journey</h2>
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-gray-500">Common Questions</h3>
-              <div className="mt-3">
-                <h4 className="text-sm text-gray-700">Explicit:</h4>
-                <ul className="mt-2 divide-y divide-gray-200">
-                  {data.initial_findings.customerJourney.commonQuestions.explicit.map(question => (
-                    <li key={question} className="py-3">{question}</li>
-                  ))}
-                </ul>
-                <h4 className="mt-4 text-sm text-gray-700">Implicit:</h4>
-                <ul className="mt-2 divide-y divide-gray-200">
-                  {data.initial_findings.customerJourney.commonQuestions.implicit.map(question => (
-                    <li key={question} className="py-3">{question}</li>
-                  ))}
-                </ul>
-                <ConfidenceIndicator score={data.initial_findings.customerJourney.confidenceScores.commonQuestions} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Action Items */}
       <div className="mt-5 overflow-hidden rounded-lg bg-white shadow">

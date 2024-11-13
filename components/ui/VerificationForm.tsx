@@ -485,7 +485,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         confidence: question.confidence || 0
       }));
 
-      // Save answers and update completion status in a transaction
+      // Save answers and update completion status
       const { error } = await supabase.rpc('update_analysis_section', {
         p_analysis_id: analysisId,
         p_section: section,
@@ -502,11 +502,14 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         description: `${section.charAt(0).toUpperCase() + section.slice(1)} section saved successfully`,
       });
 
-      // Move to next section
+      // Move to next section or competitors page
       if (section === 'verification') {
         onSectionChange('critical');
       } else if (section === 'critical') {
         onSectionChange('recommended');
+      } else if (section === 'recommended') {
+        // Redirect to competitors page
+        window.location.href = '/competitors';
       }
 
     } catch (error: any) {

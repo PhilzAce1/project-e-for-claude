@@ -14,20 +14,7 @@ interface WebsiteData {
     rawHtml: string;
 }
 
-interface InformationNeeded {
-    critical: Array<{
-        category: string;
-        field: string;
-        currentValue: any;
-        question: string;
-    }>;
-    recommended: Array<{
-        category: string;
-        field: string;
-        currentValue: any;
-        question: string;
-    }>;
-}
+
 
 export class BusinessInformationAnalyzer {
     private domain: string;
@@ -223,6 +210,9 @@ export class BusinessInformationAnalyzer {
             const scores = data.confidenceScores || {};
             
             Object.entries(scores).forEach(([field, score]: [string, number]) => {
+                // Skip the competitors field
+                if (field === 'competitors') return;
+                
                 const fieldData = data[field];
                 
                 // Add to critical if confidence is very low or data is missing

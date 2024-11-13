@@ -6,6 +6,7 @@ import { Database } from '@/types/supabase';
 import BusinessProgress from './ui/BusinessProgress';
 import { VerificationForm } from '@/components/ui/VerificationForm';
 import { useToast } from '@/components/ui/Toasts/use-toast';
+import { useParams } from 'next/navigation';
 
 interface BusinessAnalysisProps {
   analysisId: string;
@@ -149,6 +150,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
         {/* Main form content */}
         <div className="mt-5 col-span-2 relative  bg-gray-900 px-6 py-16 text-center shadow-2xl sm:rounded-xl sm:px-8">
           <VerificationForm 
+            analysisId={analysisId} 
             questions={data.verification_questions}
             informationNeeded={data.information_needed}
             onSubmit={handleSubmit}

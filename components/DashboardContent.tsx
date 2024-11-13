@@ -23,7 +23,8 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
     const [existingDomain, setExistingDomain] = useState<string | null>(null)
     const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false)
     const [hasCompetitors, setHasCompetitors] = useState<boolean>(false);
-    const [hasCriticalInfo, setHasCriticalInfo] = useState<boolean>(true);
+    const [isProfileComplete, setIsProfileComplete] = useState(false);
+    const [hasCriticalInfo, setHasCriticalInfo] = useState(false);
 
     const features = [
         {
@@ -151,19 +152,22 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
                 // Get latest business analysis
                 const { data: analysis, error: analysisError } = await supabase
                     .from('business_analyses')
-                    .select('information_needed')
+                    .select('completion_status')
                     .eq('user_id', user.id)
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .single();
 
-                if (analysisError && analysisError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-                    throw analysisError;
-                }
+                if (analysisError) throw analysisError;
 
-                // Check if there are any critical items
-                const hasCritical = analysis?.information_needed?.critical?.length > 0;
-                setHasCriticalInfo(!hasCritical); // Invert because we want to know if they've completed it
+                // Check if all sections are complete
+                const allSectionsComplete = analysis?.completion_status && 
+                    analysis.completion_status.verification === true &&
+                    analysis.completion_status.critical === true &&
+                    analysis.completion_status.recommended === true;
+
+                setHasCriticalInfo(analysis?.completion_status?.critical === true);
+                setIsProfileComplete(allSectionsComplete);
 
                 // Check competitors
                 const { data: competitors, error: competitorsError } = await supabase
@@ -181,8 +185,6 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
 
         checkProfileCompletion();
     }, [supabase, user.id]);
-
-    const isProfileComplete = hasCompetitors && hasCriticalInfo;
 
     if (!existingDomain && !domain) {
         return (

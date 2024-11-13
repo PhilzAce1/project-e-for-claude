@@ -3,26 +3,33 @@ import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import { fieldContexts } from '@/utils/business-analyzer/types';
+import { useToast } from '@/components/ui/Toasts/use-toast';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 interface VerificationFormProps {
+  analysisId: string;
   questions: any[];
   informationNeeded: {
     critical: any[];
     recommended: any[];
   };
-  onSubmit: (data: {
-    verification_questions: any[];
-    information_needed: {
-      critical: any[];
-      recommended: any[];
-    }
-  }) => void;
+  onSubmit: (data: any) => void;
   onSectionConfirm: (section: 'verification' | 'critical' | 'recommended') => void;
   onSectionChange: (section: 'verification' | 'critical' | 'recommended') => void;
   activeSection: 'verification' | 'critical' | 'recommended';
 }
 
+interface BusinessAnalysisAnswer {
+  analysis_id: string;
+  category: 'marketPosition' | 'technicalSpecifics' | 'coreBusiness' | 'customerJourney';
+  field_name: string;
+  section: 'verification' | 'critical' | 'recommended';
+  answer: any;
+  confidence: number;
+}
+
 export const VerificationForm: React.FC<VerificationFormProps> = ({ 
+  analysisId, 
   questions, 
   informationNeeded, 
   onSubmit,
@@ -30,6 +37,8 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   onSectionChange,
   activeSection
 }) => {
+  const supabase = createClientComponentClient()
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     verification_questions: questions,
     information_needed: informationNeeded
@@ -125,29 +134,44 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
     });
   };
 
-  const handleUpdateItem = (section: string, questionIndex: number, itemIndex: number, value: string, key?: string) => {
-    setFormData(prev => {
-      const newData = { ...prev };
-      
-      if (section === 'critical' || section === 'recommended') {
-        const targetQuestion = newData.information_needed[section][questionIndex];
-        if (key && targetQuestion.currentValue[key]) {
-          targetQuestion.currentValue[key][itemIndex] = value;
+  const handleUpdateItem = async (section: string, questionIndex: number, itemIndex: number, value: string, key?: string) => {
+    try {
+      setFormData(prev => {
+        const newData = { ...prev };
+        let targetQuestion;
+        
+        if (section === 'critical' || section === 'recommended') {
+          targetQuestion = newData.information_needed[section][questionIndex];
+        } else {
+          targetQuestion = newData.verification_questions[questionIndex];
         }
-      } else {
-        const targetQuestion = newData.verification_questions[questionIndex];
-        if (targetQuestion.currentValue.type === 'list') {
-          targetQuestion.currentValue.items[itemIndex] = value;
-        } else if (targetQuestion.currentValue.type === 'object' && key) {
-          const item = targetQuestion.currentValue.items.find((i: any) => i.key === key);
-          if (item) {
-            item.value[itemIndex] = value;
+
+        // Update the form state as before
+        if (section === 'critical' || section === 'recommended') {
+          if (key && targetQuestion.currentValue[key]) {
+            targetQuestion.currentValue[key][itemIndex] = value;
+          }
+        } else {
+          if (targetQuestion.currentValue.type === 'list') {
+            targetQuestion.currentValue.items[itemIndex] = value;
+          } else if (targetQuestion.currentValue.type === 'object' && key) {
+            const item = targetQuestion.currentValue.items.find((i: any) => i.key === key);
+            if (item) {
+              item.value[itemIndex] = value;
+            }
           }
         }
-      }
 
-      return newData;
-    });
+        return newData;
+      });
+    } catch (error: any) {
+      console.error('Error updating answer:', error);
+      toast({
+        title: 'Error updating answer',
+        description: error.message || 'Failed to save your answer',
+        variant: 'destructive',
+      });
+    }
   };
 
   const renderQuestionFields = (question: any, questionIndex: number, section: string) => {
@@ -440,14 +464,58 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   };
 
   // Update the button click handlers to use onSectionConfirm
-  const handleSectionComplete = (section: 'verification' | 'critical' | 'recommended') => {
-    onSectionConfirm(section);
-    
-    // Move to next section
-    if (section === 'verification') {
-      onSectionChange('critical');
-    } else if (section === 'critical') {
-      onSectionChange('recommended');
+  const handleSectionConfirm = async (section: 'verification' | 'critical' | 'recommended') => {
+    try {
+      if (!analysisId) {
+        throw new Error('Analysis ID is required');
+      }
+
+      // Get all questions for this section
+      const questions = section === 'verification' 
+        ? formData.verification_questions 
+        : formData.information_needed[section];
+
+      // Prepare all answers
+      const answers = questions.map(question => ({
+        analysis_id: analysisId,
+        category: question.category,
+        field_name: question.field,
+        section,
+        answer: question.currentValue,
+        confidence: question.confidence || 0
+      }));
+
+      // Save answers and update completion status in a transaction
+      const { error } = await supabase.rpc('update_analysis_section', {
+        p_analysis_id: analysisId,
+        p_section: section,
+        p_answers: answers
+      });
+
+      if (error) throw error;
+
+      // Update UI state
+      onSectionConfirm(section);
+      
+      toast({
+        title: 'Section completed',
+        description: `${section.charAt(0).toUpperCase() + section.slice(1)} section saved successfully`,
+      });
+
+      // Move to next section
+      if (section === 'verification') {
+        onSectionChange('critical');
+      } else if (section === 'critical') {
+        onSectionChange('recommended');
+      }
+
+    } catch (error: any) {
+      console.error('Error confirming section:', error);
+      toast({
+        title: 'Error saving section',
+        description: error.message || 'Failed to save section',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -482,7 +550,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
             <div className="flex justify-end mt-8">
               <button
                 type="button"
-                onClick={() => onSectionConfirm('verification')}
+                onClick={() => handleSectionConfirm('verification')}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 Confirm and Continue
@@ -525,7 +593,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => onSectionConfirm('critical')}
+                onClick={() => handleSectionConfirm('critical')}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 Confirm and Continue
@@ -567,7 +635,8 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                 Back
               </button>
               <button
-                type="submit"
+                type="button"
+                onClick={() => handleSectionConfirm('recommended')}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 Save All Changes

@@ -49,14 +49,14 @@ export default function BusinessProgress({
         return 0;
     }
 
-    const completed = questions.filter(q => {
+    const completed = questions?.filter(q => {
       if (typeof q.currentValue === 'object' && !Array.isArray(q.currentValue)) {
         return Object.values(q.currentValue).some((arr: any) => arr.length > 0);
       }
       return Array.isArray(q.currentValue) && q.currentValue.length > 0;
     }).length;
 
-    return Math.round((completed / questions.length) * 100);
+    return Math.round((completed / questions?.length) * 100);
   };
 
   const steps = [
@@ -146,12 +146,12 @@ export default function BusinessProgress({
                       <p className="text-sm text-gray-500">{step.description}</p>
                       
                       <p className="text-sm text-gray-400 mt-1">
-                        {step.questions.filter(q => {
+                        {step.questions?.filter(q => {
                           if (typeof q.currentValue === 'object' && !Array.isArray(q.currentValue)) {
                             return Object.values(q.currentValue).some((arr: any) => arr.length > 0);
                           }
                           return Array.isArray(q.currentValue) && q.currentValue.length > 0;
-                        }).length} of {step.questions.length} questions completed
+                        }).length} of {step.questions?.length} questions completed
                       </p>
                     </div>
                   </div>

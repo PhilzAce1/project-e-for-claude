@@ -7,6 +7,7 @@ import BusinessProgress from './ui/BusinessProgress';
 import { VerificationForm } from '@/components/ui/VerificationForm';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { useParams } from 'next/navigation';
+import {BusinessSummary} from './ui/BusinessSummary';
 
 interface BusinessAnalysisProps {
   analysisId: string;
@@ -29,7 +30,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     const fetchAnalysis = async () => {
       const { data: analysis, error } = await supabase
         .from('business_analyses')
-        .select('*')
+        .select('*, completion_status')
         .eq('id', analysisId)
         .single();
 
@@ -45,6 +46,14 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
 
       if (analysis) {
         setData(analysis);
+        // Set confirmed sections based on completion_status
+        if (analysis.completion_status) {
+          setConfirmedSections({
+            verification: analysis.completion_status.verification || false,
+            critical: analysis.completion_status.critical || false,
+            recommended: analysis.completion_status.recommended || false
+          });
+        }
         setLoading(false);
       }
     };
@@ -67,6 +76,15 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
           const analysis = payload.new;
           setData(analysis);
           
+          // Update confirmed sections when changes occur
+          if (analysis.completion_status) {
+            setConfirmedSections({
+              verification: analysis.completion_status.verification || false,
+              critical: analysis.completion_status.critical || false,
+              recommended: analysis.completion_status.recommended || false
+            });
+          }
+
           if (analysis.status === 'failed') {
             toast({
               title: 'Analysis Failed',
@@ -146,43 +164,52 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
           Business Analysis
         </h1>
       </div>
-      <div className="grid grid-cols-3 gap-4">
-        {/* Main form content */}
-        <div className="mt-5 col-span-2 relative  bg-gray-900 px-6 py-16 text-center shadow-2xl sm:rounded-xl sm:px-8">
-          <VerificationForm 
-            analysisId={analysisId} 
-            questions={data.verification_questions}
-            informationNeeded={data.information_needed}
-            onSubmit={handleSubmit}
-            activeSection={activeSection}
-            onSectionChange={handleSectionChange}
-            onSectionConfirm={(section) => {
-              setConfirmedSections(prev => ({
-                ...prev,
-                [section]: true
-              }));
-              // Move to next section after confirmation
-              if (section === 'verification') {
-                setActiveSection('critical');
-              } else if (section === 'critical') {
-                setActiveSection('recommended');
-              }
-            }}
-          />
-        </div>
-        {/* Progress sidebar */}
-        <div className="mt-5">
-          <div className="sticky top-4 overflow-hidden rounded-lg bg-white shadow ring-slate-900/10 p-8">
-            <BusinessProgress 
-              verificationQuestions={data.verification_questions}
+
+      {/* Show form if any section is incomplete */}
+      {(!confirmedSections.critical || !confirmedSections.recommended || !confirmedSections.verification) && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="mt-5 col-span-2 relative bg-gray-900 px-6 py-16 text-center shadow-2xl sm:rounded-xl sm:px-8">
+            <VerificationForm 
+              analysisId={analysisId} 
+              questions={data.verification_questions}
               informationNeeded={data.information_needed}
-              confirmedSections={confirmedSections}
+              onSubmit={handleSubmit}
               activeSection={activeSection}
-              onSectionClick={handleSectionChange}
+              onSectionChange={handleSectionChange}
+              onSectionConfirm={(section) => {
+                setConfirmedSections(prev => ({
+                  ...prev,
+                  [section]: true
+                }));
+                if (section === 'verification') {
+                  setActiveSection('critical');
+                } else if (section === 'critical') {
+                  setActiveSection('recommended');
+                }
+              }}
             />
           </div>
+          
+          <div className="mt-5">
+            <div className="sticky top-4 overflow-hidden rounded-lg bg-white shadow ring-slate-900/10 p-8">
+              <BusinessProgress 
+                verificationQuestions={data.verification_questions}
+                informationNeeded={data.information_needed}
+                confirmedSections={confirmedSections}
+                activeSection={activeSection}
+                onSectionClick={handleSectionChange}
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Show summary if all sections are complete */}
+      {(confirmedSections.critical && confirmedSections.recommended && confirmedSections.verification) && (
+        <div className="my-6 pb-1">
+          <BusinessSummary analysisId={analysisId} />
+        </div>
+      )}
     </div>
   );
 };

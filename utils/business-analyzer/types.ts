@@ -14,6 +14,7 @@ interface InformationNeeded {
 }
 
 interface FieldContext {
+  title: string;
   description: string;
   subsections?: Record<string, {
     description: string;
@@ -33,6 +34,7 @@ interface InformationNeededContext {
 const fieldContexts: Record<string, FieldContext> = {
   // Core Business Fields
   offerings: {
+    title: "Products & Services",
     description: "Your business's core products and services help us understand what you offer to the market.",
     subsections: {
       products: {
@@ -46,6 +48,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   targetCustomer: {
+    title: "Target Customer Profile",
     description: "Understanding your ideal customer profile helps focus marketing and product development efforts.",
     subsections: {
       demographics: {
@@ -59,20 +62,24 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   painPoints: {
+    title: "Customer Pain Points",
     description: "Understanding customer problems helps align your solutions.",
     // No subsections as this is a simple list
   },
   businessModel: {
+    title: "Business Model",
     description: "Your business model defines how you create and deliver value.",
     // No subsections as this is a simple choice
   },
   geographicScope: {
+    title: "Geographic Reach",
     description: "Your geographic reach impacts marketing and operations strategies.",
     // No subsections as this is a simple choice
   },
 
   // Market Position Fields
   competitors: {
+    title: "Competition",
     description: "Understanding your competitive landscape helps position your business effectively.",
     subsections: {
       mentioned: {
@@ -86,10 +93,12 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   uniqueFactors: {
+    title: "Unique Value Proposition",
     description: "Your differentiators set you apart in the market.",
     // No subsections as this is a simple list
   },
   pricePosition: {
+    title: "Pricing Strategy",
     description: "Your pricing strategy impacts market positioning and customer perception.",
     subsections: {
       level: {
@@ -103,6 +112,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   credentials: {
+    title: "Credentials & Experience",
     description: "Your credentials and experience demonstrate expertise and build trust.",
     subsections: {
       awards: {
@@ -120,6 +130,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   businessAge: {
+    title: "Business History",
     description: "Your business history demonstrates experience and stability.",
     subsections: {
       years: {
@@ -135,6 +146,7 @@ const fieldContexts: Record<string, FieldContext> = {
 
   // Customer Journey Fields
   buyingProcess: {
+    title: "Customer Buying Process",
     description: "Understanding how customers make purchasing decisions helps optimize the sales process.",
     subsections: {
       stages: {
@@ -148,6 +160,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   commonQuestions: {
+    title: "Frequently Asked Questions",
     description: "Understanding common customer questions helps improve communication.",
     subsections: {
       explicit: {
@@ -161,10 +174,11 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   objections: {
+    title: "Common Customer Concerns",
     description: "Understanding customer concerns helps improve your offering and communication.",
-    // No subsections as this is a simple list
   },
   salesCycle: {
+    title: "Sales Cycle",
     description: "Your sales cycle helps understand how customers move through the buying process.",
     subsections: {
       length: {
@@ -178,6 +192,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   conversionPoints: {
+    title: "Customer Actions",
     description: "Understanding how customers take action helps optimize your conversion funnel.",
     subsections: {
       primary: {
@@ -193,6 +208,7 @@ const fieldContexts: Record<string, FieldContext> = {
 
   // Technical Specifics Fields
   terminology: {
+    title: "Industry Terminology",
     description: "Industry-specific language helps ensure clear communication.",
     subsections: {
       industry_terms: {
@@ -206,6 +222,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   specifications: {
+    title: "Technical Details",
     description: "Technical details help customers understand your offerings.",
     subsections: {
       technical_specs: {
@@ -219,6 +236,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   seasonality: {
+    title: "Seasonal Patterns",
     description: "Understanding seasonal patterns helps optimize business operations.",
     subsections: {
       patterns: {
@@ -232,6 +250,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   regulations: {
+    title: "Regulatory Requirements",
     description: "Regulatory compliance is crucial for business operations.",
     subsections: {
       explicit: {
@@ -245,6 +264,7 @@ const fieldContexts: Record<string, FieldContext> = {
     }
   },
   industryTrends: {
+    title: "Industry Trends",
     description: "Staying aware of industry trends helps maintain competitive advantage.",
     subsections: {
       current: {

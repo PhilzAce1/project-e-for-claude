@@ -438,9 +438,8 @@ export class BusinessInformationAnalyzer {
             const title = html.match(/<title[^>]*>(.*?)<\/title>/i)?.[1] || '';
             const metaDescription = html.match(/<meta\s+name="description"\s+content="([^"]*)">/i)?.[1] || null;
             const metaKeywords = html.match(/<meta\s+name="keywords"\s+content="([^"]*)">/i)?.[1] || null;
-            
             // Extract main content with fallback
-            const bodyContent = html.match(/<body[^>]*>(.*?)<\/body>/si)?.[1] || html;
+            const bodyContent = html.match(/<body[^>]*>(.*?)<\/body>/i)?.[1] || html;
             const content = bodyContent
                 .replace(/<[^>]*>/g, ' ') // Remove HTML tags
                 .replace(/\s+/g, ' ')     // Normalize whitespace

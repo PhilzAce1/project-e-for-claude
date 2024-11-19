@@ -70,13 +70,13 @@ export default function BusinessProgress({
       name: 'Required Details',
       description: 'Fill in essential information',
       section: 'critical',
-      questions: informationNeeded.critical
+      questions: informationNeeded?.critical
     },
     {
       name: 'Additional Information',
       description: 'Add any other helpful details',
       section: 'recommended',
-      questions: informationNeeded.recommended
+      questions: informationNeeded?.recommended
     }
   ];
 

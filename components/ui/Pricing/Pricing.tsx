@@ -34,7 +34,7 @@ type BillingInterval = 'lifetime' | 'year' | 'month';
 export default function Pricing({ user, products, subscription }: Props) {
   const intervals = Array.from(
     new Set(
-      products.flatMap((product) =>
+      products?.flatMap((product) =>
         product?.prices?.map((price) => price?.interval)
       )
     )
@@ -80,7 +80,7 @@ export default function Pricing({ user, products, subscription }: Props) {
     setPriceIdLoading(undefined);
   };
 
-  if (!products.length) {
+  if (!products?.length) {
     return (
       <section className="bg-black">
         <div className="max-w-6xl px-4 py-8 mx-auto sm:py-24 sm:px-6 lg:px-8">

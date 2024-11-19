@@ -2,11 +2,17 @@ import AuthenticatedLayout from '../authenticated-layout';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import CompetitorsContent from './CompetitorsContent';
+import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
 
 export default async function CompetitorsPage() {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-  console.log('user', user)
+    const [user, products, subscription] = await Promise.all([
+      getUser(supabase),
+      getProducts(supabase),
+      getSubscription(supabase)
+    ]);
+  
+  console.log('user', products, subscription)
     if (!user) {
       redirect('/signin/password_signin');
     }

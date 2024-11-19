@@ -15,7 +15,7 @@ export default async function RankingsPage() {
     // Fetch rankings data
     const { data: rankingsData, error } = await supabase
         .from('business_information')
-        .select('rankings_data')
+        .select('rankings_data, rankings_updated_at')
         .eq('user_id', user.id)
         .single();
 
@@ -25,7 +25,7 @@ export default async function RankingsPage() {
 
     return (
       <AuthenticatedLayout user={user}>
-        <RankingsContent user={user} rankingsData={rankingsData?.rankings_data} />
+        <RankingsContent user={user} rankingsData={rankingsData?.rankings_data} lastCrawlDate={rankingsData?.rankings_updated_at} />
         </AuthenticatedLayout>
     );
 }

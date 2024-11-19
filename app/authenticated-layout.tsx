@@ -15,14 +15,14 @@ export default function AuthenticatedLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen h-screen bg-gray-100">
       <Sidebar 
         user={user} 
         sidebarOpen={sidebarOpen} 
         setSidebarOpen={setSidebarOpen}
       />
 
-      <div className="lg:pl-72">
+      <div className="lg:pl-72 h-full">
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 lg:hidden">
           <button 
             type="button" 
@@ -42,8 +42,8 @@ export default function AuthenticatedLayout({
           </div>
         </div>
 
-        <main className="py-10">
-          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+        <main className="py-10 h-full">
+          <div className="px-4 sm:px-6 lg:px-8 h-full">{children}</div>
         </main>
       </div>
     </div>

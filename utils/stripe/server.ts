@@ -135,6 +135,7 @@ export async function createStripePortal(currentPath: string) {
     }
 
     let customer;
+    console.log('user', user);
     try {
       customer = await createOrRetrieveCustomer({
         uuid: user.id || '',

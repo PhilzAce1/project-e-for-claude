@@ -75,7 +75,7 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
       return (
         <div className="">
           {answer.answer.items.map((item: { key: string; value: string[] }, i: number) => (
-            <div key={i}  className={`mt-4 space-y-1 bg-violet-900 px-8 py-4 rounded-lg text-white ${colorClasses[i % colorClasses.length]}`}> 
+            <div key={i}  className={`mt-4 space-y-1 px-8 py-4 rounded-lg  ${colorClasses[i % colorClasses.length]}`}> 
               <h5 className="font-bold text-xl">
                 {context?.subsections?.[item.key]?.title || 
                   item.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -99,7 +99,7 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
       return (
         <div className="space-y-4">
           {Object.entries(answer.answer).map(([key, values]: [string, any], index: number) => (
-            <div key={key}  className={`mt-4 space-y-1  px-8 py-4 rounded-lg text-white ${colorClasses[index % colorClasses.length]}`}>
+            <div key={key}  className={`mt-4 space-y-1  px-8 py-4 rounded-lg  ${colorClasses[index % colorClasses.length]}`}>
               <h5 className="font-bold text-xl">
                 {context?.subsections?.[key]?.title || 
                   key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -169,7 +169,7 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
   };
 
   const colorClasses = [
-    'bg-amber-100 text-amber  -900',
+    'bg-amber-100 text-amber-900',
     'bg-emerald-100 text-emerald-900',
     'bg-purple-100 text-purple-900',
   ]

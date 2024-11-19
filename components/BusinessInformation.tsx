@@ -1,8 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { BusinessAnalysisData } from '../../types';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Database } from '@/types/supabase';
 import BusinessProgress from './ui/BusinessProgress';
 import { VerificationForm } from '@/components/ui/VerificationForm';
 import { useToast } from '@/components/ui/Toasts/use-toast';
@@ -17,7 +15,7 @@ interface BusinessAnalysisProps {
 export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createClientComponentClient<any>();
   const { toast } = useToast();
   const [confirmedSections, setConfirmedSections] = useState({
     verification: false,

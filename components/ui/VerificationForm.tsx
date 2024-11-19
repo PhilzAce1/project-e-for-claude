@@ -236,7 +236,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
               <div key={item.key} className="space-y-2">
                 <div className="flex items-center gap-2 p-2 rounded">
                   <h4 className="text-sm font-medium text-gray-400">
-                    {item.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    {item.key.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </h4>
                   
                   {/* Add tooltip if we have context for this subsection */}
@@ -302,7 +302,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                       onClick={() => handleAddItem(section, questionIndex, item.key)}
                       className="flex items-center gap-2 rounded-md bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10"
                     >
-                      <PlusIcon className="h-4 w-4" /> Add {item.key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      <PlusIcon className="h-4 w-4" /> Add {item.key.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                     </button>
                   </div>
                 )}
@@ -376,7 +376,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
               <div key={key} className="space-y-2">
                 <div className="flex items-center gap-2 border border-white/10 p-2 rounded">
                   <h4 className="text-sm font-medium text-gray-400">
-                    {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    {key.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </h4>
                   
                   {/* Add tooltip if we have context for this subsection */}
@@ -442,7 +442,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                       onClick={() => handleAddItem(section, questionIndex, key)}
                       className="flex items-center gap-2 rounded-md bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10"
                     >
-                      <PlusIcon className="h-4 w-4" /> Add {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      <PlusIcon className="h-4 w-4" /> Add {key.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                     </button>
                   </div>
                 )}

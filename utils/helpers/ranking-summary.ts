@@ -1,4 +1,4 @@
-import { Rankings, RankingItem, KeywordData } from '../types/Rankings';
+import { Rankings, RankingItem } from './ranking-data-types';
 
 interface RankingSummary {
   totalKeywords: number;

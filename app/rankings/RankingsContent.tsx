@@ -5,9 +5,9 @@ import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import dynamic from 'next/dynamic';
 import {Chart, ArcElement, Title, Tooltip, Legend, Colors} from 'chart.js'
 import { useState, useEffect, Fragment } from 'react';
-import Modal from '@/components/Modal'; // Assuming you have a Modal component
 import { Dialog, Transition } from '@headlessui/react';
 import KeywordTable from '@/components/ui/KeywordTable';
+import { RankingItem } from '@/utils/helpers/ranking-data-types';
 
 const Doughnut = dynamic(() => import('react-chartjs-2').then((mod) => mod.Doughnut), {
   ssr: false,
@@ -37,37 +37,6 @@ interface Metrics {
   is_lost: number;
 }
 
-interface KeywordInfo {
-  search_volume: number;
-  competition_level: string;
-}
-
-interface SearchIntentInfo {
-  main_intent: string;
-}
-
-interface RankChanges {
-  is_new: boolean;
-  is_up: boolean;
-  is_down: boolean;
-}
-
-interface SerpItem {
-  rank_absolute: number;
-  rank_changes: RankChanges;
-  relative_url: string;
-}
-
-interface Item {
-  keyword_data: {
-    keyword: string;
-    keyword_info: KeywordInfo;
-    search_intent_info: SearchIntentInfo;
-  };
-  ranked_serp_element: {
-    serp_item: SerpItem;
-  };
-}
 
 interface RankingsData {
   total_count: number;
@@ -75,12 +44,13 @@ interface RankingsData {
     organic: Metrics;
     paid: Metrics;
   };
-  items: Item[];
+  items: RankingItem[];
 }
 
 interface RankingsContentProps {
   user: User;
   rankingsData: RankingsData;
+  lastCrawlDate: string;
 }
 
 export default function RankingsContent({ user, rankingsData, lastCrawlDate }: RankingsContentProps) {

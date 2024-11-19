@@ -1,30 +1,10 @@
-interface InformationNeeded {
-    critical: Array<{
-        category: string;
-        field: string;
-        currentValue: any;
-        question: string;
-    }>;
-    recommended: Array<{
-        category: string;
-        field: string;
-        currentValue: any;
-        question: string;
-    }>;
-}
+
 
 interface FieldContext {
   title: string;
   description: string;
   subsections?: Record<string, {
-    description: string;
-    examples: string[];
-  }>;
-}
-
-interface InformationNeededContext {
-  description: string;
-  subsections?: Record<string, {
+    title?: string;
     description: string;
     examples: string[];
   }>;

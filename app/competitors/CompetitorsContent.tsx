@@ -5,9 +5,9 @@ import { useState, Fragment, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import classNames from 'classnames';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import CompetitorKeywordList from '@/components/ui/CompetitorKeywordList';
+import { Rankings } from '@/utils/helpers/ranking-data-types';
 
 interface CompetitorsContentProps {
   user: User;
@@ -28,8 +28,14 @@ const onboardingSteps = [
   }
 ];
 
+// Update the Competitor interface to match Rankings
+interface Competitor extends Rankings {
+  // Add any additional properties specific to Competitor
+  user_id?: string;
+}
+
 export default function CompetitorsContent({ user }: CompetitorsContentProps) {
-    const [competitors, setCompetitors] = useState<{ id: string, domain: string }[]>([]);
+    const [competitors, setCompetitors] = useState<Competitor[]>([]);
     const [newCompetitors, setNewCompetitors] = useState(['']);
     const [inputErrors, setInputErrors] = useState<string[]>([]);
     const [showOnboarding, setShowOnboarding] = useState(false);
@@ -42,22 +48,23 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     }, []);
   
     async function fetchCompetitors() {
-      const { data, error } = await supabase
+      const { data: competitors, error } = await supabase
         .from('competitors')
         .select('id, domain, rankings_data, rankings_updated_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+        .eq('user_id', user.id);
   
       if (error) {
         console.error('Error fetching competitors:', error);
-        setCompetitors([]);
-      } else {
-        console.log('API response:', data); // Log the response to see its structure
-        setCompetitors(Array.isArray(data) ? data : []);
-        if(data.length === 0) {
-          setShowOnboarding(true);
-        }
+        return;
       }
+  
+      // Transform string IDs to numbers if needed
+      const transformedCompetitors = competitors?.map(comp => ({
+        ...comp,
+        id: Number(comp.id) // Convert string ID to number
+      })) || [];
+  
+      setCompetitors(transformedCompetitors);
     }
   
     const validateUrl = (url: string) => {
@@ -120,7 +127,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
       }
     };
   
-    const fetchCompetitorRankings = async (competitor: { id: string, domain: string }) => {
+    const fetchCompetitorRankings = async (competitor: { id: number, domain: string }) => {
       try {
         const response = await fetch('/api/get-ranked-keywords', {
           method: 'POST',
@@ -130,7 +137,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
           body: JSON.stringify({
             user_id: user.id,
             domain: competitor.domain,
-            competitor_id: competitor.id,
+            competitor_id: competitor.id.toString(),
           }),
         })
 
@@ -242,7 +249,11 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
                 ))}
               </select>
             </div>
-            {competitors.length > 0 && (<CompetitorKeywordList competitors={competitors} />)}
+            {competitors.length > 0 && (
+              <CompetitorKeywordList 
+                competitors={competitors} // Now the types match
+              />
+            )}
           </div>
         </>
       )}

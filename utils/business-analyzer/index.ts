@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import { JSDOM } from 'jsdom';
 import Anthropic from '@anthropic-ai/sdk';
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -134,8 +133,13 @@ export class BusinessInformationAnalyzer {
             }]
         });
 
+        // Parse the response content
+        const responseContent = message.content[0].type === 'text' 
+            ? message.content[0].text 
+            : '';
+            
         // Parse the raw data
-        const rawData = JSON.parse(message.content[0].text);
+        const rawData = JSON.parse(responseContent);
         
         // Standardize the data structure
         return this._standardizeData(rawData);
@@ -209,7 +213,7 @@ export class BusinessInformationAnalyzer {
         Object.entries(findings).forEach(([section, data]: [string, any]) => {
             const scores = data.confidenceScores || {};
             
-            Object.entries(scores).forEach(([field, score]: [string, number]) => {
+            (Object.entries(scores) as [string, number][]).forEach(([field, score]) => {
                 // Skip the competitors field
                 if (field === 'competitors') return;
                 
@@ -231,7 +235,7 @@ export class BusinessInformationAnalyzer {
 
     private _generateVerificationQuestion(category: string, field: string, value: any): string {
         // Determine if it's a software/service business
-        const isSoftwareBusiness = value?.services?.some(s => 
+        const isSoftwareBusiness = value?.services?.some((s: string) => 
             s.toLowerCase().includes('software') || 
             s.toLowerCase().includes('saas') ||
             s.toLowerCase().includes('platform')
@@ -284,7 +288,7 @@ export class BusinessInformationAnalyzer {
         Object.entries(findings).forEach(([section, data]: [string, any]) => {
             const scores = data.confidenceScores || {};
             
-            Object.entries(scores).forEach(([field, score]: [string, number]) => {
+            (Object.entries(scores) as [string, number][]).forEach(([field, score]) => {
                 if (score >= 0.7 && data[field]) {
                     // Standardize the currentValue format
                     let standardizedValue = data[field];
@@ -400,14 +404,14 @@ export class BusinessInformationAnalyzer {
                 rawHtml: html
             }];
 
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error gathering website data:', error);
             // Update scrape status to failed if there's an error
             await this.supabase
                 .from('website_scrapes')
                 .update({ 
                     status: 'failed',
-                    error_message: error.message
+                    error_message: error instanceof Error ? error.message : 'Unknown error occurred'
                 })
                 .eq('domain', this.domain);
 

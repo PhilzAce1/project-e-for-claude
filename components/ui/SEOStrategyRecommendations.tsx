@@ -1,12 +1,11 @@
 import React from 'react';
 import { Rankings } from '../../utils/helpers/ranking-data-types';
-import generateRankingsSummary, { RankingSummary } from '../../utils/helpers/ranking-summary';
-import { OnPageSEOAudit } from '../../utils/helpers/onpage-seo-types'; // Assume this type exists
+import generateRankingsSummary from '../../utils/helpers/ranking-summary';
 
 interface SEOStrategyRecommendationsProps {
   competitorsRankings: Rankings[];
   clientRankings: Rankings;
-  onPageSEOAudit: OnPageSEOAudit;
+  onPageSEOAudit: any;
 }
 
 const SEOStrategyRecommendations: React.FC<SEOStrategyRecommendationsProps> = ({
@@ -30,7 +29,7 @@ const SEOStrategyRecommendations: React.FC<SEOStrategyRecommendationsProps> = ({
   }
 
   // Analyze ranking distribution
-  Object.entries(aggregatedCompetitorSummary.rankingDistribution).forEach(([range, count]) => {
+  (Object.entries(aggregatedCompetitorSummary.rankingDistribution) as [string, number][]).forEach(([range, count]) => {
     const avgCompetitorCount = Math.round(count / competitorsSummaries.length);
     const clientCount = clientSummary.rankingDistribution[range] || 0;
     if (avgCompetitorCount > clientCount) {
@@ -39,15 +38,28 @@ const SEOStrategyRecommendations: React.FC<SEOStrategyRecommendationsProps> = ({
   });
 
   // Compare top keywords
-  const competitorTopKeywords = new Set(aggregatedCompetitorSummary.topKeywords.map(k => k.keyword));
-  const clientTopKeywords = new Set(clientSummary.topKeywords.map(k => k.keyword));
-  const missingTopKeywords = [...competitorTopKeywords].filter(x => !clientTopKeywords.has(x));
+  interface KeywordItem {
+    keyword: string;
+    [key: string]: any;  // for any other properties
+  }
+  
+  const competitorTopKeywords: Set<string> = new Set(
+    aggregatedCompetitorSummary.topKeywords.map((k: KeywordItem) => k.keyword)
+  );
+  
+  const clientTopKeywords: Set<string> = new Set(
+    clientSummary.topKeywords.map((k: KeywordItem) => k.keyword)
+  );
+  
+  const missingTopKeywords = Array.from(competitorTopKeywords)
+    .filter(x => !clientTopKeywords.has(x));
+
   if (missingTopKeywords.length > 0) {
     recommendations.push(`Target these high-value keywords that competitors are ranking for: ${missingTopKeywords.join(', ')}`);
   }
 
   // Analyze search intent distribution
-  Object.entries(aggregatedCompetitorSummary.searchIntentDistribution).forEach(([intent, count]) => {
+  (Object.entries(aggregatedCompetitorSummary.searchIntentDistribution) as [string, number][]).forEach(([intent, count]) => {
     const avgCompetitorCount = Math.round(count / competitorsSummaries.length);
     const clientCount = clientSummary.searchIntentDistribution[intent] || 0;
     if (avgCompetitorCount > clientCount) {
@@ -77,7 +89,7 @@ const SEOStrategyRecommendations: React.FC<SEOStrategyRecommendationsProps> = ({
 };
 
 // Helper function to aggregate competitor summaries
-function aggregateCompetitorSummaries(summaries: RankingSummary[]): RankingSummary {
+function aggregateCompetitorSummaries(summaries: any[]): any {
   return summaries.reduce((acc, summary) => {
     acc.totalKeywords += summary.totalKeywords;
     acc.totalETV += summary.totalETV;
@@ -106,7 +118,7 @@ function aggregateCompetitorSummaries(summaries: RankingSummary[]): RankingSumma
     potentialOpportunities: [],
     serpFeatureDistribution: {},
     averageBacklinks: 0,
-  } as RankingSummary);
+  } as any);
 }
 
 export default SEOStrategyRecommendations;

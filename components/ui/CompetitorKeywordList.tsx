@@ -6,13 +6,16 @@ import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import KeywordTable from './KeywordTable'
 import RankingsSummaryView from './RankingsSummaryView'
 import CompetitorOverview from './CompetitorOverview'
-import {Rankings} from '@/utils/helpers/ranking-data-types'
-import { classNames } from '@/utils/helpers'
+import { Rankings, RankingItem } from '@/utils/helpers/ranking-data-types'
 
-const CompetitorKeywordList = ({competitors}: {competitors: Array<Rankings>}) => {
-    const [selected, setSelected] = useState(null)
+interface CompetitorKeywordListProps {
+  competitors: Rankings[];
+}
+
+const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
+    const [selected, setSelected] = useState<Rankings | null>(null)
     const [isLoading, setIsLoading] = useState(true);
-    const [keywords, setKeywords] = useState([]);
+    const [keywords, setKeywords] = useState<RankingItem[]>([]);
 
     useEffect(() => {
         if (competitors && competitors.length > 0) {
@@ -29,9 +32,8 @@ const CompetitorKeywordList = ({competitors}: {competitors: Array<Rankings>}) =>
         }
     }, [selected]);
 
-    const fetchKeywords = async (competitor) => {
+    const fetchKeywords = async (competitor: Rankings) => {
         try {
-            // This is a placeholder. Replace with your actual API call if needed.
             setKeywords(competitor.rankings_data?.items || []);
         } catch (error) {
             console.error('Error fetching keywords:', error);
@@ -41,7 +43,7 @@ const CompetitorKeywordList = ({competitors}: {competitors: Array<Rankings>}) =>
         }
     };
 
-    const handleCompetitorChange = (newSelected) => {
+    const handleCompetitorChange = (newSelected: Rankings) => {
         console.log('am i changing?', newSelected)
         setSelected(newSelected);
     };
@@ -92,13 +94,15 @@ const CompetitorKeywordList = ({competitors}: {competitors: Array<Rankings>}) =>
             </div>
             Last Crawled: {formattedDate}
             </div>
-            <RankingsSummaryView rankings={selected} />
+            {selected && <RankingsSummaryView rankings={selected} />}
             <KeywordTable keywords={keywords} />
         </>
     )
 }
 
-function formatDate(timestamp: string): string {
+function formatDate(timestamp: string | undefined): string {
+    if (!timestamp) return 'Never';
+    
     const date = new Date(timestamp);
     
     // Use Intl.DateTimeFormat for localized date and time formatting
@@ -112,6 +116,6 @@ function formatDate(timestamp: string): string {
     });
   
     return formatter.format(date);
-  }
+}
 
 export default CompetitorKeywordList

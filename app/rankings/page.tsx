@@ -25,7 +25,7 @@ export default async function RankingsPage() {
 
     return (
       <AuthenticatedLayout user={user}>
-        <RankingsContent user={user} rankingsData={rankingsData?.rankings_data} lastCrawlDate={rankingsData.rankings_updated_at} />
+        <RankingsContent user={user} rankingsData={rankingsData?.rankings_data} lastCrawlDate={rankingsData?.rankings_updated_at} />
         </AuthenticatedLayout>
     );
 }

@@ -284,10 +284,10 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <div className="absolute top-0 right-0 pt-4 pr-4">
+                  <div className="absolute top-0 right-0 pt-4 pr-4 z-40">
                     <button
                       type="button"
-                      className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      className="rounded-md bg-white text-gray-400  hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       onClick={() => setShowOnboarding(false)}
                     >
                       <span className="sr-only">Close</span>
@@ -296,7 +296,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
                   </div>
                   <div className="relative bg-gray-100">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:grid lg:grid-cols-2 lg:px-8">
-                      <div className="mx-auto max-w-2xl py-24 lg:max-w-none lg:py-64">
+                      <div className="mx-auto max-w-2xl py-8 sm:py-16 lg:max-w-none lg:py-64">
                         <div className="lg:pr-16">
                           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl xl:text-6xl">
                             {onboardingSteps[onboardingStep].title}

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { BusinessAnalysis } from '../../components/BusinessInformation';
 import AuthenticatedLayout from '../authenticated-layout';
+import ZeroStateHero from '@/components/ZeroStateHero';
 
 export default async function BusinessInformationPage() {
     const supabase = createServerComponentClient({ cookies });
@@ -25,18 +26,23 @@ export default async function BusinessInformationPage() {
         console.error('Error fetching analysis:', error);
     }
 
+    console.log(latestAnalysis)
+
     return (
         <AuthenticatedLayout user={user}>
             {latestAnalysis ? (
                 <BusinessAnalysis analysisId={latestAnalysis.id} />
             ) : (
-                <div className="container mx-auto p-4">
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <p className="text-yellow-700">
-                            No analysis found. Start by analyzing a business website.
-                        </p>
-                    </div>
-                </div>
+                
+            <ZeroStateHero 
+                title="Kickstart Your SEO Strategy Now!"
+                subtitle="We need to start by learning about your business."
+                description="Enter your domain below to begin."
+                ctaText="Start Now"
+                user={user}
+                imageSrc="/rank-image.webp"
+                fullPage={true}
+            />
             )}
         </AuthenticatedLayout>
     );

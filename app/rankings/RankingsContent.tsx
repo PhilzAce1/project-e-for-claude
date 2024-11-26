@@ -8,6 +8,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import KeywordTable from '@/components/ui/KeywordTable';
 import { RankingItem } from '@/utils/helpers/ranking-data-types';
+import ZeroStateHero from '@/components/ZeroStateHero';
 
 const Doughnut = dynamic(() => import('react-chartjs-2').then((mod) => mod.Doughnut), {
   ssr: false,
@@ -54,6 +55,19 @@ interface RankingsContentProps {
 }
 
 export default function RankingsContent({ user, rankingsData, lastCrawlDate }: RankingsContentProps) {
+  if (!rankingsData) {
+    return (
+      <ZeroStateHero 
+        title="Kickstart Your SEO Strategy Now!"
+        subtitle="We need to start by learning about your business."
+        description="Enter your domain below to begin."
+        ctaText="Start Now"
+        user={user}
+        imageSrc="/rank-image.webp"
+        fullPage={true}
+    />
+    );
+  }
   const [showNoKeywordsModal, setShowNoKeywordsModal] = useState(false);
   const {total_count, metrics, items} = rankingsData;
 

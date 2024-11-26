@@ -6,6 +6,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Spinner from '@/components/ui/Spinner';
 import LighthouseAudits from '@/components/ui/LighthouseAudits';
 import { siteAuditDictionary, siteAutitPriority } from '@/utils/helpers/site-audit-dictionary';
+import ZeroStateHero from '@/components/ZeroStateHero';
 
 // Define the type for your audit items
 type Audit = {
@@ -23,11 +24,20 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         return <div>Please sign in to view your site audit.</div>;
     }
 
+    console.log(seoCrawlData)
+
     if (!seoCrawlData) {
         return (
-            <div className="flex flex-col items-center justify-center h-64">
-                <p className="mt-4 text-gray-600">You haven't started your site audit yet.</p>
-            </div>
+            
+            <ZeroStateHero 
+                title="Kickstart Your SEO Strategy Now!"
+                subtitle="We need to start by learning about your business."
+                description="Enter your domain below to begin."
+                ctaText="Start Now"
+                user={user}
+                imageSrc="/rank-image.webp"
+                fullPage={true}
+            />
         );
     }
 
@@ -149,11 +159,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                 return <p>Select a category to see detailed information.</p>
         }
     }
-
-    const getMessage = (key: string, value: number) => {
-        const baseMessage = (siteAuditDictionary as Record<string, string>)[key] || `have an issue with ${key}`;
-        return `${value} pages ${baseMessage}`;
-    };
 
     // Create a map of priorities for quick lookup
     const priorityMap = new Map(siteAutitPriority.map((item, index) => [item.key, index]));

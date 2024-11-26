@@ -63,9 +63,9 @@ export default async function SiteAuditIssuesPage() {
           <div className="flex flex-col bg-white px-8 py-4 relative">
             <ul className='divide-y divide-gray-200'>
               {scraped_pages.map((value: { url: string; status_code: number }) => (
-                <li  className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0 flex justify-between items-center'>
-                  <a href={value.url} className='text-orange-600 hover:text-orange-500'>{value.url}</a>
-                  <span className='p-2 bg-gray-50 '>{value.status_code}</span>
+                <li  className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0 flex justify-between items-center '>
+                  <a href={value.url} className='text-orange-600 hover:text-orange-500 grow overflow-hidden text-ellipsis whitespace-nowrap'>{value.url}</a>
+                  <span className='p-2 bg-gray-50 flex-none'>{value.status_code}</span>
                 </li>
               ))}
             </ul>

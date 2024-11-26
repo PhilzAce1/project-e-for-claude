@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { User } from '@supabase/supabase-js';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 const CustomerPortalForm = dynamic(
@@ -30,8 +30,13 @@ export default function AccountContent({ user, userDetails, subscription }: {
   const supabase = createClientComponentClient();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    redirect('/');
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    } finally {
+      window.location.href = '/';
+    }
   };
 
   return (

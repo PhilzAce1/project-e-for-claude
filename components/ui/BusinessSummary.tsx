@@ -178,8 +178,8 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
     <>
       {Object.entries(data || {}).map(([category, answers]: [string, any]) => (
     <div className=" mb-8 rounded-lg ring-1 bg-white ring-slate-900/10 ">
-      <div className="mx-auto max-w-7xl px-6 py-16 sm:pt-32 lg:px-8 lg:py-20">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-8 pr-8">
+      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-5">
             <h2 className="text-pretty text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
               {categoryTitles[category as keyof typeof categoryTitles] || category}
@@ -194,7 +194,7 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
                 {answers.map((answer: any, index: number) => (
                   <Disclosure key={index} as="div" className="pt-6">
                     <dt>
-                      <DisclosureButton className="group flex w-full items-start justify-between text-left text-gray-900">
+                      <DisclosureButton className="group flex w-full items-center justify-between text-left text-gray-900">
                         {renderFieldHeader(answer.field_name, category)}
                         <span className="ml-6 flex h-7 items-center">
                           <PlusIcon aria-hidden="true" className="size-6 group-data-[open]:hidden" />
@@ -202,7 +202,7 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
                         </span>
                       </DisclosureButton>
                     </dt>
-                    <DisclosurePanel as="dd" className="mt-2 pr-12">
+                    <DisclosurePanel as="dd" className="mt-2 pr-0 lg:pr-12">
                       {renderAnswer(answer)}
                     </DisclosurePanel>
                   </Disclosure>

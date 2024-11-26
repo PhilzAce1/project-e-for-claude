@@ -25,7 +25,44 @@ export default async function SiteAuditPage() {
     if (error) {
       console.error('Error fetching SEO crawl data:', error);
     } else {
-      seoCrawlData = data;
+      const needsRefresh = !data.lighthouse_data && 
+        !data.onpage_score &&
+        new Date(data.created_at) < new Date(Date.now() - 30 * 60 * 1000); // 30 minutes ago
+
+      if (needsRefresh && data) {
+        // Ping for SEO data if external_job_id exists
+        if (data.external_job_id) {
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/pageforseo/pingback?id=${data.external_job_id}`);
+            if (!response.ok) {
+              console.error('Error refreshing SEO data:', await response.text());
+            } else {
+              console.log('Successfully triggered SEO data refresh');
+            }
+          } catch (error) {
+            console.error('Error calling SEO pingback endpoint:', error);
+          }
+        }
+
+        // Ping for Lighthouse data if lighthouse_task_id exists
+        if (data.lighthouse_task_id) {
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/pageforseo/pingback?id=${data.lighthouse_task_id}&tag=lighthouse_audit`);
+            if (!response.ok) {
+              console.error('Error refreshing Lighthouse data:', await response.text());
+            } else {
+              console.log('Successfully triggered Lighthouse data refresh');
+            }
+          } catch (error) {
+            console.error('Error calling Lighthouse pingback endpoint:', error);
+          }
+        }
+      }
+
+      if (!needsRefresh) {
+        console.log('SEO data does not need refresh');
+        seoCrawlData = data;
+      }
     }
   }
 

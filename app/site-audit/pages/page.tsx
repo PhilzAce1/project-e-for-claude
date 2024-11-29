@@ -1,16 +1,21 @@
-import { getUserDetails } from '@/utils/supabase/queries';
+
+import { getProducts, getSubscription, getUser, getUserDetails } from '@/utils/supabase/queries';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import AuthenticatedLayout from '../../authenticated-layout';
-import { siteAuditDictionary } from '@/utils/helpers/site-audit-dictionary';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export default async function SiteAuditIssuesPage() {
   const supabase = createServerComponentClient({ cookies });
-  const { data: { user } } = await supabase.auth.getUser();
 
   let userDetails = null;
   let seoCrawlData = null;
+
+  const [subscription, products, user] = await Promise.all([
+    getSubscription(supabase),
+    getProducts(supabase),
+    getUser(supabase)
+  ]);
 
   if (user) {
     userDetails = await getUserDetails(supabase, user.id);
@@ -51,7 +56,7 @@ export default async function SiteAuditIssuesPage() {
   ];
 
   return (
-    <AuthenticatedLayout user={user}>
+    <AuthenticatedLayout products={products} subscription={subscription} user={user}>
       <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
                 <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">

@@ -78,7 +78,6 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
     }
   }, [total_count]);
 
-  console.log('rankingsData', rankingsData);
   const stats = [
     { name: 'Total Keywords Ranking', stat: total_count || 0, change: ((metrics?.organic.is_new - metrics?.organic.is_lost) / metrics?.organic.count * 100).toFixed(2) + '%', changeType: 'increase' },
     { name: 'Total Organic No.1', stat: metrics?.organic.pos_1 || 0 },

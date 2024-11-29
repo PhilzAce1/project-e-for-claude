@@ -42,7 +42,7 @@
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
-    "dataforseo-client": "^1.0.24",
+    "dataforseo-client": "1.0.24",
     "framer-motion": "^11.5.4",
     "jsdom": "^25.0.1",
     "lucide-react": "0.330.0",

@@ -80,6 +80,8 @@ export default function Pricing({ user, products, subscription }: Props) {
     setPriceIdLoading(undefined);
   };
 
+  console.log('products', products)
+
   if (!products?.length) {
     return (
       <section className="bg-black">
@@ -103,47 +105,8 @@ export default function Pricing({ user, products, subscription }: Props) {
     );
   } else {
     return (
-      <section className="bg-black">
-        <div className="max-w-6xl px-4 py-8 mx-auto sm:py-24 sm:px-6 lg:px-8">
-          <div className="sm:flex sm:flex-col sm:align-center">
-            <h1 className="font-serif text-4xl font-extrabold text-white sm:text-center sm:text-6xl">
-              Pricing Plans
-            </h1>
-            <p className="max-w-2xl m-auto mt-5 text-xl text-zinc-200 sm:text-center sm:text-2xl">
-              Start building for free, then add a site plan to go live. Account
-              plans unlock additional features.
-            </p>
-            <div className="relative self-center mt-6 bg-zinc-900 rounded-lg p-0.5 flex sm:mt-8 border border-zinc-800">
-              {intervals.includes('month') && (
-                <button
-                  onClick={() => setBillingInterval('month')}
-                  type="button"
-                  className={`${
-                    billingInterval === 'month'
-                      ? 'relative w-1/2 bg-zinc-700 border-zinc-800 shadow-sm text-white'
-                      : 'ml-0.5 relative w-1/2 border border-transparent text-zinc-400'
-                  } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
-                >
-                  Monthly billing
-                </button>
-              )}
-              {intervals.includes('year') && (
-                <button
-                  onClick={() => setBillingInterval('year')}
-                  type="button"
-                  className={`${
-                    billingInterval === 'year'
-                      ? 'relative w-1/2 bg-zinc-700 border-zinc-800 shadow-sm text-white'
-                      : 'ml-0.5 relative w-1/2 border border-transparent text-zinc-400'
-                  } rounded-md m-1 py-2 text-sm font-medium whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 focus:z-10 sm:w-auto sm:px-8`}
-                >
-                  Yearly billing
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="mt-12 space-y-0 sm:mt-16 flex flex-wrap justify-center gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0">
-            {products.map((product) => {
+      <>
+      {products.map((product) => {
               const price = product?.prices?.find(
                 (price) => price.interval === billingInterval
               );
@@ -154,49 +117,78 @@ export default function Pricing({ user, products, subscription }: Props) {
                 minimumFractionDigits: 0
               }).format((price?.unit_amount || 0) / 100);
               return (
-                <div
-                  key={product.id}
-                  className={cn(
-                    'flex flex-col rounded-lg shadow-sm divide-y divide-zinc-600 bg-zinc-900',
-                    {
-                      'border border-pink-500': subscription
-                        ? product.name === subscription?.prices?.products?.name
-                        : product.name === 'Freelancer'
-                    },
-                    'flex-1', // This makes the flex item grow to fill the space
-                    'basis-1/3', // Assuming you want each card to take up roughly a third of the container's width
-                    'max-w-xs' // Sets a maximum width to the cards to prevent them from getting too large
-                  )}
-                >
-                  <div className="p-6">
-                    <h2 className="text-2xl font-semibold leading-6 text-white">
-                      {product.name}
-                    </h2>
-                    <p className="mt-4 text-zinc-300">{product.description}</p>
-                    <p className="mt-8">
-                      <span className="text-5xl font-extrabold white">
-                        {priceString}
-                      </span>
-                      <span className="text-base font-medium text-zinc-100">
-                        /{billingInterval}
-                      </span>
+                <div className="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
+              <div className="p-8 sm:p-10 lg:flex-auto">
+                <h3 className="text-3xl font-semibold tracking-tight text-gray-900">
+                {product.name}</h3>
+                <p className="mt-6 text-base/7 text-gray-600">
+                  {product.description}
+                </p>
+                <div className="mt-10 flex items-center gap-x-4">
+                  <h4 className="flex-none text-sm/6 font-semibold text-indigo-600">What’s included</h4>
+                  <div className="h-px flex-auto bg-gray-100" />
+                </div>
+                <ul role="list" className="mt-8 grid grid-cols-1 gap-4 text-sm/6 text-gray-600 sm:grid-cols-2 sm:gap-6">
+                  {/* {includedFeatures.map((feature) => (
+                    <li key={feature} className="flex gap-x-3">
+                      <CheckIcon aria-hidden="true" className="h-6 w-5 flex-none text-indigo-600" />
+                      {feature}
+                    </li>
+                  ))} */}
+                </ul>
+              </div>
+              <div className="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0">
+                <div className="rounded-2xl bg-gray-50 pb-10 pt-5 text-center ring-1 ring-inset ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
+                  <div className="mx-auto max-w-xs px-8">
+                    <div className="mb-8 flex justify-center">
+                      <div className="grid grid-cols-2 gap-x-1 rounded-full p-1 text-center text-xs/5 font-semibold ring-1 ring-inset ring-gray-200">
+                        {intervals.includes('month') && (
+                          <button
+                            onClick={() => setBillingInterval('month')}
+                            type="button"
+                            className={`${
+                              billingInterval === 'month'
+                                ? ' text-white bg-indigo-600'
+                                : ' text-gray-500 '
+                            } relative cursor-pointer rounded-full px-2.5 py-1`}
+                          >
+                            Monthly
+                          </button>
+                        )}
+                        {intervals.includes('year') && (
+                          <button
+                            onClick={() => setBillingInterval('year')}
+                            type="button"
+                            className={`${
+                              billingInterval === 'year'
+                                ? ' text-white bg-indigo-600'
+                                : ' text-gray-500 '
+                            } relative cursor-pointer rounded-full px-2.5 py-1`}
+                          >
+                            Yearly
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="mt-6 flex items-baseline justify-center gap-x-2">
+                      <span className="text-5xl font-semibold tracking-tight text-gray-900">{priceString}</span>
+                      <span className="text-sm/6 font-semibold tracking-wide text-gray-600">GBP</span>
                     </p>
                     <button
-                      type="button"
-                      // loading={priceIdLoading === price.id}
                       onClick={() => handleStripeCheckout(price)}
-                      className="block w-full py-2 mt-8 text-sm font-semibold text-center text-white rounded-md hover:bg-zinc-900"
+                      className="mt-10 block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     >
-                      {subscription ? 'Manage' : 'Subscribe'}
+                      Get access
                     </button>
+                    <p className="mt-6 text-xs/5 text-gray-600">
+                      Invoices and receipts available for easy company reimbursement
+                    </p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-          <LogoCloud />
-        </div>
-      </section>
+              </div>
+            </div>
+              )})}
+      </>
     );
   }
 }

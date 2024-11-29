@@ -1,4 +1,4 @@
-import { getUserDetails } from '@/utils/supabase/queries';
+import { getProducts, getSubscription, getUserDetails, getUser } from '@/utils/supabase/queries';
 import SiteAuditContent from './SiteAuditContent';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
@@ -6,7 +6,12 @@ import AuthenticatedLayout from '../authenticated-layout';
 
 export default async function SiteAuditPage() {
   const supabase = createServerComponentClient({ cookies });
-  const { data: { user } } = await supabase.auth.getUser();
+  
+  const [user, subscription, products] = await Promise.all([
+    getUser(supabase),
+    getSubscription(supabase),
+    getProducts(supabase)
+  ]);
 
   let userDetails = null;
   let seoCrawlData = null;
@@ -67,7 +72,7 @@ export default async function SiteAuditPage() {
   }
 
   return (
-    <AuthenticatedLayout user={user} >
+    <AuthenticatedLayout user={user} products={products} subscription={subscription} >
         <SiteAuditContent user={user} seoCrawlData={seoCrawlData} />
     </AuthenticatedLayout>)
 }

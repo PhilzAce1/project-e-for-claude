@@ -1,4 +1,4 @@
-import { getUserDetails } from '@/utils/supabase/queries';
+import { getProducts, getSubscription, getUser, getUserDetails } from '@/utils/supabase/queries';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import AuthenticatedLayout from '../../authenticated-layout';
@@ -15,13 +15,15 @@ type Audit = {
 
 export default async function SiteAuditIssuesPage() {
   const supabase = createServerComponentClient({ cookies });
-  const { data: { user } } = await supabase.auth.getUser();
 
-  let userDetails = null;
   let seoCrawlData = null;
 
+  const [subscription, products, user] = await Promise.all([
+    getSubscription(supabase),
+    getProducts(supabase),
+    getUser(supabase)
+  ]);
   if (user) {
-    userDetails = await getUserDetails(supabase, user.id);
 
     const { data, error } = await supabase
       .from('seo_crawls')
@@ -50,7 +52,6 @@ if (!seoCrawlData) {
 }
 
 const { page_metrics } = seoCrawlData;
-console.log(seoCrawlData)
 
 // Create a map of priorities for quick lookup
 const priorityMap = new Map(siteAutitPriority.map((item, index) => [item.key, index]));
@@ -79,7 +80,7 @@ const pages = [
 
 const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as number), 0);
   return (
-    <AuthenticatedLayout user={user}>
+    <AuthenticatedLayout products={products} subscription={subscription} user={user}>
         
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">

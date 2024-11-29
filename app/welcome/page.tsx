@@ -3,14 +3,18 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import AuthenticatedLayout from '../authenticated-layout';
+import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
 
 export default async function WelcomePage() {
   const supabase = createServerComponentClient({ cookies });
-  
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
+  const [subscription, products, user] = await Promise.all([
+    getSubscription(supabase),
+    getProducts(supabase),
+    getUser(supabase)
+  ]);
+
+  
   if (!user) {
     redirect('/signin');
   }
@@ -26,7 +30,7 @@ export default async function WelcomePage() {
   const isSeoCrawlComplete = latestCrawl && latestCrawl.status === 'completed';
 
   return (
-    <AuthenticatedLayout user={user} >
+    <AuthenticatedLayout products={products} subscription={subscription} user={user} >
         <DashboardContent
         user={user}
         isSeoCrawlComplete={isSeoCrawlComplete}

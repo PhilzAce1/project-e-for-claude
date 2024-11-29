@@ -18,7 +18,7 @@ export default async function CompetitorsPage() {
     }
 
   return (
-    <AuthenticatedLayout user={user}>
+    <AuthenticatedLayout user={user} products={products} subscription={subscription}>
       <CompetitorsContent user={user} />
     </AuthenticatedLayout>
   );

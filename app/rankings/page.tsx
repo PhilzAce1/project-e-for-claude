@@ -3,10 +3,15 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import RankingsContent from './RankingsContent';
 import AuthenticatedLayout from '../authenticated-layout';
+import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
 
 export default async function RankingsPage() {
     const supabase = createServerComponentClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
+    const [user, products, subscription] = await Promise.all([
+      getUser(supabase),
+      getProducts(supabase),
+      getSubscription(supabase)
+    ]);
 
     if (!user) {
         redirect('/signin/password_signin');
@@ -24,7 +29,7 @@ export default async function RankingsPage() {
     }
 
     return (
-      <AuthenticatedLayout user={user}>
+      <AuthenticatedLayout user={user} products={products} subscription={subscription}>
         <RankingsContent user={user} rankingsData={rankingsData?.rankings_data} lastCrawlDate={rankingsData?.rankings_updated_at} />
         </AuthenticatedLayout>
     );

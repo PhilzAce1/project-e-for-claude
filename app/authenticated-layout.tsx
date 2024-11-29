@@ -4,13 +4,18 @@ import React, { useState } from 'react';
 import Sidebar from '@/components/ui/Sidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import Logo from '@/components/icons/Logo';
+import PaymentRequired from '@/components/ui/Pricing/PaymentRequired';
 
 export default function AuthenticatedLayout({
   children,
-  user
+  user,
+  products,
+  subscription
 }: {
   children: React.ReactNode;
   user: any;
+  products: any;
+  subscription: any;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -43,7 +48,8 @@ export default function AuthenticatedLayout({
         </div>
 
         <main className="py-4 sm:py-6 lg:py-10 h-full fixed lg:relative top-0 pt-20 sm:pt-24 overflow-auto w-full lg:w-auto">
-          <div className="px-4 sm:px-6 lg:px-8 h-full">{children}</div>
+          <div className="px-4 sm:px-6 lg:px-8 h-full">
+            <PaymentRequired user={user} products={products} subscription={subscription}>{children}</PaymentRequired></div>
         </main>
       </div>
     </div>

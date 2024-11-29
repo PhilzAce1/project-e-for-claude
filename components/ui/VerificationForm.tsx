@@ -55,6 +55,14 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   const criticalRef = useRef<HTMLDivElement>(null);
   const recommendedRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    console.log(formData)
+    setFormData({
+      verification_questions: questions,
+      information_needed: informationNeeded
+    })
+  }, [questions, informationNeeded])
+
   // Scroll to active section when it changes
   useEffect(() => {
     const refs = {

@@ -93,7 +93,7 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords }) => {
           {currentKeywords.map((item, index) => (
             <tr key={item.keyword_data.keyword + 'index'} className="even:bg-gray-50">
               <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left">
-                {item.keyword_data.keyword}
+                <a href={item.ranked_serp_element.serp_item.url} target="_blank" rel="noopener noreferrer">{item.keyword_data.keyword}</a>
               </td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 relative">
                 {item.ranked_serp_element.serp_item.rank_absolute}
@@ -118,11 +118,8 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords }) => {
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.keyword_data.keyword_info.search_volume}</td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.keyword_data.keyword_info.competition_level}</td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">{item.keyword_data.search_intent_info.main_intent}</td>
-              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                <a href={item.ranked_serp_element.serp_item.url} target="_blank" rel="noopener noreferrer">
-                  Link
-                </a>
-              </td>
+              <td className=''><a href='#' className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm whitespace-nowrap hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >Rank for this</a></td>
             </tr>
           ))}
           {!keywords || keywords.length === 0 && (

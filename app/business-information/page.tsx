@@ -4,10 +4,15 @@ import { redirect } from 'next/navigation';
 import { BusinessAnalysis } from '../../components/BusinessInformation';
 import AuthenticatedLayout from '../authenticated-layout';
 import ZeroStateHero from '@/components/ZeroStateHero';
+import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
 
 export default async function BusinessInformationPage() {
     const supabase = createServerComponentClient({ cookies });
-    const { data: { user } } = await supabase.auth.getUser();
+    const [user, products, subscription] = await Promise.all([
+      getUser(supabase),
+      getProducts(supabase),
+      getSubscription(supabase)
+    ]);
 
     if (!user) {
         redirect('/signin/password_signin');
@@ -29,7 +34,7 @@ export default async function BusinessInformationPage() {
     console.log(latestAnalysis)
 
     return (
-        <AuthenticatedLayout user={user}>
+        <AuthenticatedLayout user={user} products={products} subscription={subscription}>
             {latestAnalysis ? (
                 <BusinessAnalysis analysisId={latestAnalysis.id} />
             ) : (

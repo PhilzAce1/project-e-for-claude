@@ -1,7 +1,7 @@
 import { toDateTime } from '@/utils/helpers';
 import { stripe } from '@/utils/stripe/config';
 import { createClient } from '@supabase/supabase-js';
-import Stripe from 'stripe';
+import { Stripe } from 'stripe';
 import type { Database, Tables, TablesInsert } from 'types_db';
 
 type Product = Tables<'products'>;
@@ -25,7 +25,7 @@ const upsertProductRecord = async (product: Stripe.Product) => {
     description: product.description ?? null,
     image: product.images?.[0] ?? null,
     metadata: product.metadata,
-    features: product.features ?? []
+    features: product.marketing_features ?? []
   };
 
   const { error: upsertError } = await supabaseAdmin

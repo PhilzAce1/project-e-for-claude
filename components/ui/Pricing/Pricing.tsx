@@ -9,6 +9,7 @@ import { User } from '@supabase/supabase-js';
 import cn from 'classnames';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { CheckIcon } from '@heroicons/react/24/outline';
 
 type Subscription = Tables<'subscriptions'>;
 type Product = Tables<'products'>;
@@ -129,12 +130,12 @@ export default function Pricing({ user, products, subscription }: Props) {
                   <div className="h-px flex-auto bg-gray-100" />
                 </div>
                 <ul role="list" className="mt-8 grid grid-cols-1 gap-4 text-sm/6 text-gray-600 sm:grid-cols-2 sm:gap-6">
-                  {/* {includedFeatures.map((feature) => (
-                    <li key={feature} className="flex gap-x-3">
+                  {product.features?.map((feature) => (
+                    <li key={feature.name} className="flex gap-x-3">
                       <CheckIcon aria-hidden="true" className="h-6 w-5 flex-none text-indigo-600" />
-                      {feature}
+                      {feature.name}
                     </li>
-                  ))} */}
+                  ))}
                 </ul>
               </div>
               <div className="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0">

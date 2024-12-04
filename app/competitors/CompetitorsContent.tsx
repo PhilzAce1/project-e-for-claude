@@ -7,7 +7,7 @@ import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import CompetitorKeywordList from '@/components/ui/CompetitorKeywordList';
-import { Rankings } from '@/utils/helpers/ranking-data-types';
+import CompetitorOverview from '@/components/ui/CompetitorOverview';
 
 interface CompetitorsContentProps {
   user: User;
@@ -28,14 +28,14 @@ const onboardingSteps = [
   }
 ];
 
-// Update the Competitor interface to match Rankings
-interface Competitor extends Rankings {
-  // Add any additional properties specific to Competitor
-  user_id?: string;
+
+interface CompetitorTitles {
+  id: number;
+  domain: string;
 }
 
 export default function CompetitorsContent({ user }: CompetitorsContentProps) {
-    const [competitors, setCompetitors] = useState<Competitor[]>([]);
+    const [competitors, setCompetitors] = useState<CompetitorTitles[]>([]);
     const [newCompetitors, setNewCompetitors] = useState(['']);
     const [inputErrors, setInputErrors] = useState<string[]>([]);
     const [showOnboarding, setShowOnboarding] = useState(false);
@@ -50,7 +50,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     async function fetchCompetitors() {
       const { data: competitors, error } = await supabase
         .from('competitors')
-        .select('id, domain, rankings_data, rankings_updated_at')
+        .select('id, domain')
         .eq('user_id', user.id);
   
       if (error) {
@@ -86,8 +86,6 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
 
       // Remove port number if present
       cleanedDomain = cleanedDomain.split(':')[0];
-
-      console.log('cleanedDomain', cleanedDomain)
 
       return cleanedDomain;
     }
@@ -226,6 +224,8 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
           Add Competitor
         </button>
       </div>
+
+      <CompetitorOverview user={user} />
       
       {competitors.length === 0 ? (
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8 mt-4">
@@ -234,25 +234,12 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
       ) : (
         <>
           <div className='mt-8'>
-            <div className="sm:hidden">
-              <label htmlFor="tabs" className="sr-only">
-                Select a tab
-              </label>
-              <select
-                id="competitors"
-                name="competitors"
-                defaultValue={competitors.find((competitor) => competitor)?.domain}
-                className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                {competitors.map((competitor) => (
-                  <option key={competitor.domain}>{new URL(competitor.domain).hostname}</option>
-                ))}
-              </select>
-            </div>
             {competitors.length > 0 && (
-              <CompetitorKeywordList 
-                competitors={competitors} // Now the types match
+              <>
+                <CompetitorKeywordList 
+                  competitors={competitors} // Now the types match
               />
+              </>
             )}
           </div>
         </>

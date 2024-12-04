@@ -70,7 +70,6 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
           filter: `id=eq.${analysisId}`
         },
         (payload: any) => {
-          console.log('Received update:', payload);
           const analysis = payload.new;
           setData(analysis);
           

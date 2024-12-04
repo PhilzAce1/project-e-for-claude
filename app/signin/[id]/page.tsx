@@ -27,7 +27,6 @@ export default async function SignIn({
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
-  console.log('params in this fucker', params);
   // Declare 'viewProp' and initialize with the default value
   let viewProp: string;
 

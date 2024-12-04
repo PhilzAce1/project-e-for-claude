@@ -28,8 +28,6 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
 
         if (error) throw error;
 
-        // Add console.log to debug the data structure
-        console.log('Raw answers:', answers);
 
         // Group answers by category
         const groupedData = answers.reduce((acc: any, answer) => {
@@ -40,7 +38,6 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
           return acc;
         }, {});
 
-        console.log('Grouped data:', groupedData);
         setData(groupedData);
         setLoading(false);
       } catch (error: any) {

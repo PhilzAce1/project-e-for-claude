@@ -31,8 +31,6 @@ export default async function BusinessInformationPage() {
         console.error('Error fetching analysis:', error);
     }
 
-    console.log(latestAnalysis)
-
     return (
         <AuthenticatedLayout user={user} products={products} subscription={subscription}>
             {latestAnalysis ? (

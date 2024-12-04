@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import generateRankingsSummary from '@/utils/helpers/ranking-summary'
+import { Rankings } from '@/utils/helpers/ranking-data-types'
 
 const serviceRoleClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,6 +21,45 @@ function cleanDomain(domain: string): string {
   cleanedDomain = cleanedDomain.split(':')[0];
 
   return cleanedDomain;
+}
+
+async function updateCompetitorMetrics(user_id: string) {
+  try {
+    // Fetch all competitors for this user
+    const { data: competitors, error: fetchError } = await serviceRoleClient
+      .from('competitors')
+      .select('rankings_data')
+      .eq('user_id', user_id)
+      .not('rankings_data', 'is', null);
+
+    if (fetchError) throw fetchError;
+
+    // Calculate metrics
+    const summaries = competitors.map(comp => generateRankingsSummary(comp as Rankings));
+    const totalKeywords = summaries.reduce((sum, summary) => sum + summary.totalKeywords, 0);
+    const averageKeywords = Math.round(totalKeywords / summaries.length);
+    const totalOpportunities = summaries.reduce((sum, summary) => sum + summary.potentialOpportunities.length, 0);
+
+    // Save metrics to business_information
+    const { error: updateError } = await serviceRoleClient
+      .from('business_information')
+      .update({
+        competitor_metrics: {
+          total_keywords: totalKeywords,
+          average_keywords: averageKeywords,
+          total_opportunities: totalOpportunities,
+          competitor_count: competitors.length,
+          last_updated: new Date().toISOString()
+        }
+      })
+      .eq('user_id', user_id);
+
+    if (updateError) throw updateError;
+
+  } catch (error) {
+    console.error('Error updating competitor metrics:', error);
+    throw error;
+  }
 }
 
 export async function POST(req: Request) {
@@ -77,6 +118,9 @@ export async function POST(req: Request) {
         .match({ id: competitor_id })
 
       if (error) throw error
+
+      // Update competitor metrics after adding/updating competitor data
+      await updateCompetitorMetrics(user_id);
 
       return NextResponse.json({ success: true, message: 'Competitor rankings data updated successfully' })
     } else {

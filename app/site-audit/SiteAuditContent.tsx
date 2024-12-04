@@ -24,8 +24,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         return <div>Please sign in to view your site audit.</div>;
     }
 
-    console.log(seoCrawlData)
-
     if (!seoCrawlData) {
         return (
             
@@ -62,8 +60,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         { id: 3, name: 'Best Practices', value: categories['best-practices'].score * 100 },
         { id: 4, name: 'SEO', value: categories.seo.score * 100},
     ]
-
-    console.log(onpage_score, seoCrawlData)
 
     const [audits, setAudits] = useState<Audit[]>([]);
 

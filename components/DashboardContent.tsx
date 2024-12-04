@@ -137,7 +137,6 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
 
                 if (error) throw error
 
-                console.log('User referral data updated successfully')
             } catch (error) {
                 console.error('Error updating user referral data:', error)
             }

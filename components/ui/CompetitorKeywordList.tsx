@@ -5,17 +5,24 @@ import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@h
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import KeywordTable from './KeywordTable'
 import RankingsSummaryView from './RankingsSummaryView'
-import CompetitorOverview from './CompetitorOverview'
 import { Rankings, RankingItem } from '@/utils/helpers/ranking-data-types'
+import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs'
 
 interface CompetitorKeywordListProps {
   competitors: Rankings[];
+}
+// Update the Competitor interface to match Rankings
+interface Competitor extends Rankings {
+  // Add any additional properties specific to Competitor
+  user_id?: string;
 }
 
 const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
     const [selected, setSelected] = useState<Rankings | null>(null)
     const [isLoading, setIsLoading] = useState(true);
     const [keywords, setKeywords] = useState<RankingItem[]>([]);
+    const supabase = createClientComponentClient();
+    const [currentCompetitor, setCurrentCompetitor] = useState<Competitor | null>(null);
 
     useEffect(() => {
         if (competitors && competitors.length > 0) {
@@ -27,10 +34,30 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
     useEffect(() => {
         if (selected) {
             setIsLoading(true);
-            console.log('selected', selected)
-            fetchKeywords(selected);
+            fetchCurrentCompetitor(selected.id);
         }
     }, [selected]);
+
+    useEffect(() => {
+        if (selected && currentCompetitor) {
+            fetchKeywords(currentCompetitor);
+        }
+    }, [currentCompetitor]);
+
+    async function fetchCurrentCompetitor(id: number) {
+      const { data: competitor, error } = await supabase
+        .from('competitors')
+        .select('id, domain, rankings_data, rankings_updated_at')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching competitor:', error);
+        return;
+      }
+
+      setCurrentCompetitor(competitor);
+    }
 
     const fetchKeywords = async (competitor: Rankings) => {
         try {
@@ -44,7 +71,6 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
     };
 
     const handleCompetitorChange = (newSelected: Rankings) => {
-        console.log('am i changing?', newSelected)
         setSelected(newSelected);
     };
 
@@ -56,9 +82,6 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
 
     return (
         <>
-            {/* Competition Overview */}
-            <CompetitorOverview competitorsRankings={competitors} />
-
             <div className='justify-between flex mt-8'>
                 <div className='flex items-center gap-4 mb-4'>
                     <Listbox value={selected} onChange={handleCompetitorChange}>
@@ -94,7 +117,7 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
             </div>
             Last Crawled: {formattedDate}
             </div>
-            {selected && <RankingsSummaryView rankings={selected} />}
+            {(selected && currentCompetitor) && <RankingsSummaryView rankings={currentCompetitor} />}
             <KeywordTable keywords={keywords} />
         </>
     )

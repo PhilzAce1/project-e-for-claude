@@ -72,7 +72,6 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
   const {total_count, metrics, items} = rankingsData;
 
   useEffect(() => {
-    console.log('total_count', total_count)
     if (!total_count) {
       setShowNoKeywordsModal(true);
     }

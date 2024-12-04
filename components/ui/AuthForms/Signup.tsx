@@ -14,8 +14,6 @@ interface SignUpProps {
 }
 
 export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
-  console.log('allowEmail', allowEmail);
-  console.log('redirectMethod', redirectMethod);
   const router = redirectMethod === 'client' ? useRouter() : null;
   const [isSubmitting, setIsSubmitting] = useState(false);
 

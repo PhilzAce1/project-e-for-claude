@@ -5,8 +5,6 @@ const MAILJET_API_KEY = Deno.env.get("MAILJET_API_KEY");
 const MAILJET_SECRET_KEY = Deno.env.get("MAILJET_SECRET_KEY");
 const LIST_ID = 10456699;
 
-console.log("Add to Mailjet function initialized");
-
 Deno.serve(async (req) => {
   try {
     const payload = await req.json();
@@ -46,7 +44,6 @@ Deno.serve(async (req) => {
     if (!contactResponse.ok) {
       throw new Error(`Mailjet API error (contact): ${contactResponse.statusText}`);
     }
-    console.log("User addres", contactResponse);
 
     // Then, add the contact to the specified list
     const listUrl = `https://api.mailjet.com/v3/REST/listrecipient`;

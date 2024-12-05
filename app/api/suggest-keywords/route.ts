@@ -38,6 +38,7 @@ const { data: businessData, error: answersError } = await supabase
     messages: [{ role: "user", content: prompt }]
   }); 
   
+    // @ts-ignore
   const keywordSections = JSON.parse(response.content[0].text);
   console.log('keywordSections', keywordSections);
 

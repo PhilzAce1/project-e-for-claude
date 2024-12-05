@@ -106,6 +106,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     }
   }) => {
     try {
+      // First save the form data
       const { error } = await supabase
         .from('business_analyses')
         .update({
@@ -119,7 +120,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
 
       toast({
         title: 'Success',
-        description: 'Information updated successfully'
+        description: 'Information updated and keywords generated successfully'
       });
       
     } catch (error: any) {

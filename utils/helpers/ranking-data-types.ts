@@ -14,6 +14,11 @@ type BacklinksInfo = {
   referring_main_domains: number;
 };
 
+export interface CompetitorTitles {
+  id: number;
+  domain: string;
+}
+
 type RankChanges = {
   is_up: boolean;
   is_new: boolean;

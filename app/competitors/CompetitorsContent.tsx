@@ -8,6 +8,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import CompetitorKeywordList from '@/components/ui/CompetitorKeywordList';
 import CompetitorOverview from '@/components/ui/CompetitorOverview';
+import { CompetitorTitles } from '@/utils/helpers/ranking-data-types';
 
 interface CompetitorsContentProps {
   user: User;
@@ -27,12 +28,6 @@ const onboardingSteps = [
     content: "Excellent! You've added your top competitors. We'll now analyze their SEO strategies to help improve your rankings.",
   }
 ];
-
-
-interface CompetitorTitles {
-  id: number;
-  domain: string;
-}
 
 export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     const [competitors, setCompetitors] = useState<CompetitorTitles[]>([]);

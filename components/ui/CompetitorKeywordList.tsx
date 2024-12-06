@@ -7,9 +7,10 @@ import KeywordTable from './KeywordTable'
 import RankingsSummaryView from './RankingsSummaryView'
 import { Rankings, RankingItem } from '@/utils/helpers/ranking-data-types'
 import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs'
+import { CompetitorTitles } from '@/utils/helpers/ranking-data-types';
 
 interface CompetitorKeywordListProps {
-  competitors: Rankings[];
+  competitors: CompetitorTitles[];
 }
 // Update the Competitor interface to match Rankings
 interface Competitor extends Rankings {
@@ -18,7 +19,7 @@ interface Competitor extends Rankings {
 }
 
 const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
-    const [selected, setSelected] = useState<Rankings | null>(null)
+    const [selected, setSelected] = useState<CompetitorTitles | null>(null)
     const [isLoading, setIsLoading] = useState(true);
     const [keywords, setKeywords] = useState<RankingItem[]>([]);
     const supabase = createClientComponentClient();
@@ -78,7 +79,7 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
         return <div>Loading...</div>;
     }
 
-    const formattedDate = formatDate(selected?.rankings_updated_at);
+    const formattedDate = formatDate(currentCompetitor?.rankings_updated_at);
 
     return (
         <>

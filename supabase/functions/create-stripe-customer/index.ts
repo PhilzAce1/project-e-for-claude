@@ -16,8 +16,6 @@ serve(async (req) => {
     try {
       const data = await req.json()
       const { record  } = data
-      console.log('email' ,record.user_id, data)
-      console.log('referralCode', record.referral_code)
       if (!record.user_id) {
         return new Response(JSON.stringify({ error: 'user_id is required' }), { status: 400 })
       }
@@ -29,13 +27,10 @@ serve(async (req) => {
         throw new Error('Failed to fetch user data')
       }
 
-      console.log('user', user)
-
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: { tolt_referral: record.referral_code || '' },
       })
-      console.log('customer created!', customer )
       return new Response(JSON.stringify({ customerId: customer.id }), {
         headers: { "Content-Type": "application/json" },
         status: 200,

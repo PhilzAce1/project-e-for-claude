@@ -48,7 +48,6 @@ export default async function SiteAuditIssuesPage() {
   }
 
   const { scraped_pages } = seoCrawlData;
-  console.log('Scraped Pages:', scraped_pages);
 
   const breadcrumbPages = [
     { name: 'Site Audit', href: '/site-audit', current: false },

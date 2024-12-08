@@ -12,13 +12,12 @@ export default async function CompetitorsPage() {
       getSubscription(supabase)
     ]);
   
-  console.log('user', products, subscription)
     if (!user) {
       redirect('/signin/password_signin');
     }
 
   return (
-    <AuthenticatedLayout user={user} products={products} subscription={subscription}>
+    <AuthenticatedLayout user={user} products={products} subscription={subscription} disableGateway={true}>
       <CompetitorsContent user={user} />
     </AuthenticatedLayout>
   );

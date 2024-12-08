@@ -16,11 +16,9 @@ export async function handleRequest(
 
   const formData = new FormData(e.currentTarget);
   const redirectUrl: string = await requestFunc(formData);
-  console.log(formData, redirectUrl);
 
   if (router) {
     // If client-side router is provided, use it to redirect
-    console.log('router be here redirectUrl', redirectUrl);
     return router.push(redirectUrl);
   } else {
     // Otherwise, redirect server-side
@@ -37,7 +35,6 @@ export async function signInWithOAuth(e: React.FormEvent<HTMLFormElement>) {
   // Create client-side supabase client and call signInWithOAuth
   const supabase = createClient();
   const redirectURL = getURL('/auth/callback');
-  console.log('redirectURL', provider, redirectURL);
   
   await supabase.auth.signInWithOAuth({
     provider: provider,

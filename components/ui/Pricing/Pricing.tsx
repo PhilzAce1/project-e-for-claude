@@ -81,7 +81,6 @@ export default function Pricing({ user, products, subscription }: Props) {
     setPriceIdLoading(undefined);
   };
 
-  console.log('products', products)
 
   if (!products?.length) {
     return (
@@ -118,7 +117,7 @@ export default function Pricing({ user, products, subscription }: Props) {
                 minimumFractionDigits: 0
               }).format((price?.unit_amount || 0) / 100);
               return (
-                <div className="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
+                <div className="mx-auto mt-8 max-w-2xl rounded-3xl ring-1 ring-gray-200 lg:mx-0 lg:flex lg:max-w-none">
               <div className="p-8 sm:p-10 lg:flex-auto">
                 <h3 className="text-3xl font-semibold tracking-tight text-gray-900">
                 {product.name}</h3>

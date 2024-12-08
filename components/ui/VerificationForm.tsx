@@ -56,7 +56,6 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   const recommendedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log(formData)
     setFormData({
       verification_questions: questions,
       information_needed: informationNeeded

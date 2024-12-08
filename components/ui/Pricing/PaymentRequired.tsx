@@ -13,42 +13,47 @@ interface PaymentRequiredProps {
   children: React.ReactNode;
 }
 
+interface CompetitorMetrics {
+  total_keywords: number;
+  average_keywords: number;
+  total_opportunities: number;
+  competitor_count: number;
+  last_updated: string;
+}
+
 export default function PaymentRequired({ user, children, products, subscription }: PaymentRequiredProps) {
   const [loading, setLoading] = useState(true);
   const [needsPayment, setNeedsPayment] = useState(false);
+  const [metrics, setMetrics] = useState<CompetitorMetrics | null>(null);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
     async function checkPaymentStatus() {
       try {
         // Check if user has completed analysis and competitors
-        const [{ data: analysisData }, { data: competitorsData }] = await Promise.all([
+        const [{ data: analysisData }, { data: businessInfo }] = await Promise.all([
           supabase
             .from('business_analyses')
             .select('completion_status')
             .eq('user_id', user.id)
             .single(),
           supabase
-            .from('competitors')
-            .select('id')
+            .from('business_information')
+            .select('competitor_metrics')
             .eq('user_id', user.id)
+            .single()
         ]);
-        console.log('analysisData', analysisData)
 
         const hasCompletedAnalysis = analysisData?.completion_status;
-        const hasCompetitors = competitorsData && competitorsData.length > 0;
+        const hasCompetitors = businessInfo?.competitor_metrics?.competitor_count > 0;
 
-        // Check subscription status
-        const { data: subscriptionData } = await supabase
-          .from('subscriptions')
-          .select('status, stripe_subscription_id')
-          .eq('user_id', user.id)
-          .single();
+        // Set metrics if available
+        if (businessInfo?.competitor_metrics) {
+          setMetrics(businessInfo.competitor_metrics);
+        }
 
-        const hasActiveSubscription = subscriptionData?.status === 'active';
-
+        const hasActiveSubscription = subscription?.status === 'active' || subscription?.status === 'trialing';
         // Set payment required if analysis is complete, has competitors, but no subscription
-        console.log(hasCompletedAnalysis, hasCompetitors, !hasActiveSubscription)
         setNeedsPayment(hasCompletedAnalysis && hasCompetitors && !hasActiveSubscription);
         setLoading(false);
       } catch (error) {
@@ -70,21 +75,55 @@ export default function PaymentRequired({ user, children, products, subscription
 
   if (needsPayment) {
     return (
-        <div className="bg-white py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-4xl sm:text-center">
-              <h2 className="text-pretty text-5xl font-semibold tracking-tight text-gray-900 sm:text-balance sm:text-6xl">
-                Simple no-tricks pricing
-              </h2>
-              <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg font-medium text-gray-500 sm:text-xl/8">
-                Distinctio et nulla eum soluta et neque labore quibusdam. Saepe et quasi iusto modi velit ut non voluptas
-                in. Explicabo id ut laborum.
-              </p>
-            </div>
-            
-            <Pricing user={user} products={products} subscription={subscription} />
+      <div className="bg-white py-8">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-4xl sm:text-center">
+            <h2 className=" mt-8 text-pretty text-5xl font-semibold tracking-tight text-gray-900 sm:text-balance sm:text-6xl">
+              Simple no-tricks pricing
+            </h2>
           </div>
-
+          {metrics && (
+            <div className="bg-white rounded-2xl ring-1 ring-inset ring-gray-900/5 shadow mt-6">
+              <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3 p-8 py-8 border-b border-gray-200">
+                <div className="mx-auto flex max-w-xs flex-col">
+                  <dt className="text-base leading-7 text-gray-600">Total Keyword Opportunities</dt>
+                  <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {metrics.total_opportunities.toLocaleString()}
+                  </dd>
+                </div>
+                <div className="mx-auto flex max-w-xs flex-col">
+                  <dt className="text-base leading-7 text-gray-600">Total Keywords Found</dt>
+                  <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {metrics.total_keywords.toLocaleString()}
+                  </dd>
+                </div>
+                <div className="mx-auto flex max-w-xs flex-col">
+                  <dt className="text-base leading-7 text-gray-600">Competitors Analyzed</dt>
+                  <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {metrics.competitor_count}
+                  </dd>
+                </div>
+                </dl>
+                <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-2 p-8 py-8">
+        <div className="mx-auto flex max-w-xs flex-col">
+          <dt className="text-base leading-7 text-gray-600">Articles to implement now</dt>
+          <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+            11  
+                  </dd>
+                </div>
+        <div className="mx-auto flex max-w-xs flex-col">
+          <dt className="text-base leading-7 text-gray-600">OnPage SEO improvements</dt>
+          <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+            11  
+          </dd>
+        </div>
+              </dl>
+            </div>
+          )}
+          
+          <Pricing user={user} products={products} subscription={subscription} />
+          
+        </div>
       </div>
     );
   }

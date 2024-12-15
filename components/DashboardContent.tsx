@@ -8,24 +8,24 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import ZeroStateHero from '@/components/ZeroStateHero';
+import { SEOOverview } from './ui/SEOOverview';
 
-export default function DashboardContent({ user, isSeoCrawlComplete }: {
+export default function DashboardContent({ user, keywordRankings }: {
     user: User;
-    isSeoCrawlComplete: boolean;
+    keywordRankings: any;
 }) {
     const router = useRouter();
     const pathname = usePathname();
     const supabase = createClientComponentClient()
+    const [keywordSuggestions, setKeywordSuggestions] = useState<any>(null);
     
     const [domain, setDomain] = useState('')
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [existingDomain, setExistingDomain] = useState<string | null>(null)
+    const [seoAudit, setSeoAudit] = useState<any>(null)
     const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false)
     const [hasCompetitors, setHasCompetitors] = useState<boolean>(false);
-    const [isProfileComplete, setIsProfileComplete] = useState(false);
     const [hasCriticalInfo, setHasCriticalInfo] = useState(false);
-
     const features = [
         {
           name: 'Automated Keyword Research',
@@ -40,6 +40,30 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
           description: "Transform your outline into SEO-optimised content that ranks. Our AI assistant will guide you through creating engaging, high-quality content designed to dominate search results.",
         },
     ]
+    useEffect(() => {
+        async function fetchSEOAudit() {
+          try {
+            const { data: seoData, error } = await supabase
+              .from('seo_crawls')
+              .select('*')
+              .eq('user_id', user.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single();
+    
+            if (error) throw error
+    
+            setSeoAudit(seoData)
+          } catch (error) {
+            console.error('Error fetching SEO audit:', error)
+          } finally {
+            // setLoading(false)
+          }
+        }
+    
+        fetchSEOAudit()
+      }, [supabase])
+    
 
     useEffect(() => {
         const checkWelcomeStatus = async () => {
@@ -165,8 +189,7 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
                     analysis.completion_status.critical === true &&
                     analysis.completion_status.recommended === true;
 
-                setHasCriticalInfo(analysis?.completion_status?.critical === true);
-                setIsProfileComplete(allSectionsComplete);
+                setHasCriticalInfo(!allSectionsComplete);
 
                 // Check competitors
                 const { data: competitors, error: competitorsError } = await supabase
@@ -204,11 +227,12 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
         <>
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
                 <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                    {!isProfileComplete ? 'Complete your profile' : 'Profile Complete'}
+                    {(hasCriticalInfo || !hasCompetitors) ? 'Complete your profile' : 'SEO Performance Overview'}
                 </h1>
             </div>
+            {(hasCriticalInfo || !hasCompetitors) ? (
             <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 mt-6">
-                {!hasCriticalInfo && (
+                {hasCriticalInfo && (
                     <li className="relative isolate overflow-hidden bg-gray-900 px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
                         <h2 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
                             Confirm your business information
@@ -272,8 +296,14 @@ export default function DashboardContent({ user, isSeoCrawlComplete }: {
                     </li>
                 )}
             </ul>
-  
-
+            ) : (
+                <SEOOverview
+                    keywordRankings={keywordRankings?.metrics.organic}
+                    seoAudit={seoAudit}
+                    user={user}
+                    keywordSuggestions={keywordSuggestions}
+                 />
+            )}
             <Transition appear show={isWelcomeModalOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-50" onClose={closeWelcomeModal}>
                     <Transition.Child

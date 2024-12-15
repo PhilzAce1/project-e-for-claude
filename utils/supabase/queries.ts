@@ -65,3 +65,31 @@ export async function getLatestSeoCrawl(supabase: SupabaseClient, userId: string
   const isComplete = requiredFields.every(field => data && data[field] != null);
   return isComplete;
 }
+
+export const getKeywordRankings = cache(async (supabase: SupabaseClient, userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('business_information')
+      .select('rankingsData')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error fetching keyword rankings:', error);
+      return null;
+    }
+
+    // If rankingsData exists, parse it (if it's stored as a JSON string)
+    // or return it directly if it's already an object
+    if (data?.rankingsData) {
+      return typeof data.rankingsData === 'string' 
+        ? JSON.parse(data.rankingsData) 
+        : data.rankingsData;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error in getKeywordRankings:', error);
+    return null;
+  }
+});

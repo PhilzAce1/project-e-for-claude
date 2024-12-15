@@ -70,7 +70,7 @@ export const getKeywordRankings = cache(async (supabase: SupabaseClient, userId:
   try {
     const { data, error } = await supabase
       .from('business_information')
-      .select('rankingsData')
+      .select('rankings_data')
       .eq('user_id', userId)
       .single();
 
@@ -81,10 +81,10 @@ export const getKeywordRankings = cache(async (supabase: SupabaseClient, userId:
 
     // If rankingsData exists, parse it (if it's stored as a JSON string)
     // or return it directly if it's already an object
-    if (data?.rankingsData) {
-      return typeof data.rankingsData === 'string' 
-        ? JSON.parse(data.rankingsData) 
-        : data.rankingsData;
+    if (data?.rankings_data) {
+      return typeof data.rankings_data === 'string' 
+        ? JSON.parse(data.rankings_data) 
+        : data.rankings_data;
     }
 
     return null;

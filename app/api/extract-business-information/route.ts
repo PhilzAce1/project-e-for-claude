@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
         // Start analysis in the background
         console.log('Starting analysis for domain:', domain);
-        fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/business-information-extraction`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/business-information-extraction`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

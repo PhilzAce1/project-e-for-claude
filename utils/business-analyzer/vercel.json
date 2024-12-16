@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/analyze-business/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}

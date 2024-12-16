@@ -55,7 +55,16 @@ export async function POST(request: Request) {
 
         // Start analysis in the background
         console.log('Starting analysis for domain:', domain);
-        gatherBusinessInformation(domain, analysis.id, supabase).catch(console.error);
+        fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/business-information-extraction`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                domain,
+                analysisId: analysis.id
+            })
+        }).catch(console.error); 
 
         // Return immediately with the analysis ID
         return NextResponse.json({

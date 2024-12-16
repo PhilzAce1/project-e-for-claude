@@ -627,6 +627,7 @@ export async function gatherBusinessInformation(
     analysisId: string, 
     supabase: SupabaseClient
 ): Promise<any> {
+    console.log('initializing analysis for domain:', domain);
     const analyzer = new BusinessInformationAnalyzer(domain, analysisId, supabase);
     return await analyzer.analyzeBusiness();
 }

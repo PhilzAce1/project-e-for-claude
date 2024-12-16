@@ -3,6 +3,8 @@ import { gatherBusinessInformation } from '@/utils/business-analyzer';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
     try {
         const { domain } = await request.json();

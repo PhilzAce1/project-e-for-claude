@@ -37,7 +37,7 @@ export class BusinessInformationAnalyzer {
         error_message: string;
     }>) {
         try {
-            console.log('Updating analysis with:', update);
+            console.log('Updating analysis with:', update, this.analysisId);
             const { error } = await this.supabase
                 .from('business_analyses')
                 .update(update)

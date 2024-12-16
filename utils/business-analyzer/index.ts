@@ -59,19 +59,24 @@ export class BusinessInformationAnalyzer {
 
     async analyzeBusiness() {
         try {
+            console.log('Starting analyzeBusiness...');
+            
             await this._updateAnalysis({ 
                 status: 'processing',
                 progress: 'Gathering website data...'
             });
+            console.log('Updated status to processing');
 
-            console.log('Gathering website data...');
-
+            console.log('About to gather website data...');
             const websiteData = await this._gatherWebsiteData();
+            console.log('Website data gathered:', websiteData);
+
             if (!websiteData || websiteData.length === 0) {
+                console.log('No website data available');
                 throw new Error('No website data available');
             }   
 
-            console.log('Website data gathered:', websiteData);
+            console.log('Website data validation passed');
 
             // Analyze each section sequentially and update the database
             await this._updateAnalysis({ progress: 'Analyzing core business...' });
@@ -125,6 +130,7 @@ export class BusinessInformationAnalyzer {
             };
 
         } catch (error: any) {
+            console.error('Error in analyzeBusiness:', error);
             await this._updateAnalysis({
                 status: 'failed',
                 error_message: error.message,
@@ -386,15 +392,23 @@ export class BusinessInformationAnalyzer {
 
     private async _gatherWebsiteData(): Promise<WebsiteData[]> {
         try {
+            console.log('Starting _gatherWebsiteData for domain:', this.domain);
+            
             // Start with homepage
+            console.log('Fetching website:', `https://${this.domain}`);
             const response = await fetch(`https://${this.domain}`);
+            
             if (!response.ok) {
+                console.error('Fetch response not ok:', response.status, response.statusText);
                 throw new Error(`Failed to fetch website: ${response.statusText}`);
             }
             
+            console.log('Website fetched successfully');
             const html = await response.text();
+            console.log('HTML content length:', html.length);
             
             // Store the raw HTML immediately
+            console.log('Storing raw HTML in database...');
             await this.supabase
                 .from('website_scrapes')
                 .update({ 
@@ -402,9 +416,12 @@ export class BusinessInformationAnalyzer {
                     status: 'completed'
                 })
                 .eq('domain', this.domain);
+            console.log('Raw HTML stored successfully');
             
             // Extract content with default values
+            console.log('Extracting content from HTML...');
             const extracted = this._extractRelevantContent(html);
+            console.log('Content extracted successfully');
             
             return [{
                 url: this.domain,
@@ -418,7 +435,7 @@ export class BusinessInformationAnalyzer {
             }];
 
         } catch (error: unknown) {
-            console.error('Error gathering website data:', error);
+            console.error('Error in _gatherWebsiteData:', error);
             // Update scrape status to failed if there's an error
             await this.supabase
                 .from('website_scrapes')
@@ -428,16 +445,7 @@ export class BusinessInformationAnalyzer {
                 })
                 .eq('domain', this.domain);
 
-            return [{
-                url: this.domain,
-                content: '',
-                meta: {
-                    title: this.domain,
-                    description: null,
-                    keywords: null
-                },
-                rawHtml: ''
-            }];
+            throw error; // Re-throw to be caught by analyzeBusiness
         }
     }
 

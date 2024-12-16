@@ -13,6 +13,8 @@ interface WebsiteData {
     rawHtml: string;
 }
 
+export const maxDuration = 300;
+
 export class BusinessInformationAnalyzer {
     private domain: string;
     private anthropic: Anthropic;

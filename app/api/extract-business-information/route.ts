@@ -52,6 +52,7 @@ export async function POST(request: Request) {
         }
 
         // Start analysis in the background
+        console.log('Starting analysis for domain:', domain);
         gatherBusinessInformation(domain, analysis.id, supabase).catch(console.error);
 
         // Return immediately with the analysis ID

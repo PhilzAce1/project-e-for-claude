@@ -30,21 +30,30 @@ export class BusinessInformationAnalyzer {
         });
     }
 
-    private async _updateAnalysis(updates: {
-        initial_findings?: any;
-        information_needed?: any;
-        verification_questions?: any;
-        status?: 'pending' | 'processing' | 'completed' | 'failed';
-        progress?: string;
-        error_message?: string;
-    }) {
-        const { error } = await this.supabase
-            .from('business_analyses')
-            .update(updates)
-            .eq('id', this.analysisId);
+    private async _updateAnalysis(update: Partial<{
+        status: 'pending' | 'processing' | 'completed' | 'failed';
+        progress: string;
+        initial_findings: any;
+        information_needed: any;
+        verification_questions: any;
+        error_message: string;
+    }>) {
+        try {
+            console.log('Updating analysis with:', update);
+            const { error } = await this.supabase
+                .from('business_analyses')
+                .update(update)
+                .eq('id', this.analysisId);
 
-        if (error) {
-            console.error('Error updating analysis:', error);
+            if (error) {
+                console.error('Error updating analysis:', error);
+                throw error;
+            }
+
+            console.log('Analysis updated successfully');
+        } catch (error) {
+            console.error('Failed to update analysis:', error);
+            throw error; // Re-throw to be caught by the parent
         }
     }
 

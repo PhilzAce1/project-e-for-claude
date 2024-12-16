@@ -13,8 +13,6 @@ interface WebsiteData {
     rawHtml: string;
 }
 
-
-
 export class BusinessInformationAnalyzer {
     private domain: string;
     private anthropic: Anthropic;

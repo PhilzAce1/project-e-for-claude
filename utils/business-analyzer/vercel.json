@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/api/extract-business-information/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}

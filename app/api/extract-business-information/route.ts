@@ -63,7 +63,7 @@ export async function POST(request: Request) {
             data: {
                 analysisId: analysis.id
             }
-        });
+        }, { status: 202 });
 
     } catch (error: any) {
         console.error('Error analyzing website:', error);

@@ -38,7 +38,7 @@ export default async function SiteAuditPage() {
         // Ping for SEO data if external_job_id exists
         if (data.external_job_id) {
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/pageforseo/pingback?id=${data.external_job_id}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback?id=${data.external_job_id}`);
             if (!response.ok) {
               console.error('Error refreshing SEO data:', await response.text());
             } 
@@ -50,7 +50,7 @@ export default async function SiteAuditPage() {
         // Ping for Lighthouse data if lighthouse_task_id exists
         if (data.lighthouse_task_id) {
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/pageforseo/pingback?id=${data.lighthouse_task_id}&tag=lighthouse_audit`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback?id=${data.lighthouse_task_id}&tag=lighthouse_audit`);
             if (!response.ok) {
               console.error('Error refreshing Lighthouse data:', await response.text());
             } 

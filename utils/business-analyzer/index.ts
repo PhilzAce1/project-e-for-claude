@@ -55,10 +55,14 @@ export class BusinessInformationAnalyzer {
                 progress: 'Gathering website data...'
             });
 
+            console.log('Gathering website data...');
+
             const websiteData = await this._gatherWebsiteData();
             if (!websiteData || websiteData.length === 0) {
                 throw new Error('No website data available');
-            }
+            }   
+
+            console.log('Website data gathered:', websiteData);
 
             // Analyze each section sequentially and update the database
             await this._updateAnalysis({ progress: 'Analyzing core business...' });
@@ -67,19 +71,19 @@ export class BusinessInformationAnalyzer {
                 initial_findings: { coreBusiness },
                 progress: 'Analyzing market position...'
             });
-
+            console.log('Market position analysis complete');
             const marketPosition = await this._analyzeMarketPosition(websiteData[0]);
             await this._updateAnalysis({ 
                 initial_findings: { coreBusiness, marketPosition },
                 progress: 'Analyzing customer journey...'
             });
-
+            console.log('Customer journey analysis complete');
             const customerJourney = await this._analyzeCustomerJourney(websiteData[0]);
             await this._updateAnalysis({ 
                 initial_findings: { coreBusiness, marketPosition, customerJourney },
                 progress: 'Analyzing technical specifics...'
             });
-
+            console.log('Technical specifics analysis complete');
             const technicalSpecifics = await this._analyzeTechnicalSpecifics(websiteData[0]);
             const initialFindings = {
                 coreBusiness,
@@ -87,7 +91,7 @@ export class BusinessInformationAnalyzer {
                 customerJourney,
                 technicalSpecifics
             };
-
+            console.log('Initial findings generated:', initialFindings);
             await this._updateAnalysis({ 
                 initial_findings: initialFindings,
                 progress: 'Generating additional insights...'
@@ -95,7 +99,7 @@ export class BusinessInformationAnalyzer {
 
             const informationNeeded = await this._generateInformationNeeded(initialFindings);
             const verificationQuestions = await this._createVerificationQuestions(initialFindings);
-
+            console.log('Verification questions generated:', verificationQuestions);
             // Final update with all data
             await this._updateAnalysis({
                 initial_findings: initialFindings,
@@ -104,7 +108,7 @@ export class BusinessInformationAnalyzer {
                 status: 'completed',
                 progress: 'Analysis complete'
             });
-
+            console.log('Analysis complete');
             return {
                 initialFindings,
                 informationNeeded,

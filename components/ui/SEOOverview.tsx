@@ -3,7 +3,9 @@ import {
   ChartBarIcon, 
   UserGroupIcon, 
   ClipboardDocumentCheckIcon, 
-  SparklesIcon 
+  SparklesIcon,
+  MagnifyingGlassIcon,
+  HeartIcon
 } from '@heroicons/react/20/solid'
 import { useState, useEffect, useMemo } from 'react'
 import { EnvelopeOpenIcon, CursorArrowRaysIcon } from "@heroicons/react/24/outline"
@@ -348,26 +350,29 @@ export function SEOOverview({
   };
 
   const stats = [
-    { id: 1, 
-        name: 'Average Position', 
-        stat: calculateAveragePosition(keywordRankings).toString(), 
-        icon: UsersIcon, 
-        change: '0', 
-        changeType: '' 
+    { 
+      id: 1, 
+      name: 'Average Position', 
+      stat: calculateAveragePosition(keywordRankings).toString(), 
+      icon: ChartBarIcon, // Shows ranking/position concept
+      change: '0', 
+      changeType: '' 
     },
-    { id: 2, 
-        name: 'Keywords in Top 10', 
-        stat: getKeywordsInTop10(keywordRankings).toString(), 
-        icon: EnvelopeOpenIcon, 
-        change: '0', 
-        changeType: '' 
+    { 
+      id: 2, 
+      name: 'Keywords in Top 10', 
+      stat: getKeywordsInTop10(keywordRankings).toString(), 
+      icon: MagnifyingGlassIcon, // Represents search/keywords
+      change: '0', 
+      changeType: '' 
     },
-    { id: 3, 
-        name: 'SEO Health Score', 
-        stat: `${calculateSEOHealthScore(seoAudit)}%`, 
-        icon: CursorArrowRaysIcon, 
-        change: '5%', 
-        changeType: 'decrease' 
+    { 
+      id: 3, 
+      name: 'SEO Health Score', 
+      stat: `${calculateSEOHealthScore(seoAudit)}%`, 
+      icon: HeartIcon, // Represents health/wellness
+      change: '5%', 
+      changeType: 'decrease' 
     },
   ]
 

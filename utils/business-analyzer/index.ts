@@ -40,11 +40,11 @@ export class BusinessInformationAnalyzer {
     }>) {
         try {
 
-            console.log('Updating analysis with:', update, this.analysisId);
+            console.log('Updating analysis with:', {...update, user_id: this.userId}, this.analysisId);
             const {data, error } = await this.supabase
                 .from('business_analyses')
                 .update({...update, user_id: this.userId})
-                .eq('id', this.analysisId).single();
+                .eq('id', this.analysisId);
 
             if (error) {
                 console.error('Error updating analysis:', error);

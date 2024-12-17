@@ -51,20 +51,20 @@ export async function POST(request: Request) {
         // Start analysis in the background using a POST request
         console.log('Starting analysis for domain:', domain);
         
-        // Use await to ensure the request is sent before the function returns
-        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/business-information-extraction`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                domain,
-                analysisId: analysis.id,
-                userId
+        Promise.resolve(
+            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/business-information-extraction`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    domain,
+                    analysisId: analysis.id,
+                    userId
+                })
             })
-        }).catch(error => {
-            console.error('Error starting analysis:', error);
-            throw error;
+        ).catch(error => {
+            console.error('Error initiating analysis:', error);
         });
 
         // Return immediately with the analysis ID

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { gatherBusinessInformation } from '@/utils/business-analyzer';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js'
 
 export const maxDuration = 300;
 
@@ -15,9 +14,11 @@ export async function POST(request: Request) {
             }, { status: 400 });
         }
 
-        // Get user session
-        const cookieStore = cookies();
-        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+        // Create the service role client
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
 
         // Start analysis
         console.log('Starting analysis for domain:', domain);

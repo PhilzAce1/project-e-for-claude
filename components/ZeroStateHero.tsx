@@ -62,7 +62,7 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ domain: cleanDomain }),
+                    body: JSON.stringify({ domain: cleanDomain, userId: user.id  }),
                 })
             ]);
 

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { gatherBusinessInformation } from '@/utils/business-analyzer';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
@@ -53,19 +52,26 @@ export async function POST(request: Request) {
             throw new Error(`Failed to create analysis record: ${analysisError.message}`);
         }
 
+        // Get the current session token
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+            throw new Error(`Failed to get session: ${sessionError.message}`);
+        }
+
         // Start analysis in the background
         console.log('Starting analysis for domain:', domain);
         fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/business-information-extraction`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Cookie': `sb-access-token=${session?.access_token}; sb-refresh-token=${session?.refresh_token}`,
             },
             body: JSON.stringify({
                 domain,
                 analysisId: analysis.id,
                 userId: user.id
             })
-        }).catch(console.error); 
+        }).catch(console.error);
 
         // Return immediately with the analysis ID
         return NextResponse.json({

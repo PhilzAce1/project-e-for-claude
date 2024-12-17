@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
 export const maxDuration = 300;
 
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
-        )
+        );
 
         // Create initial records
         const { data: scrape, error: scrapeError } = await supabase
@@ -48,9 +48,11 @@ export async function POST(request: Request) {
             throw new Error(`Failed to create analysis record: ${analysisError.message}`);
         }
 
-        // Start analysis in the background
+        // Start analysis in the background using a POST request
         console.log('Starting analysis for domain:', domain);
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/business-information-extraction`, {
+        
+        // Use await to ensure the request is sent before the function returns
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/business-information-extraction`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -60,7 +62,10 @@ export async function POST(request: Request) {
                 analysisId: analysis.id,
                 userId
             })
-        }).catch(console.error);
+        }).catch(error => {
+            console.error('Error starting analysis:', error);
+            throw error;
+        });
 
         // Return immediately with the analysis ID
         return NextResponse.json({

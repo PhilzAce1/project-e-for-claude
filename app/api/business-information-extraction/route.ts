@@ -7,7 +7,7 @@ export const maxDuration = 300;
 
 export async function POST(request: Request) {
     try {
-        const { domain, analysisId } = await request.json();
+        const { domain, analysisId, userId } = await request.json();
         
         if (!domain) {
             return NextResponse.json({ error: 'Domain is required' }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
         // Start analysis in the background
         console.log('Starting analysis for domain:', domain);
-        await gatherBusinessInformation(domain, analysisId, supabase).catch(console.error);
+        await gatherBusinessInformation(domain, analysisId, supabase, userId).catch(console.error);
 
         // Return immediately with the analysis ID
         return NextResponse.json({

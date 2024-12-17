@@ -62,7 +62,8 @@ export async function POST(request: Request) {
             },
             body: JSON.stringify({
                 domain,
-                analysisId: analysis.id
+                analysisId: analysis.id,
+                userId: user.id
             })
         }).catch(console.error); 
 

@@ -17,11 +17,13 @@ export class BusinessInformationAnalyzer {
     private domain: string;
     private anthropic: Anthropic;
     private analysisId: string;
+    private userId: string;
     private supabase: SupabaseClient;
 
-    constructor(domain: string, analysisId: string, supabase: SupabaseClient) {
+    constructor(domain: string, analysisId: string, supabase: SupabaseClient, userId: string) {
         this.domain = domain.replace(/^(https?:\/\/)/, '').trim();
         this.analysisId = analysisId;
+        this.userId = userId;
         this.supabase = supabase;
         this.anthropic = new Anthropic({
             apiKey: process.env.ANTHROPIC_API_KEY
@@ -37,10 +39,11 @@ export class BusinessInformationAnalyzer {
         error_message: string;
     }>) {
         try {
+
             console.log('Updating analysis with:', update, this.analysisId);
             const {data, error } = await this.supabase
                 .from('business_analyses')
-                .update(update)
+                .update({...update, user_id: this.userId})
                 .eq('id', this.analysisId).single();
 
             if (error) {
@@ -640,9 +643,10 @@ export class BusinessInformationAnalyzer {
 export async function gatherBusinessInformation(
     domain: string, 
     analysisId: string, 
-    supabase: SupabaseClient
+    supabase: SupabaseClient,
+    userId: string
 ): Promise<any> {
     console.log('initializing analysis for domain:', domain);
-    const analyzer = new BusinessInformationAnalyzer(domain, analysisId, supabase);
+    const analyzer = new BusinessInformationAnalyzer(domain, analysisId, supabase, userId);
     return await analyzer.analyzeBusiness();
 }

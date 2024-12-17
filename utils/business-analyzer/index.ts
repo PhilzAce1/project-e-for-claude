@@ -38,17 +38,17 @@ export class BusinessInformationAnalyzer {
     }>) {
         try {
             console.log('Updating analysis with:', update, this.analysisId);
-            const { error } = await this.supabase
+            const {data, error } = await this.supabase
                 .from('business_analyses')
                 .update(update)
-                .eq('id', this.analysisId);
+                .eq('id', this.analysisId).single();
 
             if (error) {
                 console.error('Error updating analysis:', error);
                 throw error;
             }
 
-            console.log('Analysis updated successfully');
+            console.log('Analysis updated successfully', data);
         } catch (error) {
             console.error('Failed to update analysis:', error);
             throw error; // Re-throw to be caught by the parent

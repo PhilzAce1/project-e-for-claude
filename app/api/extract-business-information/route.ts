@@ -5,10 +5,10 @@ export const maxDuration = 300;
 
 export async function POST(request: Request) {
     try {
-        const { domain } = await request.json();
+        const { domain, userId } = await request.json();
         
-        if (!domain) {
-            return NextResponse.json({ error: 'Domain is required' }, { status: 400 });
+        if (!domain || !userId) {
+            return NextResponse.json({ error: 'Domain and userId are required' }, { status: 400 });
         }
 
         // Create the service role client
@@ -16,18 +16,13 @@ export async function POST(request: Request) {
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         )
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
 
         // Create initial records
         const { data: scrape, error: scrapeError } = await supabase
             .from('website_scrapes')
             .insert({
                 domain,
-                user_id: user.id,
+                user_id: userId,
                 status: 'processing'
             })
             .select()
@@ -41,7 +36,7 @@ export async function POST(request: Request) {
             .from('business_analyses')
             .insert({
                 domain,
-                user_id: user.id,
+                user_id: userId,
                 scrape_id: scrape.id,
                 status: 'pending',
                 progress: 'Initializing analysis...'
@@ -63,7 +58,7 @@ export async function POST(request: Request) {
             body: JSON.stringify({
                 domain,
                 analysisId: analysis.id,
-                userId: user.id
+                userId
             })
         }).catch(console.error);
 

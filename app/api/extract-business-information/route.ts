@@ -11,8 +11,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Domain is required' }, { status: 400 });
         }
 
-        // Get user session
-// Create the service role client
+        // Create the service role client
         const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -52,12 +51,6 @@ export async function POST(request: Request) {
 
         if (analysisError) {
             throw new Error(`Failed to create analysis record: ${analysisError.message}`);
-        }
-
-        // Get the current session token
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-            throw new Error(`Failed to get session: ${sessionError.message}`);
         }
 
         // Start analysis in the background

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { gatherBusinessInformation } from '@/utils/business-analyzer';
-import { createClient } from '@supabase/supabase-js'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export const maxDuration = 300;
 
@@ -14,11 +14,11 @@ export async function POST(request: Request) {
             }, { status: 400 });
         }
 
-        // Create the service role client
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        )
+        // Create a service role client instead of using cookies
+        const supabase = createClientComponentClient({
+            supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+        });
 
         // Start analysis
         console.log('Starting analysis for domain:', domain);

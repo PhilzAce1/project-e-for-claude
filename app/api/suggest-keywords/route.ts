@@ -121,11 +121,11 @@ export async function POST(req: Request) {
       );
 
       const { error: insertError } = await supabase
-        .from('keyword_suggestions')
+        .from('seed_keyword_suggestions')
         .insert(keywordEntries);
 
       if (insertError) {
-        throw new Error(`Failed to insert keywords: ${insertError.message}`);
+        throw new Error(`Failed to insert seed keywords: ${insertError.message}`);
       }
 
       return NextResponse.json(

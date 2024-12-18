@@ -143,13 +143,13 @@ const RankingDistributionChart = ({ data }: { data: any[] }) => {
       // Try 'horizontal'
       orient: 'vertical',
       right: 10,
-      top: 'center'
+      top: 10
     },
     series: [
       {
-        name: 'Keywords',
+        name: 'No. of Keywords',
         type: 'bar',
-        barWidth: '60%',
+        barWidth: '80%',
         data: data.map(item => item.count)
       }
     ]
@@ -157,6 +157,7 @@ const RankingDistributionChart = ({ data }: { data: any[] }) => {
 
   return <ReactECharts option={option} className='h-96'  />
 }
+
 
 export function SEOOverview({ 
   user, 
@@ -168,7 +169,7 @@ export function SEOOverview({
   const [currentTab, setCurrentTab] = useState('rankings')
   const [competitorData, setCompetitorData] = useState<any>(null)
   const [competitorOverlap, setCompetitorOverlap] = useState<any>(null)
-
+  const [stats, setStats] = useState<any>(null)
   const handleTabChange = (value: string) => {
     setCurrentTab(value)
     // Update tabs current state
@@ -294,10 +295,12 @@ export function SEOOverview({
   };
 
   const calculateAveragePosition = (keywordRankings: any[]) => {
-    if (!keywordRankings?.length) return 0;
+    console.log('keywordRankings',keywordRankings)
+    if (!keywordRankings) return 0;
     
     const totalPosition = keywordRankings.reduce((sum, item) => {
-      return sum + item.ranked_serp_element.rank_absolute;
+      console.log(item.ranked_serp_element.serp_item.rank_absolute)
+      return sum + item.ranked_serp_element.serp_item.rank_absolute;
     }, 0);
 
     return Number((totalPosition / keywordRankings.length).toFixed(1));
@@ -349,38 +352,37 @@ export function SEOOverview({
     return Math.round(finalScore);
   };
 
-  const stats = [
-    { 
-      id: 1, 
-      name: 'Average Position', 
-      stat: calculateAveragePosition(keywordRankings).toString(), 
-      icon: ChartBarIcon, // Shows ranking/position concept
-      change: '0', 
-      changeType: '' 
-    },
-    { 
-      id: 2, 
-      name: 'Keywords in Top 10', 
-      stat: getKeywordsInTop10(keywordRankings).toString(), 
-      icon: MagnifyingGlassIcon, // Represents search/keywords
-      change: '0', 
-      changeType: '' 
-    },
-    { 
-      id: 3, 
-      name: 'SEO Health Score', 
-      stat: `${calculateSEOHealthScore(seoAudit)}%`, 
-      icon: HeartIcon, // Represents health/wellness
-      change: '5%', 
-      changeType: 'decrease' 
-    },
-  ]
+  useEffect(() => {
+    const stats = [
+      { 
+        id: 1, 
+        name: 'Average Position', 
+        stat: calculateAveragePosition(keywordRankings?.items).toString(), 
+        icon: ChartBarIcon, // Shows ranking/position concept
+      },
+      { 
+        id: 2, 
+        name: 'Keywords in Top 10', 
+        stat: getKeywordsInTop10(keywordRankings?.metrics?.organic).toString(), 
+        icon: MagnifyingGlassIcon, // Represents search/keywords
+      },
+      { 
+        id: 3, 
+        name: 'SEO Health Score', 
+        stat: `${calculateSEOHealthScore(seoAudit)}%`, 
+        icon: HeartIcon, // Represents health/wellness
+      },
+    ]
+
+    setStats(stats) 
+  }, [keywordRankings])
+
 
   return (
     <div className="space-y-8">
       {/* Overview Cards */}
       <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {stats.map((item) => (
+        {stats?.map((item) => (
           <div
             key={item.id}
             className="relative overflow-hidden rounded-xl shadow ring-1 ring-slate-900/10 bg-white px-4 py-5 sm:px-6 sm:py-6"
@@ -393,22 +395,6 @@ export function SEOOverview({
             </dt>
             <dd className="ml-16 flex items-baseline ">
               <p className="text-2xl font-semibold text-gray-900">{item.stat}</p>
-              <p
-                className={classNames(
-                  item.changeType === 'increase' ? 'text-green-600' : 'text-red-600',
-                  'ml-2 flex items-baseline text-sm font-semibold',
-                )}
-              >
-                {item.changeType === 'increase' && (
-                  <ArrowUpIcon aria-hidden="true" className="size-5 shrink-0 self-center text-green-500" />
-                )}
-                {item.changeType === 'decrease' && (
-                  <ArrowDownIcon aria-hidden="true" className="size-5 shrink-0 self-center text-red-500" />
-                )}
-
-                <span className="sr-only"> {item.changeType === 'increase' ? 'Increased' : 'Decreased'} by </span>
-                {item.change}
-              </p>
             </dd>
           </div>
         ))}
@@ -472,8 +458,8 @@ export function SEOOverview({
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Keyword Ranking Distribution
               </h3>
-              {keywordRankings ? (
-                <RankingDistributionChart data={getRankingDistribution(keywordRankings)} />
+              {keywordRankings?.metrics ? (
+                <RankingDistributionChart data={getRankingDistribution(keywordRankings?.metrics?.organic)} />
               ) : (
                 <div className="flex items-center justify-center h-96 border-dashed border border-gray-700 rounded-xl mt-4">
                   <div className="text-gray-500">No Keywords Ranking!</div>

@@ -16,62 +16,46 @@ const supabase = createClient(
 serve(async (req) => {
   const payload = await req.json()
   const record = payload.record
-  const oldRecord = payload.old_record
 
-  // Check if all sections are now complete
-  const isNowComplete = record.completion_status?.critical && 
-                       record.completion_status?.recommended && 
-                       record.completion_status?.verification
 
-  const wasComplete = oldRecord.completion_status?.critical && 
-                     oldRecord.completion_status?.recommended && 
-                     oldRecord.completion_status?.verification
-
-  // Only proceed if the status just changed to complete
-  if (isNowComplete && !wasComplete) {
-    try {
-      // Generate keywords
-      const response = await fetch(`${Deno.env.get('SUPABASE_URL')}/api/suggest-keywords`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-        },
-        body: JSON.stringify({
-          userId: record.user_id
-        })
+  try {
+    // Generate keywords
+    console.log('Generating keywords for user', record.user_id, Deno.env.get('API_BASE_URL'))
+    const response = await fetch(`${Deno.env.get('API_BASE_URL')}/api/suggest-keywords`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+      },
+      body: JSON.stringify({
+        userId: record.user_id
       })
+    })
 
-      if (!response.ok) {
-        throw new Error('Failed to generate keywords')
-      }
-
-      // Update business_analysis status
-      await supabase
-        .from('business_analysis')
-        .update({ 
-          status: 'keywords_generated',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', record.id)
-
-      return new Response(
-        JSON.stringify({ message: 'Keywords generated successfully' }),
-        { status: 200 }
-      )
-    } catch (error) {
-      console.error('Error in webhook:', error)
-      return new Response(
-        JSON.stringify({ error: error.message }),
-        { status: 500 }
-      )
+    if (!response.ok) {
+      throw new Error('Failed to generate keywords' + JSON.stringify(response))
     }
-  }
 
-  return new Response(
-    JSON.stringify({ message: 'No action needed' }),
-    { status: 200 }
-  )
+    // Update business_analysis status
+    await supabase
+      .from('business_analysis')
+      .update({ 
+        status: 'keywords_generated',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', record.id)
+
+    return new Response(
+      JSON.stringify({ message: 'Keywords generated successfully' }),
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error('Error in webhook:', error)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500 }
+    )
+  }
 })
 
 /* To invoke locally:

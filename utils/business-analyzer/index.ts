@@ -141,90 +141,28 @@ export class BusinessInformationAnalyzer {
         }
     }
 
-    private async _analyzeSection(section: string, prompt: string) {
-        console.log(`Starting analysis for section: ${section}`);
-        
-        try {
-            // First attempt
-            console.log('Making initial Anthropic API call');
-            const initialResponse = await this.anthropic.messages.create({
-                model: "claude-3-sonnet-20240229",
-                max_tokens: 1000,
-                temperature: 0.5,
-                system: "You are an SEO expert who is unreal at suggesting keywords for businesses based on their business information. Based on the following business information, please suggest at least 100 keywords and return in an array: Ensure the response is in an array, where the internal object of each array item is\n{ \n\"sectionTitle\": string,\n\"keywords\": string[]\n}. Only return the array, nothing else.",
-                messages: [{ role: "user", content: prompt }]
-            });
+    private async _analyzeSection(section: string, content: string) {
+        const message = await this.anthropic.messages.create({
+            model: "claude-3-opus-20240229",
+            max_tokens: 1000,
+            temperature: 0,
+            system: "You are a JSON-only API. Return raw analysis data without any wrapping or metadata.",
+            messages: [{
+                role: "user",
+                content: content
+            }]
+        });
 
-            console.log('Initial response received');
+        // Parse the response content
+        const responseContent = message.content[0].type === 'text' 
+            ? message.content[0].text 
+            : '';
             
-            try {
-                // @ts-ignore
-                const parsedResponse = JSON.parse(initialResponse.content[0].text);
-                console.log('Successfully parsed initial response');
-                return parsedResponse;
-            } catch (parseError) {
-                console.log('Error parsing initial response, continuing conversation');
-                
-                // Continue the conversation with the incomplete response
-                const continuationResponse = await this.anthropic.messages.create({
-                    model: "claude-3-sonnet-20240229",
-                    max_tokens: 1000,
-                    temperature: 0.5,
-                    system: "You are an SEO expert who is unreal at suggesting keywords for businesses based on their business information. Based on the following business information, please suggest at least 100 keywords and return in an array: Ensure the response is in an array, where the internal object of each array item is\n{ \n\"sectionTitle\": string,\n\"keywords\": string[]\n}. Only return the array, nothing else.",
-                    messages: [
-                        { role: "user", content: prompt },
-                        // @ts-ignore
-                        { role: "assistant", content: initialResponse.content[0].text },
-                        { role: "user", content: "I can see the array is incomplete, only send the extra that needs to be sent to complete your working so that I can combine both outputs and have a valid JSON object. Ensure if you were mid string, that you complete that string, do not open a new array or string or object. You can add more fields if you wish if that was what your original intention was" }
-                    ]
-                });
-
-                try {
-                    // @ts-ignore
-                    const initialText = initialResponse.content[0].text;
-                    // @ts-ignore
-                    const continuationText = continuationResponse.content[0].text;
-                    
-                    console.log('Attempting to merge responses');
-                    console.log('Initial text:', initialText);
-                    console.log('Continuation text:', continuationText);
-
-                    // Merge the responses
-                    let mergedText = initialText;
-                    if (initialText.endsWith(',') || continuationText.startsWith(',')) {
-                        // Remove extra commas to prevent syntax errors
-                        mergedText = mergedText.replace(/,\s*$/, '');
-                        mergedText += continuationText.replace(/^,\s*/, '');
-                    } else {
-                        mergedText += continuationText;
-                    }
-
-                    console.log('Merged text:', mergedText);
-
-                    // Try to parse the merged response
-                    const completedResponse = JSON.parse(mergedText);
-                    console.log('Successfully parsed merged response');
-                    
-                    // Save both responses for reference
-                    await this._updateAnalysis({
-                        progress: `Completed ${section} analysis (with continuation)`,
-                        [`${section}_raw_responses`]: {
-                            initial: initialText,
-                            continuation: continuationText,
-                            merged: mergedText
-                        }
-                    });
-
-                    return completedResponse;
-                } catch (secondParseError) {
-                    console.error('Failed to parse merged response:', secondParseError);
-                    throw new Error(`Failed to parse both initial and merged responses for ${section}`);
-                }
-            }
-        } catch (error) {
-            console.error(`Error in _analyzeSection (${section}):`, error);
-            throw error;
-        }
+        // Parse the raw data
+        const rawData = JSON.parse(responseContent);
+        
+        // Standardize the data structure
+        return this._standardizeData(rawData);
     }
 
     private _standardizeData(data: any) {

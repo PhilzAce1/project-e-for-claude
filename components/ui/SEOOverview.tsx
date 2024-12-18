@@ -7,9 +7,7 @@ import {
   MagnifyingGlassIcon,
   HeartIcon
 } from '@heroicons/react/20/solid'
-import { useState, useEffect, useMemo } from 'react'
-import { EnvelopeOpenIcon, CursorArrowRaysIcon } from "@heroicons/react/24/outline"
-import { UsersIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react"
+import { useState, useEffect } from 'react'
 import { SEOHealthOverview } from './SEOHealthOverview'
 import { SEOIssuesList } from './SEOIssuesList'
 import { siteAutitPriority } from '@/utils/helpers/site-audit-dictionary'
@@ -17,6 +15,7 @@ import { User } from '@supabase/supabase-js'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import ReactECharts from 'echarts-for-react'
 import CompetitorOverview from './CompetitorOverview'
+import { Metrics, RankingItem, RankingsData } from '@/utils/helpers/ranking-data-types'
 
 const tabs = [
   { 
@@ -51,23 +50,9 @@ function classNames(...classes: string[]) {
 
 interface SEOOverviewProps {
   user: User
-  keywordRankings: any[]
+  keywordRankings: RankingsData
   seoAudit: any
   keywordSuggestions: any[]
-}
-
-interface KeywordData {
-  keyword: string;
-}
-
-interface CompetitorOverlap {
-  se_type: string;
-  keyword_data: KeywordData;
-  ranked_serp_element: {
-    serp_item: {
-      rank_absolute: number;
-    }
-  };
 }
 
 const CompetitorOverlapChart = ({ data }: { data: any[] }) => {
@@ -162,8 +147,7 @@ const RankingDistributionChart = ({ data }: { data: any[] }) => {
 export function SEOOverview({ 
   user, 
   keywordRankings, 
-  seoAudit, 
-  keywordSuggestions 
+  seoAudit
 }: SEOOverviewProps) {
   const supabase = createClientComponentClient()
   const [currentTab, setCurrentTab] = useState('rankings')
@@ -176,7 +160,7 @@ export function SEOOverview({
     tabs.forEach(tab => tab.current = tab.value === value)
   }
 
-  const calculateKeywordOverlap = (data: CompetitorOverlap[]): {
+  const calculateKeywordOverlap = (data: RankingItem[]): {
     totalKeywords: number;
     top10Keywords: number;
     top3Keywords: number;
@@ -272,7 +256,7 @@ export function SEOOverview({
     fetchCompetitorData();
   }, [currentTab, user.id, supabase]);
 
-  const getRankingDistribution = (keywordRankings: any[]) => {
+  const getRankingDistribution = (keywordRankings: Metrics) => {
     const keys = ['pos_1',
         'pos_2_3',
         'pos_4_10',
@@ -290,7 +274,7 @@ export function SEOOverview({
 
     return keys?.map((key: any) => ({
         position: key.replace('pos_', '').replace('_', '-'),
-        count: keywordRankings[key]
+        count: keywordRankings[key as keyof Metrics]
     }));
   };
 
@@ -375,14 +359,14 @@ export function SEOOverview({
     ]
 
     setStats(stats) 
-  }, [keywordRankings])
+  }, [keywordRankings, seoAudit])
 
 
   return (
     <div className="space-y-8">
       {/* Overview Cards */}
       <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {stats?.map((item) => (
+        {stats?.map((item: any) => (
           <div
             key={item.id}
             className="relative overflow-hidden rounded-xl shadow ring-1 ring-slate-900/10 bg-white px-4 py-5 sm:px-6 sm:py-6"

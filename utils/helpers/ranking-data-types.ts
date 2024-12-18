@@ -195,4 +195,4 @@ interface Rankings {
   rankings_updated_at: string;
 }
 
-export type { Rankings, RankingItem, KeywordData, SerpItem, Metrics, ImpressionsInfo, AvgBacklinksInfo, KeywordProperties, SearchIntentInfo };
+export type { RankingsData,Rankings, RankingItem, KeywordData, SerpItem, Metrics, ImpressionsInfo, AvgBacklinksInfo, KeywordProperties, SearchIntentInfo };

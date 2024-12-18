@@ -30,7 +30,7 @@ const { data: businessData, error: answersError } = await supabase
   // Create prompt for LLM
   const prompt = `
     This is the business information
-    ${businessData}
+    ${JSON.stringify(businessData)}
   `;
   // Generate keywords using LLM
   const response = await anthropic.messages.create({

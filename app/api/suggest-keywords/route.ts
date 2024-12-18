@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 
       try {
         // @ts-ignore
-        const keywordSections = JSON.parse(initialResponse.content[0].text);
+        keywordSections = JSON.parse(initialResponse.content[0].text);
         console.log('keywordSections parsed successfully:', keywordSections);
       } catch (parseError) {
         console.log('Error parsing initial response, continuing conversation');

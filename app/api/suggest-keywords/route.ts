@@ -26,7 +26,7 @@ const { data: businessData, error: answersError } = await supabase
     throw new Error('Failed to fetch business analysis answers');
   }
 
-
+  console.log('businessData', businessData)
   // Create prompt for LLM
   const prompt = `
     This is the business information
@@ -89,6 +89,7 @@ export async function POST(req: Request) {
         );
       }
   
+      console.log('businessAnalysis', businessAnalysis)
       await generateKeywordSuggestions(businessAnalysis.id, userId);
   
       return NextResponse.json(

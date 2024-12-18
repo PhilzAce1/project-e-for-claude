@@ -298,7 +298,7 @@ export default function DashboardContent({ user, keywordRankings }: {
             </ul>
             ) : (
                 <SEOOverview
-                    keywordRankings={keywordRankings?.metrics?.organic}
+                    keywordRankings={keywordRankings}
                     seoAudit={seoAudit}
                     user={user}
                     keywordSuggestions={keywordSuggestions}

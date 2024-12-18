@@ -89,7 +89,12 @@ export async function POST(req: Request) {
         );
       }
   
-      generateKeywordSuggestions(businessAnalysis.id, userId);
+      Promise.resolve(
+        generateKeywordSuggestions(businessAnalysis.id, userId))
+      .catch(error => {
+          console.error('Error initiating keyword suggestions:', error);
+      });;
+      // generateKeywordSuggestions(businessAnalysis.id, userId);
   
       return NextResponse.json(
         { message: 'Keyword suggestions generating'},

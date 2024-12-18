@@ -60,9 +60,9 @@ export async function POST(req: Request) {
       // Generate keywords using LLM
       const initialResponse = await anthropic.messages.create({
         model: "claude-3-sonnet-20240229",
-        max_tokens: 1000,
+        max_tokens: 2000,
         temperature: 0.5,
-        system: "You are an SEO expert who is unreal at suggesting keywords for businesses based on their business information. Based on the following business information, please suggest at least 100 keywords and return in an array: Ensure the response is in an array, where the internal object of each array item is\n{ \n\"sectionTitle\": string,\n\"keywords\": string[]\n}. Only return the array, nothing else.",
+        system: "You are an SEO expert who is unreal at suggesting keywords for businesses based on their business information, we want to make sure we get the best keywords possible and segment by search intent (commercial, informational, navigational, transactional). Based on the following business information, please suggest at least 100 keywords and return in an array: Ensure the response is in an array, where the internal object of each array item is\n{ \n\"sectionTitle\": string,\n\"keywords\": string[]\n}. Only return the array, nothing else.",
         messages: [{ role: "user", content: prompt }]
       }); 
 
@@ -76,9 +76,9 @@ export async function POST(req: Request) {
         // Continue the conversation with the incomplete response
         const continuationResponse = await anthropic.messages.create({
           model: "claude-3-sonnet-20240229",
-          max_tokens: 1000,
+          max_tokens: 2000,
           temperature: 0.5,
-          system: "You are an SEO expert who is unreal at suggesting keywords for businesses based on their business information. Based on the following business information, please suggest at least 100 keywords and return in an array: Ensure the response is in an array, where the internal object of each array item is\n{ \n\"sectionTitle\": string,\n\"keywords\": string[]\n}. Only return the array, nothing else.",
+          system: "You are an SEO expert who is unreal at suggesting keywords for businesses based on their business information, we want to make sure we get the best keywords possible and segment by search intent (commercial, informational, navigational, transactional). Based on the following business information, please suggest at least 100 keywords and return in an array: Ensure the response is in an array, where the internal object of each array item is\n{ \n\"sectionTitle\": string,\n\"keywords\": string[]\n}. Only return the array, nothing else.",
           messages: [
             { role: "user", content: prompt },
             // @ts-ignore

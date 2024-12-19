@@ -124,6 +124,22 @@ export async function POST(req: Request) {
         .from('seed_keyword_suggestions')
         .insert(keywordEntries);
 
+
+        
+      Promise.resolve(
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/enrich-keywords`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId
+            })
+        })
+      ).catch(error => {
+          console.error('Error initiating analysis:', error);
+      });
+      
       if (insertError) {
         throw new Error(`Failed to insert seed keywords: ${insertError.message}`);
       }

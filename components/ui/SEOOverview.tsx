@@ -15,7 +15,7 @@ import { User } from '@supabase/supabase-js'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import ReactECharts from 'echarts-for-react'
 import CompetitorOverview from './CompetitorOverview'
-import { Metrics, RankingItem, RankingsData } from '@/utils/helpers/ranking-data-types'
+import { Metrics, RankingItem } from '@/utils/helpers/ranking-data-types'
 
 const tabs = [
   { 
@@ -50,7 +50,7 @@ function classNames(...classes: string[]) {
 
 interface SEOOverviewProps {
   user: User
-  keywordRankings: RankingsData
+  keywordRankings: any
   seoAudit: any
   keywordSuggestions: any[]
 }

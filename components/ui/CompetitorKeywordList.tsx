@@ -48,7 +48,7 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
     async function fetchCurrentCompetitor(id: number) {
       const { data: competitor, error } = await supabase
         .from('competitors')
-        .select('id, domain, rankings_data, rankings_updated_at')
+        .select('id, domain, items, metrics, total_count, rankings_updated_at')
         .eq('id', id)
         .single();
 
@@ -62,7 +62,7 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
 
     const fetchKeywords = async (competitor: Rankings) => {
         try {
-            setKeywords(competitor.rankings_data?.items || []);
+            setKeywords(competitor.items || []);
         } catch (error) {
             console.error('Error fetching keywords:', error);
             setKeywords([]);

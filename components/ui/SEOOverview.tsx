@@ -15,7 +15,7 @@ import { User } from '@supabase/supabase-js'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import ReactECharts from 'echarts-for-react'
 import CompetitorOverview from './CompetitorOverview'
-import { Metrics, RankingItem, RankingsData } from '@/utils/helpers/ranking-data-types'
+import { Metrics, RankingItem } from '@/utils/helpers/ranking-data-types'
 
 const tabs = [
   { 
@@ -50,7 +50,7 @@ function classNames(...classes: string[]) {
 
 interface SEOOverviewProps {
   user: User
-  keywordRankings: RankingsData
+  keywordRankings: any
   seoAudit: any
   keywordSuggestions: any[]
 }
@@ -232,7 +232,7 @@ export function SEOOverview({
         try {
           const { data: competitors, error } = await supabase
             .from('competitors')
-            .select('domain, rankings_data')
+            .select('domain, items, metrics, total_count')
             .eq('user_id', user.id);
 
           if (error) {
@@ -243,7 +243,7 @@ export function SEOOverview({
           let itemsArray: any[] = []
 
           competitors.forEach((competitor: any) => {
-            itemsArray = [...itemsArray, ...competitor.rankings_data.items]
+            itemsArray = [...itemsArray, ...competitor.items]
           })
           setCompetitorData(competitors);
           setCompetitorOverlap(getCompetitorOverlap(itemsArray))

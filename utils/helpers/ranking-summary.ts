@@ -14,7 +14,7 @@ interface RankingSummary {
 }
 
 function generateRankingsSummary(rankings: Rankings): RankingSummary {
-  const items = rankings.rankings_data.items;
+  const items = rankings.items;
 
   const summary: RankingSummary = {
     totalKeywords: items?.length || 0,

@@ -7,7 +7,7 @@ interface RankingsSummaryViewProps {
 }
 
 const RankingsSummaryView: React.FC<RankingsSummaryViewProps> = ({ rankings }) => {
-  if (!rankings || !rankings.rankings_data || !rankings.rankings_data.items || rankings.rankings_data.items.length === 0) {
+  if (!rankings || !rankings.items || rankings.items.length === 0) {
     return (
         <div className="overflow-hidden bg-white sm:rounded-lg sm:shadow">
             <div className='border-b border-gray-200 bg-white px-4 py-5 sm:px-6'>

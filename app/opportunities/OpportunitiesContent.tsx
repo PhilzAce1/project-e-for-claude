@@ -10,6 +10,7 @@ import ReactECharts from 'echarts-for-react';
 import CompetitorKeywordList from '@/components/ui/CompetitorKeywordList';
 import CompetitorOverview from '@/components/ui/CompetitorOverview';
 import { CompetitorTitles } from '@/utils/helpers/ranking-data-types';
+import OpportunitiesTable from '@/components/ui/OpportunitiesTable';
 
 interface OpportunitiesContentProps {
   user: User;
@@ -67,69 +68,53 @@ const SearchIntentChart = ({ data }: { data: SearchIntentData[] }) => {
   return <ReactECharts option={option} style={{ height: '400px' }} />;
 };
 
-const NextContentRecommendation = ({ rankingData }: { rankingData: any }) => {
-  const determineNextContent = () => {
-    if (!rankingData?.items) return null;
-
-    const intents = {
-      informational: 0,
-      commercial: 0,
-      transactional: 0,
-      navigational: 0
-    };
-
-    rankingData.items.forEach((item: any) => {
-      const intent = item.keyword_data?.search_intent_info?.main_intent;
-      if (intent && intent in intents) {
-        intents[intent as keyof typeof intents]++;
-      }
-    });
-
-    const lowestIntent = Object.entries(intents).reduce((a, b) => 
-      (a[1] < b[1] ? a : b)
-    )[0];
-
-    const recommendations = {
-      informational: {
-        why: "Build topical authority and attract top-of-funnel traffic",
-        what: "Create a comprehensive guide that answers common questions and provides valuable insights",
-        keyword: "how to optimize website seo"
-      },
-      commercial: {
-        why: "Target users comparing solutions and considering options",
-        what: "Create a detailed comparison or review-style content that helps users make informed decisions",
-        keyword: "best seo tools 2024"
-      },
-      transactional: {
-        why: "Convert high-intent users ready to take action",
-        what: "Create content that addresses specific pain points and provides clear solutions",
-        keyword: "hire seo consultant"
-      },
-      navigational: {
-        why: "Build brand awareness and capture branded searches",
-        what: "Create branded content that highlights your unique value proposition",
-        keyword: "[brand name] seo services"
-      }
-    };
-
-    return {
-      intent: lowestIntent,
-      ...recommendations[lowestIntent as keyof typeof recommendations]
-    };
-  };
-
-  const recommendation = determineNextContent();
-
+const NextContentRecommendation = ({ contentRecommendation }: { contentRecommendation: any }) => {
+  if (!contentRecommendation) return null;
   return (
     <div className="overflow-hidden rounded-lg bg-white ring-1 ring-slate-900/10">
       <div className="p-6">
         <h2 className="text-base font-semibold leading-7 text-gray-900">
           Next Piece of Content to Create
         </h2>
-        
-        {recommendation ? (
+
+        {!contentRecommendation[0] ? (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-gray-500">Loading recommendation...</div>
+        </div>
+        ) : (
           <div className="mt-6 space-y-6">
-            <div>
+          <div>
+              <h3 className="text-sm font-medium text-gray-900">Type of Content</h3>
+              <p className="mt-2 text-sm text-gray-500 capitalize">
+                {contentRecommendation[0].content_type}
+              </p>
+            </div>
+          <div>
+              <h3 className="text-sm font-medium text-gray-900">Potential Reach</h3>
+              <p className="mt-2 text-sm text-gray-500 capitalize">
+                {contentRecommendation[0].search_volume} Searches per Month
+              </p>
+            </div>
+          <div>
+              <h3 className="text-sm font-medium text-gray-900">Çompetition</h3>
+              <p className="mt-2 text-sm text-gray-500 capitalize">
+                {contentRecommendation[0].competition}
+              </p>
+            </div>
+          <div>
+              <h3 className="text-sm font-medium text-gray-900">Focus Keyword</h3>
+              <p className="mt-2 text-sm text-gray-500 capitalize">
+                {contentRecommendation[0].keyword}
+              </p>
+            </div>
+          <div>
+              <h3 className="text-sm font-medium text-gray-900">Content Type</h3>
+              <p className="mt-2 text-sm text-gray-500 capitalize">
+                {contentRecommendation[0].content_type}
+              </p>
+            </div>
+            <button>Create with Espy Go</button>
+            {/* <div>
               <h3 className="text-sm font-medium text-gray-900">Intent</h3>
               <p className="mt-2 text-sm text-gray-500 capitalize">
                 {recommendation.intent} - {recommendation.why}
@@ -148,11 +133,7 @@ const NextContentRecommendation = ({ rankingData }: { rankingData: any }) => {
               <p className="mt-2 text-sm text-gray-500">
                 {recommendation.keyword}
               </p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-96">
-            <div className="text-gray-500">Loading recommendation...</div>
+            </div> */}
           </div>
         )}
       </div>
@@ -163,6 +144,8 @@ const NextContentRecommendation = ({ rankingData }: { rankingData: any }) => {
 export default function OpportunitiesContent({ user }: OpportunitiesContentProps) {
   const supabase = createClientComponentClient();
   const [rankingData, setRankingData] = useState<any>(null);
+  const [contentRecommendations, setContentRecommendations] = useState<any>(null);
+  
 
   useEffect(() => {
     async function fetchRankingData() {
@@ -172,12 +155,16 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
           .eq('user_id', user.id)
           .single()
 
+          const { data: contentRecommendations, error: contentRecommendationsError } = await supabase
+          .rpc('get_user_content_recommendations');
+
+
       if (error) {
         console.error('Error fetching ranking data:', error);
         return;
       }
-      console.log(data);
       setRankingData(data);
+      setContentRecommendations(contentRecommendations);
     }
 
     fetchRankingData();
@@ -223,7 +210,7 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <NextContentRecommendation rankingData={rankingData} />
+        <NextContentRecommendation contentRecommendation={contentRecommendations} />
         <div className="overflow-hidden rounded-lg bg-white ring-1 ring-slate-900/10">
           <div className="p-6">
             <h2 className="text-base font-semibold leading-7 text-gray-900">
@@ -240,6 +227,7 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
         </div>
 
       </div>
+      <OpportunitiesTable opportunities={contentRecommendations} />
     </div>
   );
 }

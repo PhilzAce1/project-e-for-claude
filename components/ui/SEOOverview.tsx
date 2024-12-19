@@ -232,7 +232,7 @@ export function SEOOverview({
         try {
           const { data: competitors, error } = await supabase
             .from('competitors')
-            .select('domain, rankings_data')
+            .select('domain, items, metrics, total_count')
             .eq('user_id', user.id);
 
           if (error) {
@@ -243,7 +243,7 @@ export function SEOOverview({
           let itemsArray: any[] = []
 
           competitors.forEach((competitor: any) => {
-            itemsArray = [...itemsArray, ...competitor.rankings_data.items]
+            itemsArray = [...itemsArray, ...competitor.items]
           })
           setCompetitorData(competitors);
           setCompetitorOverlap(getCompetitorOverlap(itemsArray))

@@ -28,9 +28,9 @@ async function updateCompetitorMetrics(user_id: string) {
     // Fetch all competitors for this user
     const { data: competitors, error: fetchError } = await serviceRoleClient
       .from('competitors')
-      .select('rankings_data')
+      .select('items')
       .eq('user_id', user_id)
-      .not('rankings_data', 'is', null);
+      .not('items', 'is', null);
 
     if (fetchError) throw fetchError;
 
@@ -39,6 +39,12 @@ async function updateCompetitorMetrics(user_id: string) {
     const totalKeywords = summaries.reduce((sum, summary) => sum + summary.totalKeywords, 0);
     const averageKeywords = Math.round(totalKeywords / summaries.length);
     const totalOpportunities = summaries.reduce((sum, summary) => sum + summary.potentialOpportunities.length, 0);
+
+    console.log('totalKeywords', totalKeywords);
+    console.log('averageKeywords', averageKeywords);
+    console.log('totalOpportunities', totalOpportunities);
+    console.log('competitors', competitors);  
+
 
     // Save metrics to business_information
     const { error: updateError } = await serviceRoleClient
@@ -112,7 +118,9 @@ export async function POST(req: Request) {
       const { error } = await serviceRoleClient
         .from('competitors')
         .update({
-          rankings_data: processedData,
+          items: processedData.items,
+          metrics: processedData.metrics,
+          total_count: processedData.total_count,
           rankings_updated_at: new Date().toISOString(),
         })
         .match({ id: competitor_id })

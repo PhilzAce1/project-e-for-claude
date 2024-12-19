@@ -175,8 +175,11 @@ interface Metrics {
   estimated_paid_traffic_cost: number;
 }
 
-// Rankings Data
-interface RankingsData {
+// Main Rankings Interface
+interface Rankings {
+  id: number;
+  domain: string;
+  rankings_updated_at: string;
   items: RankingItem[];
   metrics: {
     paid: Metrics;
@@ -187,12 +190,4 @@ interface RankingsData {
   total_count: number;
 }
 
-// Main Rankings Interface
-interface Rankings {
-  id: number;
-  domain: string;
-  rankings_data: RankingsData;
-  rankings_updated_at: string;
-}
-
-export type { RankingsData,Rankings, RankingItem, KeywordData, SerpItem, Metrics, ImpressionsInfo, AvgBacklinksInfo, KeywordProperties, SearchIntentInfo };
+export type { Rankings, RankingItem, KeywordData, SerpItem, Metrics, ImpressionsInfo, AvgBacklinksInfo, KeywordProperties, SearchIntentInfo };

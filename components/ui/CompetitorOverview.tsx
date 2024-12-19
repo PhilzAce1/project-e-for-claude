@@ -104,7 +104,7 @@ const CompetitorOverview: React.FC<CompetitorOverviewProps> = ({ user }) => {
         <div className="mx-auto flex max-w-xs flex-col">
           <dt className="text-base leading-7 text-gray-600">Total Opportunities</dt>
           <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            {metrics.total_opportunities.toLocaleString()}
+            <a href='/opportunities' className="text-indigo-600 hover:text-indigo-500">{metrics.total_opportunities.toLocaleString()}</a>
           </dd>
         </div>
       </dl>

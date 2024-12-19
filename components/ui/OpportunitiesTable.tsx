@@ -81,7 +81,7 @@ const KeywordTable = ({ opportunities }: { opportunities: any }) => {
           </tr>
         </thead>
         <tbody className="bg-white">
-          {currentopportunities.map((item, index) => (
+          {currentopportunities.map((item: any, index: any) => (
             <tr key={item.keyword + index} className="even:bg-gray-50">
               <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left">
                 {item.keyword}

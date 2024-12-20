@@ -16,6 +16,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import ReactECharts from 'echarts-for-react'
 import CompetitorOverview from './CompetitorOverview'
 import { Metrics, RankingItem } from '@/utils/helpers/ranking-data-types'
+import { NextContentRecommendation } from './NextContentRecommendation'
 
 const tabs = [
   { 
@@ -153,6 +154,8 @@ export function SEOOverview({
   const [currentTab, setCurrentTab] = useState('rankings')
   const [competitorData, setCompetitorData] = useState<any>(null)
   const [competitorOverlap, setCompetitorOverlap] = useState<any>(null)
+  const [contentRecommendation, setContentRecommendation] = useState<any>(null)
+  const [competitorMetrics, setCompetitorMetrics] = useState<any>(null)
   const [stats, setStats] = useState<any>(null)
   const handleTabChange = (value: string) => {
     setCurrentTab(value)
@@ -251,6 +254,17 @@ export function SEOOverview({
           console.error('Error in competitor data fetch:', err);
         }
       }
+      const { data: contentRecommendations, error: contentRecommendationsError } = await supabase
+      .rpc('get_user_content_recommendations');
+      setContentRecommendation(contentRecommendations)  
+
+      const { data, error } = await supabase
+      .from('business_information')
+      .select('competitor_metrics')
+      .eq('user_id', user.id)
+      .single()
+
+      setCompetitorMetrics(data.competitor_metrics)
     }
 
     fetchCompetitorData();
@@ -357,6 +371,7 @@ export function SEOOverview({
         icon: HeartIcon, // Represents health/wellness
       },
     ]
+
 
     setStats(stats) 
   }, [keywordRankings, seoAudit])
@@ -487,10 +502,7 @@ export function SEOOverview({
 
         {currentTab === 'opportunities' && (
           <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium mb-4">Keyword Suggestions by Category</h3>
-                {/* <KeywordSuggestionsList suggestions={keywordSuggestions} /> */}
-              </div>
+            <NextContentRecommendation contentRecommendation={contentRecommendation} />
 
               <div>
                 <h3 className="text-lg font-medium mb-4">Content Opportunities</h3>
@@ -498,7 +510,8 @@ export function SEOOverview({
                     keywords={keywordSuggestions} 
                     competitors={competitorRankings} 
                     /> */}
-              </div>
+                    {competitorMetrics?.total_opportunities}
+              </div>  
           </div>
         )}
       </div>

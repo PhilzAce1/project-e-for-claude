@@ -264,7 +264,7 @@ export function SEOOverview({
       .eq('user_id', user.id)
       .single()
 
-      setCompetitorMetrics(data.competitor_metrics)
+      setCompetitorMetrics(data?.competitor_metrics)
     }
 
     fetchCompetitorData();

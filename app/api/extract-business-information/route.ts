@@ -50,22 +50,6 @@ export async function POST(request: Request) {
 
         // Start analysis in the background using a POST request
         console.log('Starting analysis for domain:', domain);
-        
-        Promise.resolve(
-            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/business-information-extraction`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    domain,
-                    analysisId: analysis.id,
-                    userId
-                })
-            })
-        ).catch(error => {
-            console.error('Error initiating analysis:', error);
-        });
 
         // Return immediately with the analysis ID
         return NextResponse.json({

@@ -15,11 +15,11 @@ Deno.serve(async (req) => {
     console.log('New Record:', JSON.stringify(new_record, null, 2))
 
     // Check if domain was added/changed
-    if (old_record.domain === null && new_record.domain) {
+    if (old_record === null || (old_record?.domain === null && new_record.domain)) {
       console.log(`Domain changed from null to ${new_record.domain}`)
 
       // Call your API endpoint
-      const response = await fetch(`${Deno.env.get('BASE_URL')}/api/business-information-extraction`, {
+      const response = await fetch(`${Deno.env.get('API_BASE_URL')}/api/business-information-extraction`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

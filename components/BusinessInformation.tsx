@@ -43,6 +43,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
       }
 
       if (analysis) {
+        console.log('Analysis set when?', analysis);
         setData(analysis);
         // Set confirmed sections based on completion_status
         if (analysis.completion_status) {
@@ -71,6 +72,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
         },
         (payload: any) => {
           const analysis = payload.new;
+          console.log('Analysis', analysis);
           setData(analysis);
           
           // Update confirmed sections when changes occur
@@ -167,6 +169,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
       {(!confirmedSections.critical || !confirmedSections.recommended || !confirmedSections.verification) && (
         <div className="grid grid-cols-3 gap-4">
           <div className="mt-5 col-span-2 relative bg-gray-900 px-6 py-16 text-center shadow-2xl sm:rounded-xl sm:px-8">
+            {console.log('Something', data.verification_questions, data.information_needed, data)}
             <VerificationForm 
               analysisId={analysisId} 
               questions={data.verification_questions}

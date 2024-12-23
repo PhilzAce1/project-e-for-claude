@@ -529,130 +529,147 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
     }
   };
 
+  // Check for empty sections and auto-confirm them
+  useEffect(() => {
+    const autoConfirmEmptySections = async () => {
+      try {
+        if (activeSection === 'verification' && (!questions || questions.length === 0)) {
+          console.log('Verification questions empty, auto-confirming...');
+          await handleSectionConfirm('verification');
+        } else if (activeSection === 'critical' && (!informationNeeded.critical || informationNeeded.critical.length === 0)) {
+          console.log('Critical information empty, auto-confirming...');
+          await handleSectionConfirm('critical');
+        } else if (activeSection === 'recommended' && (!informationNeeded.recommended || informationNeeded.recommended.length === 0)) {
+          console.log('Recommended information empty, auto-confirming...');
+          await handleSectionConfirm('recommended');
+        }
+      } catch (error) {
+        console.error('Error auto-confirming empty sections:', error);
+      }
+    };
+
+    autoConfirmEmptySections();
+  }, [activeSection, questions, informationNeeded]);
+
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
       onSubmit(formData);
     }}>
-      {/* Verification Questions - Only show if active */}
-      {activeSection === 'verification' && (
-        <div 
-          ref={verificationRef}
-          className="space-y-12 transition-opacity duration-300 ease-in-out"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Let's verify your business information
-            </h2>
-            <p className="mt-4 text-lg text-gray-300">
-              We've gathered some information about your business. Please verify it and fill in any gaps.
-            </p>
+      {console.log('critical',informationNeeded,informationNeeded?.critical, formData)}
+      {/* Only render sections if they have content */}
+      {activeSection === 'verification' && questions?.length > 0 && (
+        <div ref={verificationRef}>
+          <div className="space-y-12 transition-opacity duration-300 ease-in-out">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                Let's verify your business information
+              </h2>
+              <p className="mt-4 text-lg text-gray-300">
+                We've gathered some information about your business. Please verify it and fill in any gaps.
+              </p>
+            </div>
+
+            {formData.verification_questions?.map((question, index) => (
+              <div key={index} className="bg-white/5 rounded-lg p-6 shadow-sm ring-1 ring-white/10 hover:ring-white/20 transition-all">
+                <h3 className="text-xl font-medium text-white mb-4">{question.question}</h3>
+                {renderQuestionFields(question, index, 'verification')}
+              </div>
+            ))}
+
+            {isSectionComplete(formData.verification_questions) && !confirmedSections.verification && (
+              <div className="flex justify-end mt-8">
+                <button
+                  type="button"
+                  onClick={() => handleSectionConfirm('verification')}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Confirm and Continue
+                </button>
+              </div>
+            )}
           </div>
-
-          {formData.verification_questions?.map((question, index) => (
-            <div key={index} className="bg-white/5 rounded-lg p-6 shadow-sm ring-1 ring-white/10 hover:ring-white/20 transition-all">
-              <h3 className="text-xl font-medium text-white mb-4">{question.question}</h3>
-              {renderQuestionFields(question, index, 'verification')}
+        </div>
+      )}
+      {activeSection === 'critical' && informationNeeded && informationNeeded.critical?.length > 0 && (
+        <div ref={criticalRef}>
+          <div className="space-y-12 transition-opacity duration-300 ease-in-out">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold tracking-tight text-white">
+                Required Information
+              </h2>
+              <p className="mt-4 text-lg text-gray-300">
+                We need a few more details to create your personalized strategy.
+              </p>
             </div>
-          ))}
 
-          {isSectionComplete(formData.verification_questions) && !confirmedSections.verification && (
-            <div className="flex justify-end mt-8">
-              <button
-                type="button"
-                onClick={() => handleSectionConfirm('verification')}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Confirm and Continue
-              </button>
-            </div>
-          )}
+            {formData.information_needed.critical.map((question, index) => (
+              <div key={index} className="bg-white/5 rounded-lg p-6 shadow-sm ring-1 ring-white/10 hover:ring-white/20 transition-all">
+                <h3 className="text-xl font-medium text-white mb-4">{question.question}</h3>
+                {renderQuestionFields(question, index, 'critical')}
+              </div>
+            ))}
+
+            {!confirmedSections.critical && (
+              <div className="flex justify-end gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={() => onSectionChange('verification')}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-transparent hover:bg-white/5"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSectionConfirm('critical')}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Confirm and Continue
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Critical Information - Only show if active */}
-      {activeSection === 'critical' && (
-        <div 
-          ref={criticalRef}
-          className="space-y-12 transition-opacity duration-300 ease-in-out"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-white">
-              Required Information
-            </h2>
-            <p className="mt-4 text-lg text-gray-300">
-              We need a few more details to create your personalized strategy.
-            </p>
+      {activeSection === 'recommended' && informationNeeded?.recommended?.length > 0 && (
+        <div ref={recommendedRef}>
+          <div className="space-y-12 transition-opacity duration-300 ease-in-out">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold tracking-tight text-white">
+                Additional Information
+              </h2>
+              <p className="mt-4 text-lg text-gray-300">
+                These details will help us provide more targeted recommendations.
+              </p>
+            </div>
+
+            {formData.information_needed.recommended.map((question, index) => (
+              <div key={index} className="bg-white/5 rounded-lg p-6 shadow-sm ring-1 ring-white/10 hover:ring-white/20 transition-all">
+                <h3 className="text-xl font-medium text-white mb-4">{question.question}</h3>
+                {renderQuestionFields(question, index, 'recommended')}
+              </div>
+            ))}
+
+            {!confirmedSections.recommended && (
+              <div className="flex justify-end gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={() => onSectionChange('critical')}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-transparent hover:bg-white/5"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSectionConfirm('recommended')}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Save All Changes
+                </button>
+              </div>
+            )}
           </div>
-
-          {formData.information_needed.critical.map((question, index) => (
-            <div key={index} className="bg-white/5 rounded-lg p-6 shadow-sm ring-1 ring-white/10 hover:ring-white/20 transition-all">
-              <h3 className="text-xl font-medium text-white mb-4">{question.question}</h3>
-              {renderQuestionFields(question, index, 'critical')}
-            </div>
-          ))}
-
-          {!confirmedSections.critical && (
-            <div className="flex justify-end gap-4 mt-8">
-              <button
-                type="button"
-                onClick={() => onSectionChange('verification')}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-transparent hover:bg-white/5"
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSectionConfirm('critical')}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Confirm and Continue
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Recommended Section - Only show if active */}
-      {activeSection === 'recommended' && (
-        <div 
-          ref={recommendedRef}
-          className="space-y-12 transition-opacity duration-300 ease-in-out"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-white">
-              Additional Information
-            </h2>
-            <p className="mt-4 text-lg text-gray-300">
-              These details will help us provide more targeted recommendations.
-            </p>
-          </div>
-
-          {formData.information_needed.recommended.map((question, index) => (
-            <div key={index} className="bg-white/5 rounded-lg p-6 shadow-sm ring-1 ring-white/10 hover:ring-white/20 transition-all">
-              <h3 className="text-xl font-medium text-white mb-4">{question.question}</h3>
-              {renderQuestionFields(question, index, 'recommended')}
-            </div>
-          ))}
-
-          {!confirmedSections.recommended && (
-            <div className="flex justify-end gap-4 mt-8">
-              <button
-                type="button"
-                onClick={() => onSectionChange('critical')}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-transparent hover:bg-white/5"
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSectionConfirm('recommended')}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Save All Changes
-              </button>
-            </div>
-          )}
         </div>
       )}
     </form>

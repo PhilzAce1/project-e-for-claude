@@ -37,6 +37,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     const [onboardingStep, setOnboardingStep] = useState(0);
     const supabase = createClientComponentClient();
     const { toast } = useToast()
+    const [isSubmitting, setIsSubmitting] = useState(false);
   
     useEffect(() => {
       fetchCompetitors();
@@ -51,6 +52,11 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
       if (error) {
         console.error('Error fetching competitors:', error);
         return;
+      }
+
+      if(competitors.length === 0) {
+        console.log('Competitors', competitors);
+        setShowOnboarding(true);
       }
   
       // Transform string IDs to numbers if needed
@@ -154,44 +160,57 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     }
   
     const handleSubmitCompetitors = async () => {
-      const validCompetitors = newCompetitors.filter(c => c.trim() !== '');
-      const errors: string[] = [];
-      let hasError = false;
-  
-      for (let i = 0; i < validCompetitors.length; i++) {
-        if (!validateUrl(validCompetitors[i])) {
-          errors[i] = 'Please enter a valid URL';
-          hasError = true;
-        } else {
-          errors[i] = '';
+      setIsSubmitting(true);
+      try {
+        const validCompetitors = newCompetitors.filter(c => c.trim() !== '');
+        const errors: string[] = [];
+        let hasError = false;
+    
+        for (let i = 0; i < validCompetitors.length; i++) {
+          if (!validateUrl(validCompetitors[i])) {
+            errors[i] = 'Please enter a valid URL';
+            hasError = true;
+          } else {
+            errors[i] = '';
+          }
         }
-      }
-  
-      if (hasError) {
-        setInputErrors(errors);
-        return;
-      }
-  
-      const normalizedCompetitors = validCompetitors.map(normalizeUrl);
-  
-      for (const competitor of normalizedCompetitors) {
-        const { data, error } = await supabase
-          .from('competitors')
-          .insert({ user_id: user.id, domain: competitor })
-          .select()
-          .single()
-
-        if (error) {
-          console.error('Error adding competitor:', error)
-        } else {
-          // Fetch rankings data for the new competitor
-          await fetchCompetitorRankings(data)
+    
+        if (hasError) {
+          setInputErrors(errors);
+          setIsSubmitting(false);
+          return;
         }
-      }
+    
+        const normalizedCompetitors = validCompetitors.map(normalizeUrl);
+    
+        for (const competitor of normalizedCompetitors) {
+          const { data, error } = await supabase
+            .from('competitors')
+            .insert({ user_id: user.id, domain: competitor })
+            .select()
+            .single();
   
-      await fetchCompetitors();
-      setNewCompetitors(['']);
-      setOnboardingStep(2);
+          if (error) {
+            console.error('Error adding competitor:', error);
+            throw error;
+          } else {
+            // Fetch rankings data for the new competitor
+            await fetchCompetitorRankings(data);
+          }
+        }
+    
+        await fetchCompetitors();
+        setNewCompetitors(['']);
+        setOnboardingStep(2);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to add competitors. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     };
   
     const handleNextStep = () => {
@@ -328,9 +347,21 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
                           <div className="mt-6">
                             <button
                               onClick={handleNextStep}
-                              className="inline-block rounded-md border border-transparent bg-indigo-600 px-8 py-3 font-medium text-white hover:bg-indigo-700"
+                              disabled={isSubmitting}
+                              className={`inline-block rounded-md border border-transparent px-8 py-3 font-medium text-white 
+                                ${isSubmitting 
+                                  ? 'bg-indigo-400 cursor-not-allowed' 
+                                  : 'bg-indigo-600 hover:bg-indigo-700'}`}
                             >
-                              {onboardingStep < onboardingSteps.length - 1 ? "Next" : "Start analyzing competitors"}
+                              {isSubmitting 
+                                ? <span className="flex items-center">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                                    Adding competitors...
+                                  </span>
+                                : onboardingStep < onboardingSteps.length - 1 
+                                  ? "Next" 
+                                  : "Start analyzing competitors"
+                              }
                             </button>
                           </div>
                         </div>

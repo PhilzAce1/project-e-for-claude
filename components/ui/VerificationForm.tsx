@@ -556,7 +556,6 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       e.preventDefault();
       onSubmit(formData);
     }}>
-      {console.log('critical',informationNeeded,informationNeeded?.critical, formData)}
       {/* Only render sections if they have content */}
       {activeSection === 'verification' && questions?.length > 0 && (
         <div ref={verificationRef}>

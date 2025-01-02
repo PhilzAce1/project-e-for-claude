@@ -136,12 +136,15 @@ export default function BusinessProgress({
                         }`}>
                           {step.name}
                         </span>
-                        <span className={`
-                          inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-                          ${isComplete ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'}
-                        `}>
+                        {console.log(typeof progress)}
+                        {!isNaN(progress) && (
+                          <span className={`
+                            inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+                            ${isComplete ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'}
+                          `}>
                           {progress}%
                         </span>
+                        )}
                       </div>
                       <p className="text-sm text-gray-500">{step.description}</p>
                       

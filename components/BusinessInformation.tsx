@@ -28,7 +28,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     const fetchAnalysis = async () => {
       const { data: analysis, error } = await supabase
         .from('business_analyses')
-        .select('*, completion_status')
+        .select('*, completion_status, status')
         .eq('id', analysisId)
         .single();
 
@@ -187,6 +187,8 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
                   setActiveSection('recommended');
                 }
               }}
+              status={data.status}
+              progress={data.progress}
             />
           </div>
           

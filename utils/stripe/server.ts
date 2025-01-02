@@ -19,7 +19,7 @@ type CheckoutResponse = {
 };
 
 export async function checkoutWithStripe(
-  price: Price,
+  price: Price & { metadata?: any },
   redirectPath: string = '/account'
 ): Promise<CheckoutResponse> {
   try {
@@ -31,7 +31,7 @@ export async function checkoutWithStripe(
     } = await supabase.auth.getUser();
 
     if (error || !user) {
-      console.error(error);
+      console.error('Auth error:', error);
       throw new Error('Could not get user session.');
     }
 
@@ -43,11 +43,12 @@ export async function checkoutWithStripe(
         email: user?.email || ''
       });
     } catch (err) {
-      console.error(err);
+      console.error('Customer error:', err);
       throw new Error('Unable to access customer record.');
     }
 
     let params: Stripe.Checkout.SessionCreateParams = {
+      mode: 'payment',
       allow_promotion_codes: true,
       billing_address_collection: 'required',
       customer,
@@ -60,45 +61,33 @@ export async function checkoutWithStripe(
           quantity: 1
         }
       ],
+      metadata: price.metadata || {},
       cancel_url: getURL(),
       success_url: getURL(redirectPath)
     };
 
-    console.log(
-      'Trial end:',
-      calculateTrialEndUnixTimestamp(price.trial_period_days)
-    );
-    if (price.type === 'recurring') {
-      params = {
-        ...params,
-        mode: 'subscription',
-        subscription_data: {
-          trial_end: calculateTrialEndUnixTimestamp(price.trial_period_days)
-        }
-      };
-    } else if (price.type === 'one_time') {
-      params = {
-        ...params,
-        mode: 'payment'
-      };
-    }
+    console.log('Creating checkout session with params:', JSON.stringify(params, null, 2));
 
     // Create a checkout session in Stripe
     let session;
     try {
       session = await stripe.checkout.sessions.create(params);
-    } catch (err) {
-      console.error(err);
-      throw new Error('Unable to create checkout session.');
+      console.log('Checkout session created:', session.id);
+    } catch (err: unknown) {
+      console.error('Stripe checkout error:', err);
+      if (err instanceof Error) {
+        throw new Error(`Unable to create checkout session: ${err.message}`);
+      }
+      throw new Error('Unable to create checkout session');
     }
 
-    // Instead of returning a Response, just return the data or error.
     if (session) {
       return { sessionId: session.id };
     } else {
       throw new Error('Unable to create checkout session.');
     }
   } catch (error) {
+    console.error('Checkout error:', error);
     if (error instanceof Error) {
       return {
         errorRedirect: getErrorRedirect(

@@ -136,7 +136,6 @@ export default function BusinessProgress({
                         }`}>
                           {step.name}
                         </span>
-                        {console.log(typeof progress)}
                         {!isNaN(progress) && (
                           <span className={`
                             inline-flex items-center rounded-full px-2 py-1 text-xs font-medium

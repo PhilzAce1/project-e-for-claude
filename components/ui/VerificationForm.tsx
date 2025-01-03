@@ -61,6 +61,9 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   const criticalRef = useRef<HTMLDivElement>(null);
   const recommendedRef = useRef<HTMLDivElement>(null);
 
+  // Add this state near the top of the component
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
   useEffect(() => {
     setFormData({
       verification_questions: questions,
@@ -261,11 +264,27 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                   {/* Add tooltip if we have context for this subsection */}
                   {context?.subsections?.[item.key] && (
                     <Tooltip.Provider>
-                      <Tooltip.Root>
+                      <Tooltip.Root 
+                        open={activeTooltip === `${section}-${questionIndex}-${item.key}`}
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setActiveTooltip(`${section}-${questionIndex}-${item.key}`);
+                          } else {
+                            setActiveTooltip(null);
+                          }
+                        }}
+                      >
                         <Tooltip.Trigger asChild>
                           <button 
                             className="text-gray-400 hover:text-gray-300 p-1 rounded-full hover:bg-white/5"
                             type="button"
+                            onClick={() => {
+                              if (activeTooltip === `${section}-${questionIndex}-${item.key}`) {
+                                setActiveTooltip(null);
+                              } else {
+                                setActiveTooltip(`${section}-${questionIndex}-${item.key}`);
+                              }
+                            }}
                           >
                             <InformationCircleIcon className="h-5 w-5" />
                           </button>
@@ -274,6 +293,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                           <Tooltip.Content
                             className="max-w-xs bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg"
                             sideOffset={5}
+                            onPointerDownOutside={() => setActiveTooltip(null)}
                           >
                             <div className="space-y-2">
                               <p className="text-sm">{context.subsections[item.key].description}</p>
@@ -401,11 +421,27 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                   {/* Add tooltip if we have context for this subsection */}
                   {context?.subsections?.[key] && (
                     <Tooltip.Provider>
-                      <Tooltip.Root>
+                      <Tooltip.Root 
+                        open={activeTooltip === `${section}-${questionIndex}-${key}`}
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setActiveTooltip(`${section}-${questionIndex}-${key}`);
+                          } else {
+                            setActiveTooltip(null);
+                          }
+                        }}
+                      >
                         <Tooltip.Trigger asChild>
                           <button 
                             className="text-gray-400 hover:text-gray-300 p-1 rounded-full hover:bg-white/5"
                             type="button"
+                            onClick={() => {
+                              if (activeTooltip === `${section}-${questionIndex}-${key}`) {
+                                setActiveTooltip(null);
+                              } else {
+                                setActiveTooltip(`${section}-${questionIndex}-${key}`);
+                              }
+                            }}
                           >
                             <InformationCircleIcon className="h-5 w-5" />
                           </button>
@@ -414,6 +450,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                           <Tooltip.Content
                             className="max-w-xs bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg"
                             sideOffset={5}
+                            onPointerDownOutside={() => setActiveTooltip(null)}
                           >
                             <div className="space-y-2">
                               <p className="text-sm">{context.subsections[key].description}</p>

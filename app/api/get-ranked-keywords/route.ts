@@ -47,7 +47,7 @@ async function updateCompetitorMetrics(user_id: string) {
 
 
     // Save metrics to business_information
-    const { error: updateError } = await serviceRoleClient
+    const { error: updateError, data: updateData } = await serviceRoleClient
       .from('business_information')
       .update({
         competitor_metrics: {
@@ -60,6 +60,8 @@ async function updateCompetitorMetrics(user_id: string) {
       .eq('user_id', user_id);
 
     if (updateError) throw updateError;
+
+    console.log('updateData', updateData);
 
   } catch (error) {
     console.error('Error updating competitor metrics:', error);

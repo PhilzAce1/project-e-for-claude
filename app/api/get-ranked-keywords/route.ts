@@ -43,23 +43,27 @@ async function updateCompetitorMetrics(user_id: string) {
     console.log('totalKeywords', totalKeywords);
     console.log('averageKeywords', averageKeywords);
     console.log('totalOpportunities', totalOpportunities);
-    console.log('competitors', competitors);  
+    console.log('competitors', competitors.length);  
+    console.log('last_updated', new Date().toISOString());
 
 
     // Save metrics to business_information
-    const { error: updateError } = await serviceRoleClient
+    const { error: updateError, data: updateData } = await serviceRoleClient
       .from('business_information')
       .update({
         competitor_metrics: {
           total_keywords: totalKeywords,
           average_keywords: averageKeywords,
           total_opportunities: totalOpportunities,
-          competitor_count: competitors.length
+          competitor_count: competitors.length,
+          last_updated: new Date().toISOString()
         }
       })
       .eq('user_id', user_id);
 
     if (updateError) throw updateError;
+
+    console.log('updateData', updateData);
 
   } catch (error) {
     console.error('Error updating competitor metrics:', error);

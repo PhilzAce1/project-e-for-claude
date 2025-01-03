@@ -122,7 +122,7 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords }) => {
   return (
     <>
       {isProcessing && <LoadingOverlay />}
-      <div className="p-4 sm:p-6 lg:p-8 rounded-lg bg-white shadow mt-8 overflow-x-auto">
+      <div className="p-4 sm:p-6 lg:p-8 rounded-lg bg-white shadow mt-8 overflow-x-auto mb-8">
         <div className="flex justify-between items-center mb-4">
           <div>
             <label htmlFor="itemsPerPage" className="mr-2 text-sm font-medium text-gray-700">Show</label>

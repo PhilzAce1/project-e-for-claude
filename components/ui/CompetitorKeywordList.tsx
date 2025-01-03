@@ -118,8 +118,8 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
             </div>
             Last Crawled: {formattedDate}
             </div>
-            {(selected && currentCompetitor) && <RankingsSummaryView rankings={currentCompetitor} />}
             <KeywordTable keywords={keywords} />
+            {(selected && currentCompetitor) && <RankingsSummaryView rankings={currentCompetitor} />}
         </>
     )
 }

@@ -54,10 +54,15 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
     recommended: false
   });
 
+  const [isAdding, setIsAdding] = useState(false);
+
   // Add refs for each section
   const verificationRef = useRef<HTMLDivElement>(null);
   const criticalRef = useRef<HTMLDivElement>(null);
   const recommendedRef = useRef<HTMLDivElement>(null);
+
+  // Add this state near the top of the component
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   useEffect(() => {
     setFormData({
@@ -97,21 +102,27 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
 
   const handleAddItem = (section: string, questionIndex: number, key?: string) => {
     setFormData(prev => {
-      const newData = { ...prev };
+      const newData = structuredClone(prev); // Deep clone to ensure we get a fresh copy
       
       if (section === 'critical' || section === 'recommended') {
         const targetQuestion = newData.information_needed[section][questionIndex];
         if (key && targetQuestion.currentValue[key]) {
-          targetQuestion.currentValue[key].push('');
+          // Ensure we're working with a fresh array
+          const currentArray = Array.from(targetQuestion.currentValue[key]);
+          targetQuestion.currentValue[key] = [...currentArray, ''];
         }
       } else {
         const targetQuestion = newData.verification_questions[questionIndex];
         if (targetQuestion.currentValue.type === 'list') {
-          targetQuestion.currentValue.items.push('');
+          // Ensure we're working with a fresh array
+          const currentItems = Array.from(targetQuestion.currentValue.items);
+          targetQuestion.currentValue.items = [...currentItems, ''];
         } else if (targetQuestion.currentValue.type === 'object' && key) {
           const item = targetQuestion.currentValue.items.find((i: any) => i.key === key);
           if (item) {
-            item.value.push('');
+            // Ensure we're working with a fresh array
+            const currentValues = Array.from(item.value);
+            item.value = [...currentValues, ''];
           }
         }
       }
@@ -253,11 +264,27 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                   {/* Add tooltip if we have context for this subsection */}
                   {context?.subsections?.[item.key] && (
                     <Tooltip.Provider>
-                      <Tooltip.Root>
+                      <Tooltip.Root 
+                        open={activeTooltip === `${section}-${questionIndex}-${item.key}`}
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setActiveTooltip(`${section}-${questionIndex}-${item.key}`);
+                          } else {
+                            setActiveTooltip(null);
+                          }
+                        }}
+                      >
                         <Tooltip.Trigger asChild>
                           <button 
                             className="text-gray-400 hover:text-gray-300 p-1 rounded-full hover:bg-white/5"
                             type="button"
+                            onClick={() => {
+                              if (activeTooltip === `${section}-${questionIndex}-${item.key}`) {
+                                setActiveTooltip(null);
+                              } else {
+                                setActiveTooltip(`${section}-${questionIndex}-${item.key}`);
+                              }
+                            }}
                           >
                             <InformationCircleIcon className="h-5 w-5" />
                           </button>
@@ -266,6 +293,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                           <Tooltip.Content
                             className="max-w-xs bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg"
                             sideOffset={5}
+                            onPointerDownOutside={() => setActiveTooltip(null)}
                           >
                             <div className="space-y-2">
                               <p className="text-sm">{context.subsections[item.key].description}</p>
@@ -393,11 +421,27 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                   {/* Add tooltip if we have context for this subsection */}
                   {context?.subsections?.[key] && (
                     <Tooltip.Provider>
-                      <Tooltip.Root>
+                      <Tooltip.Root 
+                        open={activeTooltip === `${section}-${questionIndex}-${key}`}
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setActiveTooltip(`${section}-${questionIndex}-${key}`);
+                          } else {
+                            setActiveTooltip(null);
+                          }
+                        }}
+                      >
                         <Tooltip.Trigger asChild>
                           <button 
                             className="text-gray-400 hover:text-gray-300 p-1 rounded-full hover:bg-white/5"
                             type="button"
+                            onClick={() => {
+                              if (activeTooltip === `${section}-${questionIndex}-${key}`) {
+                                setActiveTooltip(null);
+                              } else {
+                                setActiveTooltip(`${section}-${questionIndex}-${key}`);
+                              }
+                            }}
                           >
                             <InformationCircleIcon className="h-5 w-5" />
                           </button>
@@ -406,6 +450,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                           <Tooltip.Content
                             className="max-w-xs bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg"
                             sideOffset={5}
+                            onPointerDownOutside={() => setActiveTooltip(null)}
                           >
                             <div className="space-y-2">
                               <p className="text-sm">{context.subsections[key].description}</p>

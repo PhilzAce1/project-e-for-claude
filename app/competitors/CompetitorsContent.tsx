@@ -1,7 +1,7 @@
 'use client';
 
 import { User } from '@supabase/supabase-js';
-import { useState, Fragment, useEffect } from 'react';
+import { useState, Fragment, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -38,6 +38,16 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     const supabase = createClientComponentClient();
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const competitorOverviewRef = useRef<{ refresh: () => Promise<void> }>(null);
+  
+    const handleRefresh = () => {
+      competitorOverviewRef.current?.refresh();
+    };
+  
+    const handleRefreshRequest = () => {
+      // Do any additional refresh logic here
+      console.log('Refresh requested from CompetitorOverview');
+    };
   
     useEffect(() => {
       fetchCompetitors();
@@ -239,7 +249,10 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
         </button>
       </div>
 
-      <CompetitorOverview user={user} />
+      <CompetitorOverview 
+      ref={competitorOverviewRef}
+      onRefreshRequest={handleRefreshRequest}
+      user={user} />
       
       {competitors.length === 0 ? (
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8 mt-4">

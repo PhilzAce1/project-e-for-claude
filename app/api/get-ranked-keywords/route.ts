@@ -54,8 +54,7 @@ async function updateCompetitorMetrics(user_id: string) {
           total_keywords: totalKeywords,
           average_keywords: averageKeywords,
           total_opportunities: totalOpportunities,
-          competitor_count: competitors.length,
-          last_updated: new Date().toISOString()
+          competitor_count: competitors.length
         }
       })
       .eq('user_id', user_id);

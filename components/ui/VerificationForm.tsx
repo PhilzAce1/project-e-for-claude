@@ -54,6 +54,8 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
     recommended: false
   });
 
+  const [isAdding, setIsAdding] = useState(false);
+
   // Add refs for each section
   const verificationRef = useRef<HTMLDivElement>(null);
   const criticalRef = useRef<HTMLDivElement>(null);
@@ -97,21 +99,27 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
 
   const handleAddItem = (section: string, questionIndex: number, key?: string) => {
     setFormData(prev => {
-      const newData = { ...prev };
+      const newData = structuredClone(prev); // Deep clone to ensure we get a fresh copy
       
       if (section === 'critical' || section === 'recommended') {
         const targetQuestion = newData.information_needed[section][questionIndex];
         if (key && targetQuestion.currentValue[key]) {
-          targetQuestion.currentValue[key].push('');
+          // Ensure we're working with a fresh array
+          const currentArray = Array.from(targetQuestion.currentValue[key]);
+          targetQuestion.currentValue[key] = [...currentArray, ''];
         }
       } else {
         const targetQuestion = newData.verification_questions[questionIndex];
         if (targetQuestion.currentValue.type === 'list') {
-          targetQuestion.currentValue.items.push('');
+          // Ensure we're working with a fresh array
+          const currentItems = Array.from(targetQuestion.currentValue.items);
+          targetQuestion.currentValue.items = [...currentItems, ''];
         } else if (targetQuestion.currentValue.type === 'object' && key) {
           const item = targetQuestion.currentValue.items.find((i: any) => i.key === key);
           if (item) {
-            item.value.push('');
+            // Ensure we're working with a fresh array
+            const currentValues = Array.from(item.value);
+            item.value = [...currentValues, ''];
           }
         }
       }

@@ -43,7 +43,8 @@ async function updateCompetitorMetrics(user_id: string) {
     console.log('totalKeywords', totalKeywords);
     console.log('averageKeywords', averageKeywords);
     console.log('totalOpportunities', totalOpportunities);
-    console.log('competitors', competitors);  
+    console.log('competitors', competitors.length);  
+    console.log('last_updated', new Date().toISOString());
 
 
     // Save metrics to business_information
@@ -54,7 +55,8 @@ async function updateCompetitorMetrics(user_id: string) {
           total_keywords: totalKeywords,
           average_keywords: averageKeywords,
           total_opportunities: totalOpportunities,
-          competitor_count: competitors.length
+          competitor_count: competitors.length,
+          last_updated: new Date().toISOString()
         }
       })
       .eq('user_id', user_id);

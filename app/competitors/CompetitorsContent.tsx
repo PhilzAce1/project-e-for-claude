@@ -264,8 +264,9 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
             {competitors.length > 0 && (
               <>
                 <CompetitorKeywordList 
-                  competitors={competitors} // Now the types match
-              />
+                  competitors={competitors}
+                  userId={user.id}
+                />
               </>
             )}
           </div>

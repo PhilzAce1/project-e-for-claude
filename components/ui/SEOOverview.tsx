@@ -502,16 +502,15 @@ export function SEOOverview({
 
         {currentTab === 'opportunities' && (
           <div className="space-y-4">
-            <NextContentRecommendation contentRecommendation={contentRecommendation} />
+            <NextContentRecommendation 
+              contentRecommendation={contentRecommendation} 
+              userId={user.id}
+            />
 
-              <div>
-                <h3 className="text-lg font-medium mb-4">Content Opportunities</h3>
-                    {/* <ContentOpportunities 
-                    keywords={keywordSuggestions} 
-                    competitors={competitorRankings} 
-                    /> */}
-                    {competitorMetrics?.total_opportunities}
-              </div>  
+            <div>
+              <h3 className="text-lg font-medium mb-4">Content Opportunities</h3>
+              {competitorMetrics?.total_opportunities}
+            </div>  
           </div>
         )}
       </div>

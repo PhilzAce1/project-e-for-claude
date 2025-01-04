@@ -4,8 +4,15 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { productId, metadata } = await req.json();
+    const { productId, metadata, userId } = await req.json();
     
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 400 }
+      );
+    }
+
     const supabase = createRouteHandlerClient({ cookies });
 
     const { data: price, error } = await supabase
@@ -22,6 +29,7 @@ export async function POST(req: Request) {
     const priceWithMetadata = {
       ...price,
       metadata: {
+        user_id: userId,
         keyword: metadata.keyword,
         search_volume: metadata.search_volume,
         competition: metadata.competition,

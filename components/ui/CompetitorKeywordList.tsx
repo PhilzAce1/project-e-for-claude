@@ -11,6 +11,7 @@ import { CompetitorTitles } from '@/utils/helpers/ranking-data-types';
 
 interface CompetitorKeywordListProps {
   competitors: CompetitorTitles[];
+  userId: string;
 }
 // Update the Competitor interface to match Rankings
 interface Competitor extends Rankings {
@@ -18,7 +19,7 @@ interface Competitor extends Rankings {
   user_id?: string;
 }
 
-const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
+const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListProps) => {
     const [selected, setSelected] = useState<CompetitorTitles | null>(null)
     const [isLoading, setIsLoading] = useState(true);
     const [keywords, setKeywords] = useState<RankingItem[]>([]);
@@ -118,7 +119,7 @@ const CompetitorKeywordList = ({ competitors }: CompetitorKeywordListProps) => {
             </div>
             Last Crawled: {formattedDate}
             </div>
-            <KeywordTable keywords={keywords} />
+            <KeywordTable keywords={keywords} userId={userId} />
             {(selected && currentCompetitor) && <RankingsSummaryView rankings={currentCompetitor} />}
         </>
     )

@@ -14,7 +14,12 @@ const getCompetitionLevel = (competition: number): string => {
   return "Very Low";
 };
 
-export const NextContentRecommendation = ({ contentRecommendation }: { contentRecommendation: any }) => {
+interface NextContentRecommendationProps {
+  contentRecommendation: any;
+  userId: string;
+}
+
+export const NextContentRecommendation = ({ contentRecommendation, userId }: NextContentRecommendationProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const currentPath = usePathname();
@@ -33,10 +38,11 @@ export const NextContentRecommendation = ({ contentRecommendation }: { contentRe
         },
         body: JSON.stringify({
           productId: 'prod_RJ5FCKb73rXqQM',
+          userId,
           metadata: {
             keyword: contentRecommendation[0].keyword,
             search_volume: contentRecommendation[0].search_volume,
-            competition: contentRecommendation[0].competition,
+            competition: parseFloat(contentRecommendation[0].competition) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition,
             main_intent: contentRecommendation[0].main_intent || 'informational',
             content_type: contentRecommendation[0].content_type
           }
@@ -109,8 +115,8 @@ export const NextContentRecommendation = ({ contentRecommendation }: { contentRe
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-900">Competition</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  {getCompetitionLevel(contentRecommendation[0].competition)}
+                <p className="mt-2 text-sm text-gray-500 capitalize">
+                  {!isNaN(parseFloat(contentRecommendation[0].competition)) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition.toLowerCase()}
                 </p>
               </div>
               <div>

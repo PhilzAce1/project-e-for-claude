@@ -42,7 +42,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId }: Nex
           metadata: {
             keyword: contentRecommendation[0].keyword,
             search_volume: contentRecommendation[0].search_volume,
-            competition: contentRecommendation[0].competition,
+            competition: parseFloat(contentRecommendation[0].competition) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition,
             main_intent: contentRecommendation[0].main_intent || 'informational',
             content_type: contentRecommendation[0].content_type
           }
@@ -115,8 +115,8 @@ export const NextContentRecommendation = ({ contentRecommendation, userId }: Nex
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-900">Competition</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  {getCompetitionLevel(contentRecommendation[0].competition)}
+                <p className="mt-2 text-sm text-gray-500 capitalize">
+                  {!isNaN(parseFloat(contentRecommendation[0].competition)) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition.toLowerCase()}
                 </p>
               </div>
               <div>

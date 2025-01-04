@@ -165,7 +165,7 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
                   {item.keyword}
                 </td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.search_volume}</td>
-                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><CompetitionBadge value={item.competition} /></td>
+                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><CompetitionBadge value={isNaN(parseFloat(item.competition)) ? item.competition : parseFloat(item.competition)} /></td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">{item.main_intent}</td>
                 <td className=''>
                   <button

@@ -9,9 +9,10 @@ import { LoadingOverlay } from './LoadingOverlay';
 
 interface KeywordTableProps {
   keywords: RankingItem[];
+  userId: string;
 }
 
-const KeywordTable: React.FC<KeywordTableProps> = ({ keywords }) => {
+const KeywordTable: React.FC<KeywordTableProps> = ({ keywords, userId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -75,6 +76,7 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords }) => {
         },
         body: JSON.stringify({
           productId: 'prod_RJ5FCKb73rXqQM',
+          userId,
           metadata: {
             keyword: keyword.keyword_data.keyword,
             search_volume: keyword.keyword_data.keyword_info.search_volume,

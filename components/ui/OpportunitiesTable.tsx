@@ -7,7 +7,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { LoadingOverlay } from './LoadingOverlay';
 
-const KeywordTable = ({ opportunities }: { opportunities: any }) => {
+interface OpportunitiesTableProps {
+  opportunities: any;
+  userId: string;
+}
+
+const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -66,6 +71,7 @@ const KeywordTable = ({ opportunities }: { opportunities: any }) => {
         },
         body: JSON.stringify({
           productId: 'prod_RJ5FCKb73rXqQM',
+          userId,
           metadata: {
             keyword: keyword.keyword,
             search_volume: keyword.search_volume,
@@ -242,4 +248,4 @@ const KeywordTable = ({ opportunities }: { opportunities: any }) => {
   );
 };
 
-export default KeywordTable;
+export default OpportunitiesTable;

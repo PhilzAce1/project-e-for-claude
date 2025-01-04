@@ -14,7 +14,12 @@ const getCompetitionLevel = (competition: number): string => {
   return "Very Low";
 };
 
-export const NextContentRecommendation = ({ contentRecommendation }: { contentRecommendation: any }) => {
+interface NextContentRecommendationProps {
+  contentRecommendation: any;
+  userId: string;
+}
+
+export const NextContentRecommendation = ({ contentRecommendation, userId }: NextContentRecommendationProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const currentPath = usePathname();
@@ -33,6 +38,7 @@ export const NextContentRecommendation = ({ contentRecommendation }: { contentRe
         },
         body: JSON.stringify({
           productId: 'prod_RJ5FCKb73rXqQM',
+          userId,
           metadata: {
             keyword: contentRecommendation[0].keyword,
             search_volume: contentRecommendation[0].search_volume,

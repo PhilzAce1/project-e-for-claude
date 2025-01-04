@@ -189,7 +189,7 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
           </div>
         </div>
       </div>
-      <KeywordTable keywords={items} />
+      <KeywordTable keywords={items} userId={user.id} />
 
       <Transition appear show={showNoKeywordsModal} as={Fragment}>
         <Dialog as="div" className="relative z-50 " onClose={() => setShowNoKeywordsModal(false)}>

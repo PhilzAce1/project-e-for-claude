@@ -218,7 +218,7 @@ const createContentOrder = async (metadata: {
 }) => {
   try {
     const { error } = await supabaseAdmin
-      .from('content_orders')
+      .from('content_orders' as any) // Type assertion to bypass type checking
       .insert({
         user_id: metadata.user_id,
         keyword: metadata.keyword,

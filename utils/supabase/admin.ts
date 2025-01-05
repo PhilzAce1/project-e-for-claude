@@ -209,6 +209,34 @@ const copyBillingDetailsToCustomer = async (
   if (updateError) throw new Error(`Customer update failed: ${updateError.message}`);
 };
 
+const createContentOrder = async (metadata: { 
+  keyword: string,
+  competition: string,
+  user_id: string,
+  search_volume: string,
+  main_intent: string
+}) => {
+  try {
+    const { error } = await supabaseAdmin
+      .from('content_orders')
+      .insert({
+        user_id: metadata.user_id,
+        keyword: metadata.keyword,
+        competition_level: metadata.competition,
+        search_volume: metadata.search_volume,
+        search_intent: metadata.main_intent,
+        status: 'pending'  // Initial status
+      });
+
+    if (error) throw error;
+
+    console.log('Content order created successfully for keyword:', metadata.keyword);
+  } catch (error) {
+    console.error('Error creating content order:', error);
+    throw error;
+  }
+};
+
 const manageSubscriptionStatusChange = async (
   subscriptionId: string,
   customerId: string,
@@ -292,5 +320,6 @@ export {
   deleteProductRecord,
   deletePriceRecord,
   createOrRetrieveCustomer,
-  manageSubscriptionStatusChange
+  manageSubscriptionStatusChange,
+  createContentOrder
 };

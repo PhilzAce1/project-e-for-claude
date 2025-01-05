@@ -74,7 +74,7 @@ export async function POST(req: Request) {
               true
             );
           } else if (checkoutSession.mode === 'payment') {
-            console.log('Payment completed, now create a new content order');
+            console.log('Payment completed, now create a new content order',event.data.object);
           }
           break;
         default:

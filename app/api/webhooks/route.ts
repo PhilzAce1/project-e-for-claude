@@ -5,7 +5,8 @@ import {
   upsertPriceRecord,
   manageSubscriptionStatusChange,
   deleteProductRecord,
-  deletePriceRecord
+  deletePriceRecord,
+  createContentOrder
 } from '@/utils/supabase/admin';
 
 const relevantEvents = new Set([
@@ -73,8 +74,15 @@ export async function POST(req: Request) {
               checkoutSession.customer as string,
               true
             );
-          } else if (checkoutSession.mode === 'payment') {
-            console.log('Payment completed, now create a new content order',event.data.object);
+          } else if (checkoutSession.mode === 'payment' && checkoutSession.metadata) {
+            console.log('Payment completed, now create a new content order', event.data.object);
+            await createContentOrder(checkoutSession.metadata as {
+              keyword: string;
+              competition: string;
+              user_id: string;
+              search_volume: string;
+              main_intent: string;
+            });
           }
           break;
         default:

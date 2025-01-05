@@ -9,6 +9,8 @@ interface ContentOrdersContentProps {
 }
 
 interface ContentOrder {
+  search_intent: ReactNode;
+  competition_level: ReactNode;
   id: string;
   created_at: string;
   keyword: string;
@@ -126,10 +128,10 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
                         {order.search_volume.toLocaleString()}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">
-                        {order.competition}
+                        {order.competition_level}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">
-                        {order.main_intent}
+                        {order.search_intent}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${

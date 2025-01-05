@@ -9,8 +9,8 @@ interface ContentOrdersContentProps {
 }
 
 interface ContentOrder {
-  search_intent: ReactNode;
-  competition_level: ReactNode;
+  search_intent: string;
+  competition_level: string;
   id: string;
   created_at: string;
   keyword: string;

@@ -69,28 +69,34 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
   const [rankingData, setRankingData] = useState<any>(null);
   const [contentRecommendations, setContentRecommendations] = useState<any>(null);
   
+  const fetchContentRecommendations = async () => {
+    const { data: recommendations, error } = await supabase
+      .rpc('get_user_content_recommendations');
+
+    if (error) {
+      console.error('Error fetching recommendations:', error);
+      return;
+    }
+    setContentRecommendations(recommendations);
+  };
 
   useEffect(() => {
-    async function fetchRankingData() {
+    async function fetchData() {
       const { data, error } = await supabase
-          .from('business_information')
-          .select('rankings_data')
-          .eq('user_id', user.id)
-          .single()
-
-          const { data: contentRecommendations, error: contentRecommendationsError } = await supabase
-          .rpc('get_user_content_recommendations');
-
+        .from('business_information')
+        .select('rankings_data')
+        .eq('user_id', user.id)
+        .single();
 
       if (error) {
         console.error('Error fetching ranking data:', error);
         return;
       }
       setRankingData(data);
-      setContentRecommendations(contentRecommendations);
+      fetchContentRecommendations();
     }
 
-    fetchRankingData();
+    fetchData();
   }, [user.id, supabase]);
 
   const searchIntentData = rankingData ? [
@@ -136,6 +142,7 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
         <NextContentRecommendation 
           contentRecommendation={contentRecommendations} 
           userId={user.id}
+          onUpdate={fetchContentRecommendations}
         />
         <div className="overflow-hidden rounded-lg bg-white ring-1 ring-slate-900/10">
           <div className="p-6">

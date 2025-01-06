@@ -5,7 +5,7 @@ import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries'
 import ContentOrdersContent from './ContentOrdersContent';
 
 export default async function ContentOrdersPage() {
-    const supabase = createClient();
+    const supabase = await createClient();
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),

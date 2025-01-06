@@ -9,7 +9,7 @@ import AccountContent from '@/components/AccountContent';
 import AuthenticatedLayout from '../authenticated-layout';
 
 export default async function AccountPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const userId = user?.id as string;

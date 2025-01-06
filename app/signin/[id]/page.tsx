@@ -18,19 +18,10 @@ import SignUp from '@/components/ui/AuthForms/Signup';
 import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
 import { Metadata } from 'next';
 
-interface SignInPageProps {
-  params: { 
-    id: string 
-  };
-  searchParams?: { 
-    disable_button?: boolean 
-  };
-}
-
 export default async function SignIn({
   params,
-  searchParams = {}
-}: SignInPageProps) {
+  searchParams
+}: any) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
@@ -41,14 +32,14 @@ export default async function SignIn({
   if (typeof params.id === 'string' && viewTypes.includes(params.id)) {
     viewProp = params.id;
   } else {
-    const preferredSignInView =
-      cookies().get('preferredSignInView')?.value || null;
+    const cookieStore = await cookies();
+    const preferredSignInView = cookieStore.get('preferredSignInView')?.value || null;
     viewProp = getDefaultSignInView(preferredSignInView);
     return redirect(`/signin/${viewProp}`);
   }
 
   // Check if the user is already logged in and redirect to the account page if so
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user }

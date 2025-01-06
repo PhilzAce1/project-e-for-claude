@@ -48,7 +48,7 @@ export async function checkoutWithStripe(
     }
 
     let params: Stripe.Checkout.SessionCreateParams = {
-      mode: 'payment',
+      mode: price.type === 'one_time' ? 'payment' : 'subscription',
       allow_promotion_codes: true,
       billing_address_collection: 'required',
       customer,

@@ -4,6 +4,9 @@ import { checkoutWithStripe } from '@/utils/stripe/server';
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { LoadingOverlay } from './LoadingOverlay';
+import { Dialog, Transition } from '@headlessui/react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Fragment } from 'react';
 
 // Helper function to convert competition float to readable text
 const getCompetitionLevel = (competition: number): string => {
@@ -19,11 +22,119 @@ interface NextContentRecommendationProps {
   userId: string;
 }
 
+interface UrlModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (url: string, title: string) => void;
+}
+
+const UrlModal = ({ isOpen, onClose, onSubmit }: UrlModalProps) => {
+  const [url, setUrl] = useState('');
+  const [title, setTitle] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(url, title);
+    setUrl('');
+    setTitle('');
+  };
+
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900"
+                >
+                  Content Completed
+                </Dialog.Title>
+                <form onSubmit={handleSubmit}>
+                  <div className="mt-4">
+                    <div className="mb-4">
+                      <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                        Content Title
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        required
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label htmlFor="url" className="block text-sm font-medium text-gray-700">
+                        Content URL
+                      </label>
+                      <input
+                        type="url"
+                        id="url"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        className="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        placeholder="https://example.com/your-content"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end gap-x-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                      onClick={onClose}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+  );
+};
+
 export const NextContentRecommendation = ({ contentRecommendation, userId }: NextContentRecommendationProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const currentPath = usePathname();
   const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const supabase = createClientComponentClient();
 
   const handleCreateContent = async () => {
     if (!contentRecommendation[0]) return;
@@ -84,13 +195,49 @@ export const NextContentRecommendation = ({ contentRecommendation, userId }: Nex
     }
   };
 
+  const handleContentCompleted = async (url: string, title: string) => {
+    try {
+      const { error } = await supabase
+        .from('content')
+        .insert({
+          user_id: userId,
+          url,
+          title,
+          target_keyword: contentRecommendation[0].keyword,
+          status: 'published',
+          secondary_keywords: [] // Add secondary keywords if available
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Content has been marked as completed.',
+      });
+      
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to mark content as completed.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   if (!contentRecommendation) return null;
 
   return (
     <>
       {isProcessing && <LoadingOverlay />}
+      <UrlModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleContentCompleted}
+      />
       <div className="overflow-hidden rounded-lg bg-white ring-1 ring-slate-900/10">
-        <div className="p-6">
+        <div className="p-6 relative">
           <h2 className="text-base font-semibold leading-7 text-gray-900">
             Next Piece of Content to Create
           </h2>
@@ -136,6 +283,12 @@ export const NextContentRecommendation = ({ contentRecommendation, userId }: Nex
                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Create with Espy Go
+              </button>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className=" rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 absolute top-10 right-6"
+              >
+                Mark as Complete
               </button>
             </div>
           )}

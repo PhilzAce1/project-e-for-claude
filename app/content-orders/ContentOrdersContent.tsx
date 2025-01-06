@@ -82,82 +82,74 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-base font-semibold leading-6 text-gray-900">Content Orders</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            A list of all your content orders and their current status.
-          </p>
-        </div>
-      </div>
-      <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                      Keyword
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Search Volume
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Competition
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Intent
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Status
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {orders.map((order) => (
-                    <tr key={order.id}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                        {order.keyword}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {order.search_volume.toLocaleString()}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">
-                        {order.competition_level}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">
-                        {order.search_intent}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                          order.status === 'completed' 
-                            ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20' 
-                            : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(order.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {orders.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-sm text-gray-500">No content orders yet.</p>
-                </div>
-              )}
-            </div>
+    <><div className="container mx-auto">
+          <div className=" overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
+              <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Content Orders</h1>
+              <p className="mt-2 max-w-4xl text-sm text-gray-500">
+                  A list of all your content orders and their current status.
+              </p>
           </div>
-        </div>
       </div>
-    </div>
+      <div className="p-4 sm:p-6 lg:p-8 rounded-lg bg-white shadow mt-8 overflow-x-auto mb-8">
+      <table className="min-w-full divide-y divide-gray-300 text-center">
+                              <thead >
+                                  <tr>
+                                  <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3">
+                                          Keyword
+                                      </th>
+                                      <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                                          Search Volume
+                                      </th>
+                                      <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                                          Competition
+                                      </th>
+                                      <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                                          Intent
+                                      </th>
+                                      <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                                          Status
+                                      </th>
+                                      <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                                          Date
+                                      </th>
+                                  </tr>
+                              </thead>
+                              <tbody className="bg-white">
+                                  {orders.map((order) => (
+                                      <tr key={order.id} className="even:bg-gray-50">
+                                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left">
+                                              {order.keyword}
+                                          </td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              {order.search_volume.toLocaleString()}
+                                          </td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">
+                                              {order.competition_level}
+                                          </td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">
+                                              {order.search_intent}
+                                          </td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${order.status === 'completed'
+                                                      ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
+                                                      : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'}`}>
+                                                  {order.status}
+                                              </span>
+                                          </td>
+                                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              {new Date(order.created_at).toLocaleDateString()}
+                                          </td>
+                                      </tr>
+                                  ))}
+                              </tbody>
+                          </table>
+                          {orders.length === 0 && (
+                              <div className="text-center py-8">
+                                  <p className="text-sm text-gray-500">No content orders yet.</p>
+                              </div>
+                          )}
+                      </div>
+          </>
+
   );
 } 

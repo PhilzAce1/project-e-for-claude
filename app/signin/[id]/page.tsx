@@ -16,19 +16,20 @@ import ForgotPassword from '@/components/ui/AuthForms/ForgotPassword';
 import UpdatePassword from '@/components/ui/AuthForms/UpdatePassword';
 import SignUp from '@/components/ui/AuthForms/Signup';
 import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
+import { Metadata } from 'next';
 
 interface SignInPageProps {
   params: { 
     id: string 
   };
-  searchParams: { 
+  searchParams?: { 
     disable_button?: boolean 
   };
 }
 
 export default async function SignIn({
   params,
-  searchParams
+  searchParams = {}
 }: SignInPageProps) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();

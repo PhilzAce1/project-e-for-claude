@@ -9,6 +9,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import KeywordTable from '@/components/ui/KeywordTable';
 import { RankingItem } from '@/utils/helpers/ranking-data-types';
 import ZeroStateHero from '@/components/ZeroStateHero';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 const Doughnut = dynamic(() => import('react-chartjs-2').then((mod) => mod.Doughnut), {
   ssr: false,
@@ -69,6 +70,22 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
     );
   }
   const [showNoKeywordsModal, setShowNoKeywordsModal] = useState(false);
+  const [hasCompetitors, setHasCompetitors] = useState(false);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const checkCompetitors = async () => {
+      const { count } = await supabase
+        .from('competitors')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      
+      setHasCompetitors(count ? count > 0 : false);
+    };
+
+    checkCompetitors();
+  }, [user.id, supabase]);
+
   const {total_count, metrics, items} = rankingsData;
 
   useEffect(() => {
@@ -229,11 +246,11 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
                     This sucks, we know. 
                   </p>
                   <p className="mt-4 text-xl text-gray-600">
-                    Let's get you ranking for your first keywords.
+                    Let's get you ranking for your first keywords. {!hasCompetitors ? 'Before we do that, we need to know who your competitors are.' : ''}
                   </p>
                   <div className="mt-6">
                     <a
-                      href="/competitors"
+                      href={hasCompetitors ? "/opportunities" : "/competitors"}
                       className="inline-block rounded-md border border-transparent bg-indigo-600 px-8 py-3 font-medium text-white hover:bg-indigo-700"
                     >
                       Start Ranking now!

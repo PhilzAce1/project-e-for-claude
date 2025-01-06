@@ -65,7 +65,6 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
       }
 
       if(competitors.length === 0) {
-        console.log('Competitors', competitors);
         setShowOnboarding(true);
       }
   

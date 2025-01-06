@@ -229,6 +229,12 @@ export function SEOOverview({
     ];
   }
 
+  const fetchContentRecommendations = async () => {
+    const { data: contentRecommendations, error: contentRecommendationsError } = await supabase
+      .rpc('get_user_content_recommendations');
+    setContentRecommendation(contentRecommendations);
+  };
+
   useEffect(() => {
     async function fetchCompetitorData() {
       if (currentTab === 'competitors') {
@@ -254,17 +260,16 @@ export function SEOOverview({
           console.error('Error in competitor data fetch:', err);
         }
       }
-      const { data: contentRecommendations, error: contentRecommendationsError } = await supabase
-      .rpc('get_user_content_recommendations');
-      setContentRecommendation(contentRecommendations)  
+      
+      fetchContentRecommendations();
 
       const { data, error } = await supabase
-      .from('business_information')
-      .select('competitor_metrics')
-      .eq('user_id', user.id)
-      .single()
+        .from('business_information')
+        .select('competitor_metrics')
+        .eq('user_id', user.id)
+        .single();
 
-      setCompetitorMetrics(data?.competitor_metrics)
+      setCompetitorMetrics(data?.competitor_metrics);
     }
 
     fetchCompetitorData();
@@ -293,11 +298,9 @@ export function SEOOverview({
   };
 
   const calculateAveragePosition = (keywordRankings: any[]) => {
-    console.log('keywordRankings',keywordRankings)
     if (!keywordRankings) return 0;
     
     const totalPosition = keywordRankings.reduce((sum, item) => {
-      console.log(item.ranked_serp_element.serp_item.rank_absolute)
       return sum + item.ranked_serp_element.serp_item.rank_absolute;
     }, 0);
 
@@ -505,6 +508,7 @@ export function SEOOverview({
             <NextContentRecommendation 
               contentRecommendation={contentRecommendation} 
               userId={user.id}
+              onUpdate={fetchContentRecommendations}
             />
 
             <div>

@@ -588,13 +588,10 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
 
       try {
         if (activeSection === 'verification' && (!questions || questions.length === 0)) {
-          console.log('Verification questions empty, auto-confirming...');
           await handleSectionConfirm('verification');
         } else if (activeSection === 'critical' && (!informationNeeded.critical || informationNeeded.critical.length === 0)) {
-          console.log('Critical information empty, auto-confirming...');
           await handleSectionConfirm('critical');
         } else if (activeSection === 'recommended' && (!informationNeeded.recommended || informationNeeded.recommended.length === 0)) {
-          console.log('Recommended information empty, auto-confirming...');
           await handleSectionConfirm('recommended');
         }
       } catch (error) {

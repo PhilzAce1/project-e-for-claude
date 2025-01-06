@@ -19,7 +19,6 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
   const router = useRouter();
   const currentPath = usePathname();
   const { toast } = useToast();
-  console.log(opportunities)
 
   if (!opportunities || opportunities.length === 0) {
     return null;

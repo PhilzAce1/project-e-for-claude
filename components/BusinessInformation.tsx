@@ -43,7 +43,6 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
       }
 
       if (analysis) {
-        console.log('Analysis set when?', analysis);
         setData(analysis);
         // Set confirmed sections based on completion_status
         if (analysis.completion_status) {
@@ -72,7 +71,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
         },
         (payload: any) => {
           const analysis = payload.new;
-          console.log('Analysis', analysis);
+          
           setData(analysis);
           
           // Update confirmed sections when changes occur

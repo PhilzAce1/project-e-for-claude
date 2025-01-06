@@ -20,6 +20,7 @@ const getCompetitionLevel = (competition: number): string => {
 interface NextContentRecommendationProps {
   contentRecommendation: any;
   userId: string;
+  onUpdate: () => void;
 }
 
 interface UrlModalProps {
@@ -146,7 +147,7 @@ const UrlModal = ({ isOpen, onClose, onSubmit }: UrlModalProps) => {
   );
 };
 
-export const NextContentRecommendation = ({ contentRecommendation, userId }: NextContentRecommendationProps) => {
+export const NextContentRecommendation = ({ contentRecommendation, userId, onUpdate }: NextContentRecommendationProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const currentPath = usePathname();
@@ -254,6 +255,34 @@ export const NextContentRecommendation = ({ contentRecommendation, userId }: Nex
     }
   };
 
+  const handleMuteKeyword = async () => {
+    try {
+      const { error: muteError } = await supabase
+        .from('muted_keywords')
+        .insert({ 
+          user_id: userId,
+          keyword: contentRecommendation[0].keyword
+        });
+
+      if (muteError) throw muteError;
+
+      toast({
+        title: 'Success',
+        description: 'Keyword has been muted and won\'t appear in recommendations.',
+      });
+      
+      onUpdate();
+      
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to mute keyword.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   if (!contentRecommendation) return null;
 
   return (
@@ -306,9 +335,10 @@ export const NextContentRecommendation = ({ contentRecommendation, userId }: Nex
                   {contentRecommendation[0].content_type}
                 </p>
               </div>
+              <div>
               <button
                 onClick={handleCreateContent}
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="mb-4 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Create with Espy Go
               </button>
@@ -318,6 +348,13 @@ export const NextContentRecommendation = ({ contentRecommendation, userId }: Nex
               >
                 Mark as Complete
               </button>
+              <button
+                onClick={handleMuteKeyword}
+                className="w-full rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+              >
+                Mute Recommendation
+              </button>
+              </div>
             </div>
           )}
         </div>

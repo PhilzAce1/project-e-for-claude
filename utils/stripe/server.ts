@@ -24,7 +24,7 @@ export async function checkoutWithStripe(
 ): Promise<CheckoutResponse> {
   try {
     // Get the user from Supabase auth
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       error,
       data: { user }
@@ -48,7 +48,7 @@ export async function checkoutWithStripe(
     }
 
     let params: Stripe.Checkout.SessionCreateParams = {
-      mode: 'payment',
+      mode: price.type === 'one_time' ? 'payment' : 'subscription',
       allow_promotion_codes: true,
       billing_address_collection: 'required',
       customer,
@@ -110,7 +110,7 @@ export async function checkoutWithStripe(
 
 export async function createStripePortal(currentPath: string) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       error,
       data: { user }

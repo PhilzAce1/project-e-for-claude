@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '../authenticated-layout';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import CompetitorsContent from './CompetitorsContent';
 import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import YourContentContent from './YourContentContent';
 
-export default async function CompetitorsPage() {
+export default async function YourContentPage() {
     const supabase = await createClient();
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
@@ -17,8 +17,8 @@ export default async function CompetitorsPage() {
     }
 
   return (
-    <AuthenticatedLayout user={user} products={products} subscription={subscription} disableGateway={true}>
-      <CompetitorsContent user={user} />
+    <AuthenticatedLayout user={user} products={products} subscription={subscription}>
+      <YourContentContent user={user} />
     </AuthenticatedLayout>
   );
-}
+} 

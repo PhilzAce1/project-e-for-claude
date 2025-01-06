@@ -27,9 +27,7 @@ type PageType = {
 
 export default async function SiteAuditIssuesPage({
   params
-}: {
-  params: { issue: string };
-}) {
+}: any) {
   const supabase = createServerComponentClient({ cookies });
   const issue = params.issue;
   let seoCrawlData = null;

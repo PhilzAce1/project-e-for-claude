@@ -16,14 +16,12 @@ import ForgotPassword from '@/components/ui/AuthForms/ForgotPassword';
 import UpdatePassword from '@/components/ui/AuthForms/UpdatePassword';
 import SignUp from '@/components/ui/AuthForms/Signup';
 import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
+import { Metadata } from 'next';
 
 export default async function SignIn({
   params,
   searchParams
-}: {
-  params: { id: string };
-  searchParams: { disable_button: boolean };
-}) {
+}: any) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
@@ -34,14 +32,14 @@ export default async function SignIn({
   if (typeof params.id === 'string' && viewTypes.includes(params.id)) {
     viewProp = params.id;
   } else {
-    const preferredSignInView =
-      cookies().get('preferredSignInView')?.value || null;
+    const cookieStore = await cookies();
+    const preferredSignInView = cookieStore.get('preferredSignInView')?.value || null;
     viewProp = getDefaultSignInView(preferredSignInView);
     return redirect(`/signin/${viewProp}`);
   }
 
   // Check if the user is already logged in and redirect to the account page if so
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user }
@@ -111,7 +109,7 @@ export default async function SignIn({
           <p className="mt-10 text-center text-sm text-gray-500">
             Not a member?{' '}
             <a href="/signin/signup" className="font-semibold leading-6 text-orange-600 hover:text-orange-500">
-              Start a 14 day free trial
+              Sign up now!
             </a>
           </p>
         )}

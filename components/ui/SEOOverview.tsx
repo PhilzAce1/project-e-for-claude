@@ -293,11 +293,9 @@ export function SEOOverview({
   };
 
   const calculateAveragePosition = (keywordRankings: any[]) => {
-    console.log('keywordRankings',keywordRankings)
     if (!keywordRankings) return 0;
     
     const totalPosition = keywordRankings.reduce((sum, item) => {
-      console.log(item.ranked_serp_element.serp_item.rank_absolute)
       return sum + item.ranked_serp_element.serp_item.rank_absolute;
     }, 0);
 

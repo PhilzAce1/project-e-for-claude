@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js'
 import { Anthropic } from '@anthropic-ai/sdk';
 
 export const maxDuration = 300;
@@ -15,11 +15,11 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
-  
-      const supabase = createClientComponentClient({
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
-      });
+        
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
 
       const anthropic = new Anthropic({
         apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -31,7 +31,9 @@ export async function POST(req: Request) {
         .select('id')
         .eq('user_id', userId)
         .single();
-  
+
+        console.log('businessAnalysis', businessAnalysis)
+
       if (analysisError || !businessAnalysis) {
         return NextResponse.json(
           { error: 'Business analysis not found' },

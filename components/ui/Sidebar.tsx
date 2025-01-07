@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { Dialog, Transition, Disclosure } from '@headlessui/react';
+import { XMarkIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { Fragment } from 'react';
 import Logo from '@/components/icons/Logo';
 import { navigation } from '@/utils/helpers/navigation';
@@ -25,6 +25,93 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
       return pathname === path;
     }
     return pathname.startsWith(path);
+  };
+
+  // Function to check if any child item is active
+  const hasActiveChild = (items: any[]) => {
+    return items?.some(item => isActivePath(item.href));
+  };
+
+  const NavItem = ({ item }: { item: any }) => {
+    if (item.items) {
+      return (
+        <Disclosure as="div" defaultOpen={hasActiveChild(item.items)}>
+          {({ open }) => (
+            <>
+              <Disclosure.Button
+                className={classNames(
+                  hasActiveChild(item.items) ? 'bg-gray-50 text-orange-600' : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
+                  'flex items-center w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold cursor-pointer'
+                )}
+              >
+                <item.icon
+                  className={classNames(
+                    hasActiveChild(item.items) ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
+                    'h-6 w-6 shrink-0'
+                  )}
+                  aria-hidden="true"
+                />
+                {item.name}
+                <ChevronRightIcon
+                  className={classNames(
+                    open ? 'rotate-90 text-gray-500' : 'text-gray-400',
+                    'ml-auto h-5 w-5 shrink-0 transition-transform duration-200'
+                  )}
+                  aria-hidden="true"
+                />
+              </Disclosure.Button>
+              <Disclosure.Panel className="mt-1 px-2">
+                <ul role="list" className="space-y-1">
+                  {item.items.map((subItem: any) => (
+                    <li key={subItem.name}>
+                      <Link
+                        href={subItem.href}
+                        className={classNames(
+                          isActivePath(subItem.href)
+                            ? 'bg-gray-50 text-orange-600'
+                            : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
+                          'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold pl-6'
+                        )}
+                      >
+                        <subItem.icon
+                          className={classNames(
+                            isActivePath(subItem.href) ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
+                            'h-6 w-6 shrink-0'
+                          )}
+                          aria-hidden="true"
+                        />
+                        {subItem.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </Disclosure.Panel>
+            </>
+          )}
+        </Disclosure>
+      );
+    }
+
+    return (
+      <Link
+        href={item.href}
+        className={classNames(
+          isActivePath(item.href)
+            ? 'bg-gray-50 text-orange-600'
+            : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
+          'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+        )}
+      >
+        <item.icon
+          className={classNames(
+            isActivePath(item.href) ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
+            'h-6 w-6 shrink-0'
+          )}
+          aria-hidden="true"
+        />
+        {item.name}
+      </Link>
+    );
   };
 
   return (
@@ -77,39 +164,22 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
                   <nav className="flex flex-1 flex-col">
                     <ul role="list" className="flex flex-1 flex-col gap-y-7">
                       <li>
-                      <ul role="list" className="-mx-2 space-y-1">
-                  {navigation.map((item) => (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        className={classNames(
-                          isActivePath(item.href)
-                            ? 'bg-gray-50 text-orange-600'
-                            : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
-                          'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                        )}
-                      >
-                        <item.icon
-                          className={classNames(
-                            isActivePath(item.href) ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
-                            'h-6 w-6 shrink-0'
-                          )}
-                          aria-hidden="true"
-                        />
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                        <ul role="list" className="-mx-2 space-y-1">
+                          {navigation.map((item) => (
+                            <li key={item.name}>
+                              <NavItem item={item} />
+                            </li>
+                          ))}
+                        </ul>
                       </li>
                       <li className="-mx-6 mt-auto">
                         <Link
                           href="/account"
                           className={classNames(
-                            true
+                            'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6',
+                            isActivePath('/account')
                               ? 'bg-gray-50 text-orange-600'
-                              : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
-                            'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6'
+                              : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50'
                           )}
                         >
                           <img
@@ -117,7 +187,6 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
                             src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user.user_metadata?.full_name || user?.email || 'User'}`}
                             alt=""
                           />
-                          <span className="sr-only">Your profile</span>
                           <span aria-hidden="true">{user.user_metadata?.full_name || user?.email || 'User'}</span>
                         </Link>
                       </li>
@@ -142,24 +211,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
                 <ul role="list" className="-mx-2 space-y-1">
                   {navigation.map((item) => (
                     <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        className={classNames(
-                          isActivePath(item.href)
-                            ? 'bg-gray-50 text-orange-600'
-                            : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
-                          'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                        )}
-                      >
-                        <item.icon
-                          className={classNames(
-                            isActivePath(item.href) ? 'text-orange-600' : 'text-gray-400 group-hover:text-orange-600',
-                            'h-6 w-6 shrink-0'
-                          )}
-                          aria-hidden="true"
-                        />
-                        {item.name}
-                      </Link>
+                      <NavItem item={item} />
                     </li>
                   ))}
                 </ul>
@@ -168,10 +220,10 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
                 <Link
                   href="/account"
                   className={classNames(
-                    true
+                    'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 rounded-md',
+                    isActivePath('/account')
                       ? 'bg-gray-50 text-orange-600'
-                      : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50',
-                    'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 rounded-md'
+                      : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50'
                   )}
                 >
                   <img
@@ -179,7 +231,6 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
                     src={user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user.user_metadata?.full_name || user?.email || 'User'}`}
                     alt=""
                   />
-                  <span className="sr-only">Your profile</span>
                   <span aria-hidden="true">{user.user_metadata?.full_name || user?.email || 'User'}</span>
                 </Link>
               </li>

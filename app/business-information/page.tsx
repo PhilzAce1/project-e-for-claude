@@ -8,7 +8,7 @@ import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries'
 
 export default async function BusinessInformationPage() {
     const cookieStore = await cookies();
-    const supabase = createServerComponentClient({ cookies: () => cookieStore });
+    const supabase = createServerComponentClient({ cookies: () => cookieStore as any });
     
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),

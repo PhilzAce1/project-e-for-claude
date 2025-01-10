@@ -7,7 +7,9 @@ import ZeroStateHero from '@/components/ZeroStateHero';
 import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
 
 export default async function BusinessInformationPage() {
-    const supabase = createServerComponentClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore as any });
+    
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),
@@ -36,16 +38,15 @@ export default async function BusinessInformationPage() {
             {latestAnalysis ? (
                 <BusinessAnalysis analysisId={latestAnalysis.id} />
             ) : (
-                
-            <ZeroStateHero 
-                title="Kickstart Your SEO Strategy Now!"
-                subtitle="We need to start by learning about your business."
-                description="Enter your domain below to begin."
-                ctaText="Start Now"
-                user={user}
-                imageSrc="/rank-image.webp"
-                fullPage={true}
-            />
+                <ZeroStateHero 
+                    title="Kickstart Your SEO Strategy Now!"
+                    subtitle="We need to start by learning about your business."
+                    description="Enter your domain below to begin."
+                    ctaText="Start Now"
+                    user={user}
+                    imageSrc="/rank-image.webp"
+                    fullPage={true}
+                />
             )}
         </AuthenticatedLayout>
     );

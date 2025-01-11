@@ -216,7 +216,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
 
   const handleContentCompleted = async (url: string, title: string) => {
     try {
-      const { error: contentError } = await supabase
+      const { error: contentError, data: newContent } = await supabase
         .from('content')
         .insert({
           user_id: userId,
@@ -225,9 +225,12 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           target_keyword: contentRecommendation[0].keyword,
           status: 'published',
           secondary_keywords: [] // Add secondary keywords if available
-        });
+        }).select();
 
       if (contentError) throw contentError;
+
+      console.log('New content:', newContent);
+
 
       const { error: keywordError } = await supabase
         .from('keyword_suggestions')
@@ -243,8 +246,23 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
         title: 'Success',
         description: 'Content has been marked as completed and keyword updated.',
       });
-      
       setIsModalOpen(false);
+      // Call the index-site API
+      const indexResponse = await fetch('/api/index-site', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url,
+          contentId: newContent[0].id
+        })
+      });
+
+      if (!indexResponse.ok) {
+        console.error('Failed to index site:', await indexResponse.text());
+      }
+      
     } catch (error) {
       console.error('Error:', error);
       toast({

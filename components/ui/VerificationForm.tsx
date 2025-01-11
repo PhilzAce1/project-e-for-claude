@@ -133,21 +133,34 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
 
   const handleRemoveItem = (section: string, questionIndex: number, itemIndex: number, key?: string) => {
     setFormData(prev => {
-      const newData = { ...prev };
+      // Create a deep clone of the previous state
+      const newData = structuredClone(prev);
       
       if (section === 'critical' || section === 'recommended') {
         const targetQuestion = newData.information_needed[section][questionIndex];
         if (key && targetQuestion.currentValue[key]) {
-          targetQuestion.currentValue[key].splice(itemIndex, 1);
+          // Remove only the specific item at itemIndex
+          targetQuestion.currentValue[key] = [
+            ...targetQuestion.currentValue[key].slice(0, itemIndex),
+            ...targetQuestion.currentValue[key].slice(itemIndex + 1)
+          ];
         }
       } else {
         const targetQuestion = newData.verification_questions[questionIndex];
         if (targetQuestion.currentValue.type === 'list') {
-          targetQuestion.currentValue.items.splice(itemIndex, 1);
+          // Remove only the specific item at itemIndex
+          targetQuestion.currentValue.items = [
+            ...targetQuestion.currentValue.items.slice(0, itemIndex),
+            ...targetQuestion.currentValue.items.slice(itemIndex + 1)
+          ];
         } else if (targetQuestion.currentValue.type === 'object' && key) {
           const item = targetQuestion.currentValue.items.find((i: any) => i.key === key);
           if (item) {
-            item.value.splice(itemIndex, 1);
+            // Remove only the specific item at itemIndex
+            item.value = [
+              ...item.value.slice(0, itemIndex),
+              ...item.value.slice(itemIndex + 1)
+            ];
           }
         }
       }

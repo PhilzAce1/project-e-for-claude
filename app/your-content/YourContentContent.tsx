@@ -16,6 +16,7 @@ interface Content {
   secondary_keywords: string[];
   title: string;
   status: string;
+  site_indexed: boolean;
 }
 
 export default function YourContentContent({ user }: YourContentContentProps) {
@@ -110,6 +111,9 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                 Status
               </th>
               <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                Indexed
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
                 Date
               </th>
             </tr>
@@ -138,6 +142,15 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                       : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
                   }`}>
                     {item.status}
+                  </span>
+                </td>
+                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                    item.site_indexed 
+                      ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20' 
+                      : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
+                  }`}>
+                    {item.site_indexed ? 'Indexed' : 'Pending'}
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

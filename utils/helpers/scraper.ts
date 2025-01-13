@@ -86,7 +86,7 @@ export async function scrapeUrls(urls: string[]): Promise<string> {
           content
         };
 
-      } catch (error) {
+      } catch (error: any) {
         console.error(`❌ Failed to scrape ${url}:`, error);
         console.error('Full error:', {
           name: error.name,

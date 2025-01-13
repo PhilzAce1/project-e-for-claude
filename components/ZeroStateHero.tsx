@@ -43,7 +43,7 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
                 .trim(); // Remove any whitespace
 
             // Validate domain format before submitting
-            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:[.,]\w+)*\.(\w+)/;
             if (!domainRegex.test(cleanDomain)) {
                 throw new Error('Please enter a valid domain (e.g., example.com)');
             }

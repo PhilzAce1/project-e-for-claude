@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import * as fs from 'fs/promises';
 import { scrapeUrls } from '@/utils/helpers/scraper';
 
 const execAsync = promisify(exec);
@@ -119,7 +118,7 @@ export async function POST(request: Request) {
           content: scrapedContent
         }
       ]
-    });
+    }) as any;
     console.timeEnd('claudeAnalysis');
     console.log('✅ Claude analysis complete');
 

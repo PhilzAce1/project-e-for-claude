@@ -18,13 +18,6 @@ Deno.serve(async (req) => {
       throw new Error("Email is required");
     }
 
-    // Check if the user is an SSO user or has a confirmation token
-    if (!record.confirmed_at) {
-      return new Response(JSON.stringify({ message: "Skipped Mailjet update" }), {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
     // First, create or update the contact
     const contactUrl = "https://api.mailjet.com/v3/REST/contact";
     const contactBody = JSON.stringify({

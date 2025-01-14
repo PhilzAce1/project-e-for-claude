@@ -10,6 +10,7 @@ import KeywordTable from '@/components/ui/KeywordTable';
 import { RankingItem } from '@/utils/helpers/ranking-data-types';
 import ZeroStateHero from '@/components/ZeroStateHero';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { toast } from '@/components/ui/Toasts/use-toast';
 
 const Doughnut = dynamic(() => import('react-chartjs-2').then((mod) => mod.Doughnut), {
   ssr: false,

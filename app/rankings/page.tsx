@@ -20,17 +20,18 @@ export default async function RankingsPage() {
     // Fetch rankings data
     const { data: rankingsData, error } = await supabase
         .from('business_information')
-        .select('rankings_data, rankings_updated_at')
+        .select('rankings_data, rankings_updated_at, domain')
         .eq('user_id', user.id)
         .single();
 
+    console.log(rankingsData)
     if (error) {
         console.error('Error fetching rankings data:', error);
     }
 
     return (
       <AuthenticatedLayout user={user} products={products} subscription={subscription}>
-        <RankingsContent user={user} rankingsData={rankingsData?.rankings_data} lastCrawlDate={rankingsData?.rankings_updated_at} />
+        <RankingsContent user={user} domain={rankingsData?.domain} rankingsData={rankingsData?.rankings_data} lastCrawlDate={rankingsData?.rankings_updated_at} />
         </AuthenticatedLayout>
     );
 }

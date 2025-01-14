@@ -122,7 +122,7 @@ export async function POST(request: Request) {
     console.timeEnd('claudeAnalysis');
     console.log('✅ Claude analysis complete');
 
-    // Store results in Supabase with provided user_id
+    // Store results in Supabase
     console.time('supabaseStore');
     console.log('💾 Storing results in Supabase...');
     
@@ -132,11 +132,11 @@ export async function POST(request: Request) {
         keyword,
         serp_urls: topUrls,
         analysis: JSON.parse(analysis.content[0].text),
-        user_id, // Use the provided user_id
+        user_id,
         status: 'completed',
         created_at: new Date().toISOString()
       })
-      .select()
+      .select('*')  // Select all columns
       .single();
 
     if (error) {
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
 
     return new Response(JSON.stringify({
       success: true,
-      data: contentRecommendation
+      data: contentRecommendation  // Return the full recommendation
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

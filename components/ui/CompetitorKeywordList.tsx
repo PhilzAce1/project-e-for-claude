@@ -119,7 +119,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
             </div>
             Last Crawled: {formattedDate}
             </div>
-            <KeywordTable keywords={keywords} userId={userId} />
+            <KeywordTable keywords={keywords} userId={userId} showPayLink={true} />
             {(selected && currentCompetitor) && <RankingsSummaryView rankings={currentCompetitor} />}
         </>
     )

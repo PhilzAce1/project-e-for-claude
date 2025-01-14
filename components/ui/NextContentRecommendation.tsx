@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getStripe } from '@/utils/stripe/client';
 import { checkoutWithStripe } from '@/utils/stripe/server';
 import { useRouter, usePathname } from 'next/navigation';
@@ -149,14 +149,74 @@ const UrlModal = ({ isOpen, onClose, onSubmit }: UrlModalProps) => {
 
 export const NextContentRecommendation = ({ contentRecommendation, userId, onUpdate }: NextContentRecommendationProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [contentBrief, setContentBrief] = useState<any>(null);
+  const [isLoadingBrief, setIsLoadingBrief] = useState(false);
   const router = useRouter();
   const currentPath = usePathname();
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createClientComponentClient();
 
+  useEffect(() => {
+    const checkExistingRecommendation = async () => {
+      if (!contentRecommendation?.[0]?.keyword) return;
+
+      setIsLoadingBrief(true);
+      try {
+        const { data, error } = await supabase
+          .from('content_recommendations')
+          .select('*')
+          .eq('keyword', contentRecommendation[0].keyword)
+          .eq('user_id', userId)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking recommendations:', error);
+          return;
+        }
+
+        if (data) {
+          // Use existing recommendation
+          console.log('Found existing recommendation:', data);
+          setContentBrief(data);
+        } else {
+          // No existing recommendation found, call the API
+          const response = await fetch('/api/get-detailed-content-recommendation', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              keyword: contentRecommendation[0].keyword,
+              user_id: userId
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`API responded with status ${response.status}`);
+          }
+
+          const result = await response.json();
+          console.log('Content recommendation created:', result);
+          setContentBrief(result.data);
+        }
+      } catch (error) {
+        console.error('Error creating content recommendation:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to create content recommendation.',
+          variant: 'destructive'
+        });
+      } finally {
+        setIsLoadingBrief(false);
+      }
+    };
+
+    checkExistingRecommendation();
+  }, [contentRecommendation, userId, supabase, toast]);
+
   const handleCreateContent = async () => {
-    if (!contentRecommendation[0]) return;
+    if (!contentRecommendation?.[0]) return;
     
     setIsProcessing(true);
 
@@ -316,6 +376,30 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           <h2 className="text-base font-semibold leading-7 text-gray-900">
             Next Piece of Content to Create
           </h2>
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">Focus Keyword</h3>
+            <p className="mt-2 text-sm text-gray-500 capitalize">
+              {contentRecommendation[0].keyword}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">Potential Reach</h3>
+            <p className="mt-2 text-sm text-gray-500 capitalize">
+              {contentRecommendation[0].search_volume} Searches per Month
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">Competition</h3>
+            <p className="mt-2 text-sm text-gray-500 capitalize">
+              {!isNaN(parseFloat(contentRecommendation[0].competition)) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition.toLowerCase()}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">Content Type</h3>
+            <p className="mt-2 text-sm text-gray-500 capitalize">
+              {contentRecommendation[0].content_type}
+            </p>
+          </div>
 
           {!contentRecommendation[0] ? (
             <div className="flex items-center justify-center h-96">
@@ -323,32 +407,57 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
             </div>
           ) : (
             <div className="mt-6 space-y-6">
+              {isLoadingBrief ? (
+                <div className="text-gray-500">Loading content brief...</div>
+              ) : contentBrief ? (
+                <>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Title</h3>
+                  <p className="mt-2 text-sm text-gray-500 capitalize">
+                    {contentBrief.analysis.meta_information.title}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Meta Description</h3>
+                  <p className="mt-2 text-sm text-gray-500 capitalize">
+                    {contentBrief.analysis.meta_information.description}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">URL Structure</h3>
+                  <p className="mt-2 text-sm text-gray-500 capitalize">
+                    {contentBrief.analysis.url_structure}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Secondary Keywords</h3>
+                  <ul className="mt-2 text-sm text-gray-500 capitalize list-decimal">
+                    {contentBrief.analysis.secondary_keywords.map((keyword: string, index: number) => (
+                      <li key={index}>{keyword}</li>
+                    ))}
+                  </ul>
+                  
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Content Summary</h3>
+                  <p className="mt-2 text-sm text-gray-500 capitalize">{contentBrief.analysis.content_brief.summary}</p>
+                  
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Key Points of Content</h3>
+                  <ul className="mt-2 text-sm text-gray-500 capitalize list-decimal">
+                    {contentBrief.analysis.content_brief.key_points.map((point: string, index: number) => (
+                      <li key={index}>{point}</li>
+                    ))}
+                  </ul>
+                </div>
+                </>
+              ) : (
+                <div className="text-gray-500">No content brief available</div>
+              )}
+              
               <div>
                 <h3 className="text-sm font-medium text-gray-900">Type of Content</h3>
-                <p className="mt-2 text-sm text-gray-500 capitalize">
-                  {contentRecommendation[0].content_type}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-900">Potential Reach</h3>
-                <p className="mt-2 text-sm text-gray-500 capitalize">
-                  {contentRecommendation[0].search_volume} Searches per Month
-                </p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-900">Competition</h3>
-                <p className="mt-2 text-sm text-gray-500 capitalize">
-                  {!isNaN(parseFloat(contentRecommendation[0].competition)) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition.toLowerCase()}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-900">Focus Keyword</h3>
-                <p className="mt-2 text-sm text-gray-500 capitalize">
-                  {contentRecommendation[0].keyword}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-900">Content Type</h3>
                 <p className="mt-2 text-sm text-gray-500 capitalize">
                   {contentRecommendation[0].content_type}
                 </p>

@@ -1,7 +1,7 @@
 'use client';
 
 import { User } from '@supabase/supabase-js';
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { ArrowUpIcon, ArrowDownIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import dynamic from 'next/dynamic';
 import {Chart, ArcElement, Title, Tooltip, Legend, Colors} from 'chart.js'
 import { useState, useEffect, Fragment } from 'react';
@@ -53,9 +53,10 @@ interface RankingsContentProps {
   user: User;
   rankingsData: RankingsData;
   lastCrawlDate: string;
+  domain: string;
 }
 
-export default function RankingsContent({ user, rankingsData, lastCrawlDate }: RankingsContentProps) {
+export default function RankingsContent({ user, rankingsData, lastCrawlDate, domain }: RankingsContentProps) {
   if (!rankingsData) {
     return (
       <ZeroStateHero 
@@ -72,6 +73,7 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
   const [showNoKeywordsModal, setShowNoKeywordsModal] = useState(false);
   const [hasCompetitors, setHasCompetitors] = useState(false);
   const supabase = createClientComponentClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const checkCompetitors = async () => {
@@ -137,12 +139,66 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
   function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
   }
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      
+      if (!domain) {
+        throw new Error('No domain found');
+      }
+
+      const response = await fetch('/api/get-ranked-keywords', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          user_id: user.id,
+          domain: domain
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh rankings');
+      }
+
+      // Refresh the page to show new data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error refreshing rankings:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to refresh rankings',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <div className="container mx-auto">
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
         <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Keyword Rankings</h1>
       </div>
-      <h3 className="text-base font-semibold leading-6 text-gray-900 mt-6 ml-6">Last Crawled - {new Date(lastCrawlDate).toLocaleDateString()}</h3>
+      <div className="flex items-center justify-between mt-6 ml-6">
+        <h3 className="text-base font-semibold leading-6 text-gray-900">
+          Last Crawled - {new Date(lastCrawlDate).toLocaleDateString()}
+        </h3>
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="ml-4 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+        >
+          <ArrowPathIcon 
+            className={`-ml-0.5 mr-1.5 h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} 
+            aria-hidden="true" 
+          />
+          {isRefreshing ? 'Refreshing...' : 'Refresh Rankings'}
+        </button>
+      </div>
       <dl className="mt-5 grid grid-cols-1 divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow md:grid-cols-3 md:divide-x md:divide-y-0">
         {stats.map((item) => (
           <div key={item.name} className="px-4 py-5 sm:p-6">
@@ -206,7 +262,7 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate }: R
           </div>
         </div>
       </div>
-      <KeywordTable keywords={items} userId={user.id} />
+      <KeywordTable keywords={items} userId={user.id} showPayLink={false} />
 
       <Transition appear show={showNoKeywordsModal} as={Fragment}>
         <Dialog as="div" className="relative z-50 " onClose={() => setShowNoKeywordsModal(false)}>

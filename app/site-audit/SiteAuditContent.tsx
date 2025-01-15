@@ -211,7 +211,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-teal-500 rounded-full inline-block'></span>
-                            Redirects: <strong>{page_metrics?.is_redirect || 0}</strong>
+                            Redirects: <strong>{page_metrics?.checks?.is_redirect || 0}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-orange-500 rounded-full inline-block'></span>
@@ -219,7 +219,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-red-500 rounded-full inline-block'></span>
-                            Blocked: <strong>{page_metrics?.non_indexable || 0}</strong>
+                            Blocked: <strong>{page_metrics?.checks?.non_indexable || 0}</strong>
                         </li>
                     </ul>
                     <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">

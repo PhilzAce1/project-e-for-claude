@@ -76,7 +76,9 @@ async function fetchScrapedPages(taskId: string) {
     const postData = [{
         id: taskId,
         filters: [
-            ["resource_type", "=", "html"]
+            ["resource_type", "=", "html"],
+            "or",["resource_type","=","broken"],
+            "or",["resource_type","=","redirect"]
         ],
         limit: 100  // Adjust this value as needed
     }]

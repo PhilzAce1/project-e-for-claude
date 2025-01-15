@@ -3,15 +3,20 @@ import SiteAuditContent from './SiteAuditContent';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import AuthenticatedLayout from '../authenticated-layout';
+import { redirect } from 'next/navigation';
 
 export default async function SiteAuditPage() {
   const supabase = createServerComponentClient({ cookies });
   
-  const [user, subscription, products] = await Promise.all([
+  const [user, products, subscription] = await Promise.all([
     getUser(supabase),
-    getSubscription(supabase),
-    getProducts(supabase)
+    getProducts(supabase),
+    getSubscription(supabase)
   ]);
+
+  if (!user) {
+    redirect('/signin/password_signin');
+  }
 
   let userDetails = null;
   let seoCrawlData = null;

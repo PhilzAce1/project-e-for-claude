@@ -1,11 +1,12 @@
 import AuthenticatedLayout from '../authenticated-layout';
-import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
 import YourContentContent from './YourContentContent';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export default async function YourContentPage() {
-    const supabase = await createClient();
+  const supabase = createServerComponentClient({ cookies });
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),

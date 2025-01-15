@@ -138,7 +138,6 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
         </h1>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <NextContentRecommendation 
           contentRecommendation={contentRecommendations} 
           userId={user.id}
@@ -159,6 +158,10 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
           </div>
         </div>
 
+        <div className="relative md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-4 px-8 mt-4 ">
+        <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">
+          More Opportunities
+        </h2>
       </div>
       <OpportunitiesTable 
         opportunities={contentRecommendations} 

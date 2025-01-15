@@ -371,36 +371,74 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleContentCompleted}
       />
-      <div className="overflow-hidden rounded-lg bg-white ring-1 ring-slate-900/10">
-        <div className="p-6 relative">
-          <h2 className="text-base font-semibold leading-7 text-gray-900">
-            Next Piece of Content to Create
-          </h2>
-          <div>
-            <h3 className="text-sm font-medium text-gray-900">Focus Keyword</h3>
-            <p className="mt-2 text-sm text-gray-500 capitalize">
-              {contentRecommendation[0].keyword}
-            </p>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-900">Potential Reach</h3>
+      <div className="relative md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-4 px-8 mt-4 ">
+        <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">
+          Create this content next
+        </h2>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className=" rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 absolute top-4 right-6"
+        >
+          Mark as Complete
+        </button>
+      </div>
+      <div className="rounded-lg bg-white ring-1 ring-slate-900/10 mb-4 columns-2 gap-4 my-4 p-2">
+          <div className="p-6 relative break-inside-avoid ">
+            <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4">
+              Content Opportunity
+            </h2>
+            <h3 className="text-sm font-medium text-gray-900 mt-4">Potential Reach</h3>
             <p className="mt-2 text-sm text-gray-500 capitalize">
               {contentRecommendation[0].search_volume} Searches per Month
             </p>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-900">Competition</h3>
+            <h3 className="text-sm font-medium text-gray-900 mt-4">Competition</h3>
             <p className="mt-2 text-sm text-gray-500 capitalize">
               {!isNaN(parseFloat(contentRecommendation[0].competition)) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition.toLowerCase()}
             </p>
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-900">Content Type</h3>
-            <p className="mt-2 text-sm text-gray-500 capitalize">
-              {contentRecommendation[0].content_type}
-            </p>
-          </div>
+          <div className="p-6 relative break-inside-avoid ">
+          <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4">
+            Content Brief
+          </h2>
+            {isLoadingBrief || !contentBrief ? (
+              <div className="text-gray-500">Loading content brief...</div>
+            ) : (
+              <>
+                <h3 className="text-sm font-medium text-gray-900 mt-4">Type of Content</h3>
+                <p className="mt-2 text-sm text-gray-500 capitalize">
+                  {contentBrief?.analysis.content_type}
+                </p>
+                <h3 className="mt-4 text-sm font-medium text-gray-900">Content Summary</h3>
+                <p className="mt-2 text-sm text-gray-500 capitalize">{contentBrief?.analysis.content_brief.summary}</p>
 
+                <h3 className="mt-4 text-sm font-medium text-gray-900">Key Points of Content</h3>
+                <ul className="mt-2 text-sm text-gray-500 capitalize pl-4 list-disc">
+                  {contentBrief?.analysis.content_brief.key_points.map((point: string, index: number) => (
+                    <li key={index}>{point}</li>
+                  ))}
+                </ul> 
+              </>
+            )}
+          </div>
+          <div className="p-6 relative break-inside-avoid ">
+            <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4">
+              Keyword Information
+            </h2>
+            <h3 className="text-sm font-medium text-gray-900 mt-4">Focus Keyword</h3>
+            <p className="mt-2 text-sm text-gray-500 capitalize">
+              {contentRecommendation[0].keyword}
+            </p>
+            <h3 className="text-sm font-medium text-gray-900 mt-4">Secondary Keywords</h3>
+            <ul className="mt-2 text-sm text-gray-500 capitalize pl-4 list-disc">
+              {contentBrief?.analysis.secondary_keywords.map((keyword: string, index: number) => (
+                <li key={index}>{keyword}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="p-6 relative break-inside-avoid ">
+          <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4">
+            Meta Information
+          </h2>
           {!contentRecommendation[0] ? (
             <div className="flex items-center justify-center h-96">
               <div className="text-gray-500">Loading recommendation...</div>
@@ -414,42 +452,20 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
                 <div>
                   <h3 className="text-sm font-medium text-gray-900">Title</h3>
                   <p className="mt-2 text-sm text-gray-500 capitalize">
-                    {contentBrief.analysis.meta_information.title}
+                    {contentBrief?.analysis.meta_information.title}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-900">Meta Description</h3>
                   <p className="mt-2 text-sm text-gray-500 capitalize">
-                    {contentBrief.analysis.meta_information.description}
+                    {contentBrief?.analysis.meta_information.description}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-900">URL Structure</h3>
                   <p className="mt-2 text-sm text-gray-500 capitalize">
-                    {contentBrief.analysis.url_structure}
+                    {contentBrief?.analysis.url_structure}
                   </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Secondary Keywords</h3>
-                  <ul className="mt-2 text-sm text-gray-500 capitalize list-decimal">
-                    {contentBrief.analysis.secondary_keywords.map((keyword: string, index: number) => (
-                      <li key={index}>{keyword}</li>
-                    ))}
-                  </ul>
-                  
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Content Summary</h3>
-                  <p className="mt-2 text-sm text-gray-500 capitalize">{contentBrief.analysis.content_brief.summary}</p>
-                  
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Key Points of Content</h3>
-                  <ul className="mt-2 text-sm text-gray-500 capitalize list-decimal">
-                    {contentBrief.analysis.content_brief.key_points.map((point: string, index: number) => (
-                      <li key={index}>{point}</li>
-                    ))}
-                  </ul>
                 </div>
                 </>
               ) : (
@@ -457,23 +473,11 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
               )}
               
               <div>
-                <h3 className="text-sm font-medium text-gray-900">Type of Content</h3>
-                <p className="mt-2 text-sm text-gray-500 capitalize">
-                  {contentRecommendation[0].content_type}
-                </p>
-              </div>
-              <div>
               <button
                 onClick={handleCreateContent}
                 className="mb-4 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Create with Espy Go
-              </button>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className=" rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 absolute top-10 right-6"
-              >
-                Mark as Complete
               </button>
               <button
                 onClick={handleMuteKeyword}

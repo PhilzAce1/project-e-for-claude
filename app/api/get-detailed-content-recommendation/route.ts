@@ -85,6 +85,9 @@ export async function POST(request: Request) {
     // Analyze with Claude
     console.time('claudeAnalysis');
     console.log('🤖 Starting Claude analysis...');
+    if (scrapedContent.length === 0) {
+      throw new Error('No content scraped');
+    }
     const analysis = await anthropic.messages.create({
       model: "claude-3-sonnet-20240229",
       max_tokens: 4096,

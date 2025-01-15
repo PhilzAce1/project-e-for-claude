@@ -207,7 +207,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                     <ul className='mt-4'>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-green-500 rounded-full inline-block'></span>
-                            Successful: <strong>{seoCrawlData?.total_pages - (page_metrics?.checks?.is_broken || 0) - (page_metrics?.checks?.is_4xx_code || 0) - (page_metrics?.checks?.is_5xx_code || 0) - (page_metrics?.checks?.is_redirect || 0) || 'N/A'}</strong>
+                            Successful: <strong>{seoCrawlData?.total_pages - (page_metrics?.checks?.is_broken || 0) - (page_metrics?.checks?.is_redirect || 0) || 'N/A'}</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-teal-500 rounded-full inline-block'></span>
@@ -215,7 +215,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-orange-500 rounded-full inline-block'></span>
-                            Broken: <strong>{(page_metrics?.checks?.is_broken || 0) + (page_metrics?.checks?.is_4xx_code || 0) + (page_metrics?.checks?.is_5xx_code || 0)}</strong>
+                            Broken: <strong>{(page_metrics?.checks?.is_broken || 0) }</strong>
                         </li>
                         <li className='flex items-center gap-2'>
                             <span className='h-4 w-4 bg-red-500 rounded-full inline-block'></span>

@@ -1,9 +1,21 @@
-
 import { getProducts, getSubscription, getUser, getUserDetails } from '@/utils/supabase/queries';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import AuthenticatedLayout from '../../authenticated-layout';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
+
+const getStatusCodeColor = (statusCode: number): string => {
+  if (statusCode >= 200 && statusCode < 300) {
+    return 'bg-green-50 text-green-700'; // Success
+  } else if (statusCode >= 300 && statusCode < 400) {
+    return 'bg-yellow-50 text-yellow-700'; // Redirect
+  } else if (statusCode >= 400 && statusCode < 500) {
+    return 'bg-orange-50 text-orange-700'; // Client Error
+  } else if (statusCode >= 500) {
+    return 'bg-red-50 text-red-700'; // Server Error
+  }
+  return 'bg-gray-50 text-gray-700'; // Default
+};
 
 export default async function SiteAuditIssuesPage() {
   const supabase = createServerComponentClient({ cookies });
@@ -68,9 +80,13 @@ export default async function SiteAuditIssuesPage() {
           <div className="flex flex-col bg-white px-8 py-4 relative">
             <ul className='divide-y divide-gray-200'>
               {scraped_pages.map((value: { url: string; status_code: number }) => (
-                <li  className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0 flex justify-between items-center '>
-                  <a href={value.url} className='text-orange-600 hover:text-orange-500 grow overflow-hidden text-ellipsis whitespace-nowrap'>{value.url}</a>
-                  <span className='p-2 bg-gray-50 flex-none'>{value.status_code}</span>
+                <li key={value.url} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0 flex justify-between items-center'>
+                  <a href={value.url} className='text-orange-600 hover:text-orange-500 grow overflow-hidden text-ellipsis whitespace-nowrap'>
+                    {value.url}
+                  </a>
+                  <span className={`p-2 rounded-md flex-none ${getStatusCodeColor(value.status_code)}`}>
+                    {value.status_code}
+                  </span>
                 </li>
               ))}
             </ul>

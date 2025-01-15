@@ -1,12 +1,14 @@
-import { createClient } from '@/utils/supabase/server';
+
 import { redirect } from 'next/navigation';
 import AuthenticatedLayout from './authenticated-layout';
-import { getSubscription, getLatestSeoCrawl, getProducts, getKeywordRankings } from '@/utils/supabase/queries';
+import { getSubscription, getLatestSeoCrawl, getProducts, getKeywordRankings, getUser } from '@/utils/supabase/queries';
 import DashboardContent from '@/components/DashboardContent';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = createServerComponentClient({ cookies });
+  const user = await getUser(supabase);
 
   if (!user) {
     redirect('/signin/password_signin');

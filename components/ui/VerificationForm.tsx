@@ -107,22 +107,18 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       if (section === 'critical' || section === 'recommended') {
         const targetQuestion = newData.information_needed[section][questionIndex];
         if (key && targetQuestion.currentValue[key]) {
-          // Ensure we're working with a fresh array
-          const currentArray = Array.from(targetQuestion.currentValue[key]);
-          targetQuestion.currentValue[key] = [...currentArray, ''];
+          targetQuestion.currentValue[key] = [...targetQuestion.currentValue[key], ''];
+        } else if (Array.isArray(targetQuestion.currentValue)) {
+          targetQuestion.currentValue = [...targetQuestion.currentValue, ''];
         }
       } else {
         const targetQuestion = newData.verification_questions[questionIndex];
         if (targetQuestion.currentValue.type === 'list') {
-          // Ensure we're working with a fresh array
-          const currentItems = Array.from(targetQuestion.currentValue.items);
-          targetQuestion.currentValue.items = [...currentItems, ''];
+          targetQuestion.currentValue.items = [...targetQuestion.currentValue.items, ''];
         } else if (targetQuestion.currentValue.type === 'object' && key) {
           const item = targetQuestion.currentValue.items.find((i: any) => i.key === key);
           if (item) {
-            // Ensure we're working with a fresh array
-            const currentValues = Array.from(item.value);
-            item.value = [...currentValues, ''];
+            item.value = [...item.value, ''];
           }
         }
       }
@@ -215,7 +211,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       const context = fieldContexts[question.field];
 
       // Handle list type
-      if (question.currentValue.type === 'list') {
+      if (question.currentValue.type === 'list' || question.field === 'geographic_areas') {
         return (
           <div className="space-y-6">
             {/* Add main field context if available */}
@@ -233,7 +229,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                     value={value}
                     onChange={(e) => handleUpdateItem(section, questionIndex, valueIndex, e.target.value)}
                     className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm/6"
-                    placeholder="Add your answer..."
+                    placeholder={question.field === 'geographic_areas' ? "e.g., New York, London, Tokyo" : "Add your answer..."}
                   />
                   <button
                     type="button"
@@ -249,7 +245,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                 onClick={() => handleAddItem(section, questionIndex)}
                 className="flex items-center gap-2 rounded-md bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10"
               >
-                <PlusIcon className="h-4 w-4" /> Add Item
+                <PlusIcon className="h-4 w-4" /> Add {question.field === 'geographic_areas' ? 'Location' : 'Item'}
               </button>
             </div>
           </div>

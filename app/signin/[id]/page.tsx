@@ -10,26 +10,16 @@ import {
 } from '@/utils/auth-helpers/settings';
 import PasswordSignIn from '@/components/ui/AuthForms/PasswordSignIn';
 import EmailSignIn from '@/components/ui/AuthForms/EmailSignIn';
-import Separator from '@/components/ui/AuthForms/Separator';
 import OauthSignIn from '@/components/ui/AuthForms/OauthSignIn';
 import ForgotPassword from '@/components/ui/AuthForms/ForgotPassword';
 import UpdatePassword from '@/components/ui/AuthForms/UpdatePassword';
 import SignUp from '@/components/ui/AuthForms/Signup';
 import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
-import { Metadata } from 'next';
-
-type PageProps = {
-  params: { id: string };
-  searchParams: {
-    code?: string;
-    disable_button?: string;
-  };
-};
 
 export default async function SignIn({
   params,
   searchParams
-}: PageProps) {
+}: any) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();

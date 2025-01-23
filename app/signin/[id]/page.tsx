@@ -10,13 +10,11 @@ import {
 } from '@/utils/auth-helpers/settings';
 import PasswordSignIn from '@/components/ui/AuthForms/PasswordSignIn';
 import EmailSignIn from '@/components/ui/AuthForms/EmailSignIn';
-import Separator from '@/components/ui/AuthForms/Separator';
 import OauthSignIn from '@/components/ui/AuthForms/OauthSignIn';
 import ForgotPassword from '@/components/ui/AuthForms/ForgotPassword';
 import UpdatePassword from '@/components/ui/AuthForms/UpdatePassword';
 import SignUp from '@/components/ui/AuthForms/Signup';
 import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
-import { Metadata } from 'next';
 
 export default async function SignIn({
   params,
@@ -25,11 +23,11 @@ export default async function SignIn({
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();
-  // Declare 'viewProp' and initialize with the default value
   let viewProp: string;
 
-  // Assign url id to 'viewProp' if it's a valid string and ViewTypes includes it
-  if (typeof params.id === 'string' && viewTypes.includes(params.id)) {
+  if (searchParams.code && params.id === 'update_password') {
+    viewProp = 'update_password';
+  } else if (typeof params.id === 'string' && viewTypes.includes(params.id)) {
     viewProp = params.id;
   } else {
     const cookieStore = await cookies();
@@ -38,7 +36,6 @@ export default async function SignIn({
     return redirect(`/signin/${viewProp}`);
   }
 
-  // Check if the user is already logged in and redirect to the account page if so
   const supabase = await createClient();
 
   const {
@@ -47,7 +44,7 @@ export default async function SignIn({
 
   if (user && viewProp !== 'update_password') {
     return redirect('/');
-  } else if (!user && viewProp === 'update_password') {
+  } else if (!user && viewProp === 'update_password' && !searchParams.code) {
     return redirect('/signin/password_signin');
   }
 

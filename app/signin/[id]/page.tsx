@@ -18,13 +18,18 @@ import SignUp from '@/components/ui/AuthForms/Signup';
 import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
 import { Metadata } from 'next';
 
+type PageProps = {
+  params: { id: string };
+  searchParams: {
+    code?: string;
+    disable_button?: string;
+  };
+};
+
 export default async function SignIn({
   params,
   searchParams
-}: {
-  params: { id: string };
-  searchParams: { code?: string };
-}) {
+}: PageProps) {
   const { allowOauth, allowEmail, allowPassword } = getAuthTypes();
   const viewTypes = getViewTypes();
   const redirectMethod = getRedirectMethod();

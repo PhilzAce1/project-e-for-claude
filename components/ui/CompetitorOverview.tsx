@@ -97,31 +97,31 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
       <div className="overflow-hidden bg-white sm:rounded-lg sm:shadow ring-slate-900/10 mt-8">
         <div className='border-b border-gray-20'>
           <h2 className="text-base font-semibold leading-6 text-gray-900 p-6">
-            Summary of {metrics.competitor_count} competitors analyzed
+            Summary of {metrics?.competitor_count} competitors analyzed
           </h2>
         </div>
         <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3 p-8 py-8">
           <div className="mx-auto flex max-w-xs flex-col">
             <dt className="text-base leading-7 text-gray-600">Total Keywords</dt>
             <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {metrics.total_keywords.toLocaleString()}
+              {metrics?.total_keywords?.toLocaleString()}
             </dd>
           </div>
           <div className="mx-auto flex max-w-xs flex-col">
             <dt className="text-base leading-7 text-gray-600">Average Keywords per Competitor</dt>
             <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {metrics.average_keywords.toLocaleString()}
+              {metrics?.average_keywords ? metrics?.average_keywords?.toLocaleString() : 0}
             </dd>
           </div>
           <div className="mx-auto flex max-w-xs flex-col">
             <dt className="text-base leading-7 text-gray-600">Total Opportunities</dt>
             <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              <a href='/opportunities' className="text-indigo-600 hover:text-indigo-500">{metrics.total_opportunities.toLocaleString()}</a>
+              <a href='/opportunities' className="text-indigo-600 hover:text-indigo-500">{metrics?.total_opportunities.toLocaleString()}</a>
             </dd>
           </div>
         </dl>
         <div className="text-xs text-gray-500 text-right p-4">
-          Last updated: {new Date(metrics.last_updated).toLocaleString()}
+          Last updated: {new Date(metrics?.last_updated).toLocaleString()}
         </div>
       </div>
     );

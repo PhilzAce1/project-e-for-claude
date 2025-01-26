@@ -99,7 +99,7 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
     };
 
   return (
-    <div className=' bg-white relative lg:p-8 rounded-xl overflow-hidden h-full sm:shadow ring-slate-900/10  flex flex-col items-stretch'>
+    <div className=' bg-white relative lg:p-8 rounded-xl overflow-hidden lg:h-full sm:shadow ring-slate-900/10  flex flex-col items-stretch sm:h-auto'>
       <div className="mx-auto overflow-auto max-w-7xl px-8 lg:grid lg:grid-cols-2 lg:px-8">
         <div className={`mx-auto  max-w-2xl sm:p-16 lg:px-0 py-8 lg:max-w-none lg:py-64`}>
           <div className="lg:pr-16">

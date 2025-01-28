@@ -62,6 +62,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     ]
 
     const [audits, setAudits] = useState<Audit[]>([]);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         async function fetchAudits() {
@@ -178,10 +179,63 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         
     const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as number), 0);
 
+    const refreshAudit = async () => {
+        setRefreshing(true);
+        try {
+            const response = await fetch('/api/init-seo-crawl', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    domain: seoCrawlData?.domain,
+                    userId: user?.id,
+                    createBusiness: false
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to refresh audit');
+            }
+
+            // Refresh the page to show new data
+            window.location.reload();
+        } catch (error) {
+            console.error('Error refreshing audit:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
     return (
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-                <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Site Audit: <a href={seoCrawlData?.domain} className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.domain}</a></h1>
+                <div className="flex items-center gap-x-3">
+                    <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                        Site Audit: <a href={seoCrawlData?.domain} className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.domain}</a>
+                    </h1>
+                    <button
+                        onClick={refreshAudit}
+                        disabled={refreshing}
+                        className="flex items-center gap-x-2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+                    >
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            strokeWidth={1.5} 
+                            stroke="currentColor" 
+                            className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`}
+                        >
+                            <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" 
+                            />
+                        </svg>
+                        <span>Refresh Audit</span>
+                    </button>
+                </div>
             </div>
             <dl className="mt-8 flex overflow-hidden  bg-white divide-x items-center rounded-2xl text-center ring-slate-900/10 ring-1">
                   <div className=" p-8 flex-grow">

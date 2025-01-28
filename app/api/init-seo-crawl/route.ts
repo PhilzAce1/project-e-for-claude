@@ -102,19 +102,33 @@ async function initiateLighthouseTask(domain: string) {
     }
 }
 
-async function recordSEOCrawl(userId: string, domain: string, externalJobId: string, lighthouseTaskId: string) {
-    const { data, error } = await serviceRoleClient
-        .from('seo_crawls')
-        .insert({ 
+async function recordSEOCrawl(userId: string, domain: string, externalJobId: string, lighthouseTaskId: string, updateOriginal: boolean) {
+    if (updateOriginal) {
+        const { data, error } = await serviceRoleClient
+            .from('seo_crawls')
+            .update({ 
+                external_job_id: externalJobId,
+                lighthouse_task_id: lighthouseTaskId,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('user_id', userId)
+            .eq('domain', domain)
+            .select();
+
+        if (error) throw error;
+        return data;
+    } else {
+        const { data, error } = await serviceRoleClient
+            .from('seo_crawls')
+            .insert({ 
             user_id: userId, 
             domain: domain, 
             external_job_id: externalJobId,
             lighthouse_task_id: lighthouseTaskId
-        })
-        .select()
-
-    if (error) throw error
-    return data
+        }).select()
+        if (error) throw error
+        return data
+    }
 }
 
 function createAuthenticatedFetch(username: string, password: string) {
@@ -136,10 +150,12 @@ function createAuthenticatedFetch(username: string, password: string) {
 
 export async function POST(request: Request) {
     try {
-        const { domain, userId } = await request.json()
+        const { domain, userId, createBusiness = true } = await request.json()
         
         console.log('Inserting domain into database...')
-        await insertBusinessInformation(userId, domain)
+        if (createBusiness) {
+            await insertBusinessInformation(userId, domain)
+        }
 
         console.log(`Initiating SEO crawl for domain: ${domain}, userId: ${userId}`)
         const externalApiData = await initiateExternalSEOCrawl(domain)
@@ -156,7 +172,7 @@ export async function POST(request: Request) {
             throw new Error('Failed to initiate Lighthouse task')
         }
 
-        const crawlData = await recordSEOCrawl(userId, domain, externalApiData.id, lighthouseTaskId)
+        const crawlData = await recordSEOCrawl(userId, domain, externalApiData.id, lighthouseTaskId, !createBusiness)
 
         return NextResponse.json({ 
             message: 'SEO crawl and Lighthouse audit initiated successfully', 

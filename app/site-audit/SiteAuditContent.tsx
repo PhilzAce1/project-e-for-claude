@@ -43,7 +43,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     const { onpage_score, lighthouse_data, page_metrics } = seoCrawlData;
     const [refreshing, setRefreshing] = useState(false);
     const [localSEOData, setLocalSEOData] = useState(seoCrawlData);
-    
+
     const refreshAudit = async () => {
         if (!user?.id || !seoCrawlData?.domain) return;
         
@@ -124,7 +124,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     }
 
     const { categories = {} } = lighthouse_data;
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('Performance');
     const supabase = createClientComponentClient();
     const lighthouseStats = [
@@ -133,29 +133,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         { id: 3, name: 'Best Practices', value: categories['best-practices'].score * 100 },
         { id: 4, name: 'SEO', value: categories.seo.score * 100},
     ]
-
-    const [audits, setAudits] = useState<Audit[]>([]);
-
-    useEffect(() => {
-        async function fetchAudits() {
-            try {
-                const { data, error } = await supabase
-                    .from('seo_crawls')
-                    .select('*')
-                    .eq('user_id', user?.id)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                setAudits(data as Audit[] || []);
-            } catch (error) {
-                console.error('Error fetching audits:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchAudits();
-    }, []);
 
     function getScoreColor(score: number): string {
         if (score >= 86) return 'text-green-500';
@@ -255,6 +232,8 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     // Subscribe to real-time updates
     useEffect(() => {
         if (!user?.id || !seoCrawlData?.domain) return;
+
+        console.log('Subscribing to real-time updates');
 
         const channel = supabase
             .channel('seo_crawl_updates')

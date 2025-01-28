@@ -7,6 +7,7 @@ import Spinner from '@/components/ui/Spinner';
 import LighthouseAudits from '@/components/ui/LighthouseAudits';
 import { siteAuditDictionary, siteAutitPriority } from '@/utils/helpers/site-audit-dictionary';
 import ZeroStateHero from '@/components/ZeroStateHero';
+import { toast } from "@/components/ui/Toasts/use-toast";
 
 // Define the type for your audit items
 type Audit = {
@@ -40,17 +41,89 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     }
 
     const { onpage_score, lighthouse_data, page_metrics } = seoCrawlData;
+    const [refreshing, setRefreshing] = useState(false);
+    const [localSEOData, setLocalSEOData] = useState(seoCrawlData);
+    
+    const refreshAudit = async () => {
+        if (!user?.id || !seoCrawlData?.domain) return;
+        
+        setRefreshing(true);
+        try {
+            const response = await fetch('/api/init-seo-crawl', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: user.id,
+                    domain: seoCrawlData.domain,
+                    createBusiness: false // We don't want to create a new business entry
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to refresh audit');
+            }
+
+            // Show success toast or notification
+            toast({
+                title: "Audit Started",
+                description: "Your site audit has been initiated. Results will be available shortly.",
+            });
+
+        } catch (error) {
+            console.error('Error refreshing audit:', error);
+            toast({
+                title: "Error",
+                description: "Failed to start site audit. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     if (!onpage_score || !lighthouse_data) {
         return (
+            <div>
+            <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
+                <div className="flex items-center gap-x-3">
+                    <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                        Site Audit: <a href={`https://${localSEOData?.domain}`} target="_blank" rel="noopener noreferrer" className='text-orange-600 hover:text-orange-500'>{localSEOData?.domain}</a>
+                    </h1>
+                    <button
+                        onClick={refreshAudit}
+                        disabled={refreshing || localSEOData?.status === 'pending'}
+                        className="flex items-center gap-x-2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+                        title={localSEOData?.status === 'pending' ? "Audit in progress" : "Refresh Site Audit"}
+                    >
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            strokeWidth={1.5} 
+                            stroke="currentColor" 
+                            className={`w-5 h-5 ${refreshing || localSEOData?.status === 'pending' ? 'animate-spin' : ''}`}
+                        >
+                            <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" 
+                            />
+                        </svg>
+                        <span>Reaudit Website</span>
+                    </button>
+                </div>
+            </div>
             <div className="flex flex-col items-center justify-center h-64">
                 <Spinner />
                 <p className="mt-4 text-gray-600">We're still working on your site audit. We'll email you when it's ready.</p>
             </div>
+            </div>
         );
     }
 
-    const { categories } = lighthouse_data;
+    const { categories = {} } = lighthouse_data;
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Performance');
     const supabase = createClientComponentClient();
@@ -62,7 +135,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     ]
 
     const [audits, setAudits] = useState<Audit[]>([]);
-    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         async function fetchAudits() {
@@ -179,45 +251,53 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
         
     const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as number), 0);
 
-    const refreshAudit = async () => {
-        setRefreshing(true);
-        try {
-            const response = await fetch('/api/init-seo-crawl', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+
+    // Subscribe to real-time updates
+    useEffect(() => {
+        if (!user?.id || !seoCrawlData?.domain) return;
+
+        const channel = supabase
+            .channel('seo_crawl_updates')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'seo_crawls',
+                    filter: `user_id=eq.${user.id} AND domain=eq.${seoCrawlData.domain}`
                 },
-                body: JSON.stringify({
-                    domain: seoCrawlData?.domain,
-                    userId: user?.id,
-                    createBusiness: false
-                })
-            });
+                (payload) => {
+                    console.log('Received update:', payload);
+                    setLocalSEOData(payload.new);
+                    
+                    // If the crawl is complete, show a notification
+                    if (payload.new.status === 'completed' && payload.old.status === 'pending') {
+                        toast({
+                            title: "Audit Complete",
+                            description: "Your site audit has been updated with fresh data.",
+                        });
+                    }
+                }
+            )
+            .subscribe();
 
-            if (!response.ok) {
-                throw new Error('Failed to refresh audit');
-            }
-
-            // Refresh the page to show new data
-            window.location.reload();
-        } catch (error) {
-            console.error('Error refreshing audit:', error);
-        } finally {
-            setRefreshing(false);
-        }
-    };
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user?.id, seoCrawlData?.domain, supabase]);
 
     return (
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
                 <div className="flex items-center gap-x-3">
                     <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                        Site Audit: <a href={seoCrawlData?.domain} className='text-orange-600 hover:text-orange-500'>{seoCrawlData?.domain}</a>
+                        Site Audit: <a href={`https://${localSEOData?.domain}`} target="_blank" rel="noopener noreferrer" className='text-orange-600 hover:text-orange-500'>{localSEOData?.domain}</a>
                     </h1>
                     <button
                         onClick={refreshAudit}
-                        disabled={refreshing}
+                        disabled={refreshing || localSEOData?.status === 'pending'}
                         className="flex items-center gap-x-2 rounded-full p-1 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+                        title={localSEOData?.status === 'pending' ? "Audit in progress" : "Refresh Site Audit"}
                     >
                         <svg 
                             xmlns="http://www.w3.org/2000/svg" 
@@ -225,7 +305,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                             viewBox="0 0 24 24" 
                             strokeWidth={1.5} 
                             stroke="currentColor" 
-                            className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`}
+                            className={`w-5 h-5 ${refreshing || localSEOData?.status === 'pending' ? 'animate-spin' : ''}`}
                         >
                             <path 
                                 strokeLinecap="round" 
@@ -233,119 +313,135 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                                 d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" 
                             />
                         </svg>
-                        <span>Refresh Audit</span>
+                        <span>Reaudit Website</span>
                     </button>
                 </div>
             </div>
-            <dl className="mt-8 flex overflow-hidden  bg-white divide-x items-center rounded-2xl text-center ring-slate-900/10 ring-1">
-                  <div className=" p-8 flex-grow">
-                  <dd className={`order-first p-8 text-6xl inline-block font-semibold tracking-tight rounded-xl mb-4 ${getScoreBGColor(parseInt(onpage_score))} ${getScoreColor(parseInt(onpage_score))}`}>{parseInt(onpage_score) }</dd>
-                    <dt className="font-serif text-sm font-semibold  leading-6 text-gray-600 ">On Page SEO Score</dt>
-                  </div>
-                  <div className='h-96 overflow-auto flex-grow-0 relative'>
-                    <img src={seoCrawlData.lighthouse_data.fullPageScreenshot.screenshot.data} />
-                  </div>
-            </dl>
-            <div className="mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl  ring-slate-900/10 ring-1 sm:grid-cols-2 lg:grid-cols-2 ">
-                  <div className="flex flex-col bg-white p-8 relative pb-20">
-                    
-                    <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
-                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Pages Discovered</h2>
+
+            {/* Show loading state when audit is pending */}
+            {localSEOData?.status === 'pending' ? (
+                <div className="mt-8 text-center">
+                    <div className="animate-pulse space-y-4">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
                     </div>
-                    <p className="mt-4 text-3xl font-bold">{seoCrawlData?.total_pages || 'N/A'}</p>
-                    <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.total_pages || 'N/A'} pages and found {page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
-                    
-                    <div className="border-b mt-8 border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
-                        <h3 className=" text-base font-semibold leading-6 text-gray-900">Page Status</h3>
-                    </div>
-                    <ul className='mt-4'>
-                        <li className='flex items-center gap-2'>
-                            <span className='h-4 w-4 bg-green-500 rounded-full inline-block'></span>
-                            Successful: <strong>{seoCrawlData?.total_pages - (page_metrics?.checks?.is_broken || 0) - (page_metrics?.checks?.is_redirect || 0) || 'N/A'}</strong>
-                        </li>
-                        <li className='flex items-center gap-2'>
-                            <span className='h-4 w-4 bg-teal-500 rounded-full inline-block'></span>
-                            Redirects: <strong>{page_metrics?.checks?.is_redirect || 0}</strong>
-                        </li>
-                        <li className='flex items-center gap-2'>
-                            <span className='h-4 w-4 bg-orange-500 rounded-full inline-block'></span>
-                            Broken: <strong>{(page_metrics?.checks?.is_broken || 0) }</strong>
-                        </li>
-                        <li className='flex items-center gap-2'>
-                            <span className='h-4 w-4 bg-red-500 rounded-full inline-block'></span>
-                            Blocked: <strong>{page_metrics?.checks?.non_indexable || 0}</strong>
-                        </li>
-                    </ul>
-                    <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
-                        <a href="/site-audit/pages" className="font-medium text-orange-600 hover:text-orange-500 p-4 my-4 ">
-                            View All Pages
-                        </a>
-                    </div>
-                  </div>
-                  <div className="flex flex-col bg-white p-8 relative pb-20">
-                    
-                    <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">                        
-                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
-                    </div>
-                    <p className="mt-4 text-3xl font-bold">
-                        {totalIssues}
-                    </p>
-                    
-                    <div className="border-b border-gray-200 mt-8 pb-5 sm:flex sm:items-center sm:justify-between">
-                        <h3 className="text-base font-semibold leading-6 text-gray-900">Top SEO Issues</h3>
-                    </div>
-                    <ul className='divide-y divide-gray-200'>
-                    {filteredChecks.slice(0, 4).map(([key, value]) => (
-                        <li key={key} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0'>
-                            <a href={`/site-audit/issues/${key}`}  className='text-orange-600 hover:text-orange-500'>
-                                {String(value)} pages
-                            </a>
-                            {' '}
-                            {siteAuditDictionary[key as keyof typeof siteAuditDictionary] || `have an issue with ${key}`}
-                            <a href={`/site-audit/issues/${key}`}  className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
-                        </li>
-                    ))}
-                    </ul>
-                    <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
-                        <a href="/site-audit/issues" className="font-medium text-orange-600 hover:text-orange-500">
-                            View All Issues
-                        </a>
-                    </div>
-                  </div>
-            </div>
-            <div className="bg-white mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl  ring-slate-900/10 ring-1 p-8">
-                <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Site Speed - Powered by Google Lighthouse</h2>                   
-            </div>
-            {loading ? (
-                <p>Loading audits...</p>
-            ) : lighthouseStats.length > 0 ? (
-                <>
-                    <dl className="mt-8 border-b border-gray-200 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl rounded-b-none text-center sm:grid-cols-2 lg:grid-cols-4 ring-slate-900/10 ring-1">
-                        {lighthouseStats.map((stat) => (
-                            <div 
-                                key={stat.id} 
-                                className={`flex flex-col bg-white p-8 cursor-pointer`}
-                                onClick={() => setActiveTab(stat.name)}
-                            >
-                                <dt className="text-sm font-semibold leading-6 text-gray-600">{stat.name}</dt>
-                                <dd className={`rounded-lg p-4 order-first text-3xl font-semibold tracking-tight 
-                                    ${activeTab === stat.name 
-                                        ? getActiveScoreColor(parseInt(stat.value.toString()))
-                                        : `${getScoreBGColor(parseInt(stat.value.toString()))} ${getScoreColor(parseInt(stat.value.toString()))}`
-                                    }`}
-                                >
-                                    {stat.value}
-                                </dd>
-                            </div>
-                        ))}
-                    </dl>
-                    <div className='bg-white grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl rounded-t-none ring-slate-900/10 ring-1 p-8'>
-                        {renderTabContent(activeTab)}
-                    </div>
-                </>
+                    <p className="mt-4 text-gray-600">Analyzing your site... This may take a few minutes.</p>
+                </div>
             ) : (
-                <p>No audits found. Start a new audit from the dashboard.</p>
+                <>
+                    <dl className="mt-8 flex overflow-hidden  bg-white divide-x items-center rounded-2xl text-center ring-slate-900/10 ring-1">
+                          <div className=" p-8 flex-grow">
+                          <dd className={`order-first p-8 text-6xl inline-block font-semibold tracking-tight rounded-xl mb-4 ${getScoreBGColor(parseInt(onpage_score))} ${getScoreColor(parseInt(onpage_score))}`}>{parseInt(onpage_score) }</dd>
+                            <dt className="font-serif text-sm font-semibold  leading-6 text-gray-600 ">On Page SEO Score</dt>
+                          </div>
+                          <div className='h-96 overflow-auto flex-grow-0 relative'>
+                            <img src={seoCrawlData.lighthouse_data.fullPageScreenshot.screenshot.data} />
+                          </div>
+                    </dl>
+                    <div className="mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl  ring-slate-900/10 ring-1 sm:grid-cols-2 lg:grid-cols-2 ">
+                          <div className="flex flex-col bg-white p-8 relative pb-20">
+                            
+                            <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
+                                <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Pages Discovered</h2>
+                            </div>
+                            <p className="mt-4 text-3xl font-bold">{seoCrawlData?.total_pages || 'N/A'}</p>
+                            <p className="mt-2 text-sm text-gray-500">We've crawled {seoCrawlData?.total_pages || 'N/A'} pages and found {page_metrics?.non_indexable || 0} non-indexable pages for a total of {seoCrawlData?.total_pages || 'N/A'} pages discovered.</p>
+                            
+                            <div className="border-b mt-8 border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">
+                                <h3 className=" text-base font-semibold leading-6 text-gray-900">Page Status</h3>
+                            </div>
+                            <ul className='mt-4'>
+                                <li className='flex items-center gap-2'>
+                                    <span className='h-4 w-4 bg-green-500 rounded-full inline-block'></span>
+                                    Successful: <strong>{seoCrawlData?.total_pages - (page_metrics?.checks?.is_broken || 0) - (page_metrics?.checks?.is_redirect || 0) || 'N/A'}</strong>
+                                </li>
+                                <li className='flex items-center gap-2'>
+                                    <span className='h-4 w-4 bg-teal-500 rounded-full inline-block'></span>
+                                    Redirects: <strong>{page_metrics?.checks?.is_redirect || 0}</strong>
+                                </li>
+                                <li className='flex items-center gap-2'>
+                                    <span className='h-4 w-4 bg-orange-500 rounded-full inline-block'></span>
+                                    Broken: <strong>{(page_metrics?.checks?.is_broken || 0) }</strong>
+                                </li>
+                                <li className='flex items-center gap-2'>
+                                    <span className='h-4 w-4 bg-red-500 rounded-full inline-block'></span>
+                                    Blocked: <strong>{page_metrics?.checks?.non_indexable || 0}</strong>
+                                </li>
+                            </ul>
+                            <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
+                                <a href="/site-audit/pages" className="font-medium text-orange-600 hover:text-orange-500 p-4 my-4 ">
+                                    View All Pages
+                                </a>
+                            </div>
+                          </div>
+                          <div className="flex flex-col bg-white p-8 relative pb-20">
+                            
+                            <div className="border-b border-gray-200 pb-5 sm:flex sm:items-center sm:justify-between">                        
+                                <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">SEO Issues Discovered</h2>
+                            </div>
+                            <p className="mt-4 text-3xl font-bold">
+                                {totalIssues}
+                            </p>
+                            
+                            <div className="border-b border-gray-200 mt-8 pb-5 sm:flex sm:items-center sm:justify-between">
+                                <h3 className="text-base font-semibold leading-6 text-gray-900">Top SEO Issues</h3>
+                            </div>
+                            <ul className='divide-y divide-gray-200'>
+                            {filteredChecks.slice(0, 4).map(([key, value]) => (
+                                <li key={key} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0'>
+                                    <a href={`/site-audit/issues/${key}`}  className='text-orange-600 hover:text-orange-500'>
+                                        {String(value)} pages
+                                    </a>
+                                    {' '}
+                                    {siteAuditDictionary[key as keyof typeof siteAuditDictionary] || `have an issue with ${key}`}
+                                    <a href={`/site-audit/issues/${key}`}  className='text-orange-600 hover:text-orange-500 float-right'>View Details</a>
+                                </li>
+                            ))}
+                            </ul>
+                            <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6 border-t text-sm">
+                                <a href="/site-audit/issues" className="font-medium text-orange-600 hover:text-orange-500">
+                                    View All Issues
+                                </a>
+                            </div>
+                          </div>
+                    </div>
+                    <div className="bg-white mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl  ring-slate-900/10 ring-1 p-8">
+                        <h2 className="font-serif text-xl font-bold leading-6 text-gray-900">Site Speed - Powered by Google Lighthouse</h2>                   
+                    </div>
+                    {loading ? (
+                        <p>Loading audits...</p>
+                    ) : lighthouseStats.length > 0 ? (
+                        <>
+                            <dl className="mt-8 border-b border-gray-200 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl rounded-b-none text-center sm:grid-cols-2 lg:grid-cols-4 ring-slate-900/10 ring-1">
+                                {lighthouseStats.map((stat) => (
+                                    <div 
+                                        key={stat.id} 
+                                        className={`flex flex-col bg-white p-8 cursor-pointer`}
+                                        onClick={() => setActiveTab(stat.name)}
+                                    >
+                                        <dt className="text-sm font-semibold leading-6 text-gray-600">{stat.name}</dt>
+                                        <dd className={`rounded-lg p-4 order-first text-3xl font-semibold tracking-tight 
+                                            ${activeTab === stat.name 
+                                                ? getActiveScoreColor(parseInt(stat.value.toString()))
+                                                : `${getScoreBGColor(parseInt(stat.value.toString()))} ${getScoreColor(parseInt(stat.value.toString()))}`
+                                            }`}
+                                        >
+                                            {stat.value}
+                                        </dd>
+                                    </div>
+                                ))}
+                            </dl>
+                            <div className='bg-white grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl rounded-t-none ring-slate-900/10 ring-1 p-8'>
+                                {renderTabContent(activeTab)}
+                            </div>
+                        </>
+                    ) : (
+                        <p>No audits found. Start a new audit from the dashboard.</p>
+                    )}
+                </>
             )}
         </div>
     );
 }
+

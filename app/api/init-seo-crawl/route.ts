@@ -155,7 +155,17 @@ export async function POST(request: Request) {
         console.log('Inserting domain into database...')
         if (createBusiness) {
             await insertBusinessInformation(userId, domain)
-        }
+        } else {
+            const { data, error } = await serviceRoleClient
+                .from('seo_crawls')
+                .update({ 
+                    lighthouse_data: null,
+                    scraped_pages: null 
+                })
+                .eq('user_id', userId)
+                .eq('domain', domain)
+                .select();
+            }
 
         console.log(`Initiating SEO crawl for domain: ${domain}, userId: ${userId}`)
         const externalApiData = await initiateExternalSEOCrawl(domain)

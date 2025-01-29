@@ -3,21 +3,27 @@ import { redirect } from 'next/navigation';
 import {
   getUserDetails,
   getSubscription,
-  getProducts
+  getProducts,
+  getUser
 } from '@/utils/supabase/queries';
 import AccountContent from '@/components/AccountContent';
 import AuthenticatedLayout from '../authenticated-layout';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export default async function AccountPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const supabase = createServerComponentClient({ cookies });
+  
+  const [user, products, subscription] = await Promise.all([
+    getUser(supabase),
+    getProducts(supabase),
+    getSubscription(supabase)
+  ]);
 
   const userId = user?.id as string;
 
-  const [userDetails, subscription, products] = await Promise.all([
+  const [userDetails] = await Promise.all([
     getUserDetails(supabase, userId),
-    getSubscription(supabase),
-    getProducts(supabase)
   ]);
 
   if (!user) {

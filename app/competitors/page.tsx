@@ -6,7 +6,8 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
 export default async function CompetitorsPage() {
-    const supabase = createServerComponentClient({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore as any });
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),

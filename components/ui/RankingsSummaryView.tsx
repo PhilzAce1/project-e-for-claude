@@ -99,8 +99,9 @@ const RankingDistribution: React.FC<{distribution: Record<string, number>}> = ({
         <h2 className='text-center tracking-wider font-bold text-sm text-gray-900 uppercase py-4'>Ranking Distribution</h2>
     </div>
     <table className="divide-y divide-gray-300 text-center m-auto">
+      <tbody>
     {Object.entries(distribution).map(([range, count]) => (
-        <tr key={count} className="even:bg-gray-50">
+        <tr key={range + count} className="even:bg-gray-50">
             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left"> 
             {range}:
             </td>
@@ -109,6 +110,7 @@ const RankingDistribution: React.FC<{distribution: Record<string, number>}> = ({
             </td>
         </tr>
       ))}
+      </tbody>
     </table>
   </div>
 );
@@ -139,7 +141,7 @@ const TopKeywords: React.FC<{keywords: Array<{keyword: string; etv: number; rank
         </thead>
         <tbody className="bg-white">
       {keywords.map(keyword => (
-            <tr key={keyword.keyword} className="even:bg-gray-50">
+            <tr key={keyword.keyword + keyword.etv + keyword.rank + keyword.rankChange} className="even:bg-gray-50">
               <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left">  {keyword.keyword}</td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${keyword.etv.toFixed(2)}</td>
               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{keyword.rank}</td>
@@ -158,8 +160,9 @@ const KeywordDifficultyDistribution: React.FC<{distribution: Record<string, numb
         <h2 className='text-center tracking-wider font-bold text-sm text-gray-900 uppercase  py-4'>Keyword Difficulty Distribution</h2>
     </div>
     <table className="divide-y divide-gray-300 text-center m-auto">
+      <tbody>
     {Object.entries(distribution).map(([level, count]) => (
-        <tr key={level} className="even:bg-gray-50">
+        <tr key={level + count} className="even:bg-gray-50">
             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left"> 
                 {level}: 
             </td>
@@ -168,6 +171,7 @@ const KeywordDifficultyDistribution: React.FC<{distribution: Record<string, numb
             </td>
         </tr>
     ))}
+    </tbody>
     </table>
   </div>
 );
@@ -178,8 +182,9 @@ const SearchIntentDistribution: React.FC<{distribution: Record<string, number>}>
         <h2 className='text-center tracking-wider font-bold text-sm text-gray-900 uppercase  py-4'>Search Intent Distribution</h2>
     </div>
     <table className="divide-y divide-gray-300 text-center m-auto">
+      <tbody>
     {Object.entries(distribution).map(([intent, count]) => (
-        <tr key={intent} className="even:bg-gray-50">
+        <tr key={intent + count} className="even:bg-gray-50">
             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left capitalize"> 
                 {intent}: 
             </td>
@@ -188,6 +193,7 @@ const SearchIntentDistribution: React.FC<{distribution: Record<string, number>}>
             </td>
         </tr>
     ))}
+    </tbody>
     </table>
   </div>
 );
@@ -210,7 +216,7 @@ const TrendingKeywords: React.FC<{keywords: Array<{keyword: string; rankImprovem
         </thead>
         <tbody className="bg-white">
       {keywords.map(keyword => (
-        <tr key={keyword.keyword} className="even:bg-gray-50">
+        <tr key={keyword.keyword + keyword.rankImprovement} className="even:bg-gray-50">
             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left capitalize"> 
                 {keyword.keyword} 
             </td>
@@ -231,7 +237,7 @@ const PotentialOpportunities: React.FC<{opportunities: Array<{keyword: string; r
     </div>
     <ul>
       {opportunities.map(opportunity => (
-        <li key={opportunity.keyword}>
+        <li key={opportunity.keyword + opportunity.rank}>
           {opportunity.keyword} - Current Rank: {opportunity.rank}
         </li>
       ))}
@@ -253,7 +259,7 @@ const SerpFeatureDistribution: React.FC<{distribution: Record<string, number>}> 
       </thead>
       <tbody>
         {Object.entries(distribution).map(([feature, count]) => (
-          <tr key={feature} className="even:bg-gray-50">
+          <tr key={feature + count} className="even:bg-gray-50">
             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left capitalize">
               {feature.replace(/_/g, ' ')}
             </td>

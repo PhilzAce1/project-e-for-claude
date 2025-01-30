@@ -2,12 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, ChevronUpDownIcon, TrashIcon } from '@heroicons/react/20/solid'
 import KeywordTable from './KeywordTable'
 import RankingsSummaryView from './RankingsSummaryView'
 import { Rankings, RankingItem } from '@/utils/helpers/ranking-data-types'
 import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs'
 import { CompetitorTitles } from '@/utils/helpers/ranking-data-types';
+import { toast } from '@/components/ui/Toasts/use-toast';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "./AlertDialog"
 
 interface CompetitorKeywordListProps {
   competitors: CompetitorTitles[];
@@ -25,6 +36,8 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
     const [keywords, setKeywords] = useState<RankingItem[]>([]);
     const supabase = createClientComponentClient();
     const [currentCompetitor, setCurrentCompetitor] = useState<Competitor | null>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [updatedCompetitors, setUpdatedCompetitors] = useState<CompetitorTitles[]>(competitors);
 
     useEffect(() => {
         if (competitors && competitors.length > 0) {
@@ -76,6 +89,48 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
         setSelected(newSelected);
     };
 
+    const handleRemoveCompetitor = async () => {
+        if (!selected) return;
+        
+        try {
+            const { error } = await supabase
+                .from('competitors')
+                .delete()
+                .eq('id', selected.id)
+                .eq('user_id', userId);
+
+            if (error) {
+                console.error('Supabase delete error:', error);
+                throw error;
+            }
+
+            // Update the local state to remove the competitor
+            const updatedCompetitors = competitors.filter(c => c.id !== selected.id);
+            
+            setUpdatedCompetitors(updatedCompetitors);
+            if (updatedCompetitors.length > 0) {
+                setSelected(updatedCompetitors[0]);
+            } else {
+                setSelected(null);
+            }
+
+            toast({
+                title: "Competitor Removed",
+                description: `Successfully removed ${selected.domain}`,
+            });
+
+        } catch (error) {
+            console.error('Error removing competitor:', error);
+            toast({
+                title: "Error",
+                description: "Failed to remove competitor. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
+            setShowDeleteDialog(false);
+        }
+    };
+
     if (isLoading) {
         return <div>Loading...</div>;
     }
@@ -100,7 +155,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
                             transition
                             className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in sm:text-sm"
                         >
-                            {competitors.map((competitor) => (
+                            {updatedCompetitors.map((competitor) => (
                                 <ListboxOption
                                     key={competitor.id}
                                     value={competitor}
@@ -116,11 +171,41 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
                         </ListboxOptions>
                     </div>
                 </Listbox>
+                
+                {selected && (
+                    <button
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="inline-flex items-center gap-x-1.5 rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-100"
+                    >
+                        <TrashIcon className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+                        Remove Competitor
+                    </button>
+                )}
             </div>
             Last Crawled: {formattedDate}
             </div>
             <KeywordTable keywords={keywords} userId={userId} showPayLink={true} />
             {(selected && currentCompetitor) && <RankingsSummaryView rankings={currentCompetitor} />}
+
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Competitor</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to remove {selected?.domain}? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleRemoveCompetitor}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600 text-white"
+                        >
+                            Remove
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }

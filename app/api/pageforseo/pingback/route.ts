@@ -104,13 +104,13 @@ async function fetchScrapedPages(taskId: string) {
 async function saveSEOCrawlData(taskId: string, summaryData: any, scrapedPagesData: any) {
     const { crawl_progress, domain_info, page_metrics } = summaryData
 
-    console.log('Attempting to update row with external_job_id:', taskId)
+    console.log('Attempting to update row with external_job_id:', taskId, summaryData)
 
     const { data, error } = await serviceRoleClient
         .from('seo_crawls')
         .update({
             total_pages: domain_info.total_pages,
-            onpage_score: page_metrics.onpage_score,
+            onpage_score: page_metrics?.onpage_score,
             page_metrics: page_metrics,
             scraped_pages: scrapedPagesData[0].items
         })

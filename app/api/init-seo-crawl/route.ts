@@ -57,9 +57,14 @@ async function initiateExternalSEOCrawl(domain: string) {
     task.target = `https://${domain}`
     task.max_crawl_pages = 100
     task.load_resources = true
-    task.enable_javascript = true
+    // task.enable_javascript = true
     task.pingback_url = pingbackUrl
     task.lighthouse = true // Enable Lighthouse audit
+    task.custom_robots_txt = "User-agent: Mozilla/5.0 (compatible; RSiteAuditor)\nDisallow:"
+    task.robots_txt_merge_mode = "override"
+    task.switch_pool = true
+    task.crawl_sitemap_only = true
+    task.respect_sitemap = true
 
     try {
         const response = await onPageApi.taskPost([task])

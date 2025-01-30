@@ -114,6 +114,15 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
                 setSelected(null);
             }
 
+            // Call update-competitor-metrics API
+            await fetch('/api/update-competitors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId }),
+            });
+
             toast({
                 title: "Competitor Removed",
                 description: `Successfully removed ${selected.domain}`,

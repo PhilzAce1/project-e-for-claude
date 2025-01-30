@@ -34,7 +34,7 @@ async function getTopSerps(keyword: string) {
       language_code: "en",
       device: "desktop",
       os: "windows",
-      depth: 5  // Changed from 10 to 5
+      depth: 10  // Changed from 10 to 5
     }])
   });
 

@@ -42,6 +42,10 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
         return;
       }
 
+      if(analysis.status === 'completed') {
+        channel.unsubscribe();
+      }
+
       if (analysis) {
         setData(analysis);
         // Set confirmed sections based on completion_status

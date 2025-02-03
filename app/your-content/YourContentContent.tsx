@@ -165,11 +165,22 @@ export default function YourContentContent({ user }: YourContentContentProps) {
               <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
                 Your Content
               </h1>
-              <p className="mt-2 max-w-4xl text-sm text-gray-500">
-                A list of all your published content.
-              </p>
+              <div className="mt-4 border-t border-gray-200 pt-4">
+                <h2 className="text-lg font-bold">What is this?</h2>
+                <p className="text-sm text-gray-600 mb-2 w-2/3">
+                  When you publish content, we index it and add it to your content library.
+                </p>
+                <p className="text-sm text-gray-600">
+                  You can then use this content to create backlinks for your site.
+                </p>
+              </div>
             </div>
-            <div className="mt-4 flex md:ml-4 md:mt-0">
+          </div>
+        </div>
+
+
+        <div className="p-4 sm:p-6 lg:p-8 rounded-lg bg-white shadow mt-8 overflow-x-auto mb-8 relative">
+            <div className="absolute right-4 top-4">
               <button
                 type="button"
                 onClick={() => {
@@ -180,10 +191,6 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                 Submit Content
               </button>
             </div>
-          </div>
-        </div>
-
-        <div className="p-4 sm:p-6 lg:p-8 rounded-lg bg-white shadow mt-8 overflow-x-auto mb-8">
           <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead>
               <tr>

@@ -99,10 +99,9 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
     };
 
   return (
-    <div className=' bg-white relative lg:p-8 rounded-xl overflow-hidden lg:h-full sm:shadow ring-slate-900/10  flex flex-col items-stretch sm:h-auto'>
-      <div className="mx-auto overflow-auto max-w-7xl px-8 lg:grid lg:grid-cols-2 lg:px-8">
-        <div className={`mx-auto  max-w-2xl sm:p-16 lg:px-0 py-8 lg:max-w-none lg:py-64`}>
-          <div className="lg:pr-16">
+    <div className=' bg-white relative p-4 lg:p-8 rounded-xl overflow-hidden lg:h-full sm:shadow ring-slate-900/10 sm:flex-row flex-col flex items-stretch'>
+      <div className="flex-1 flex-grow flex">
+          <div className="lg:pr-16 pr-6 content-center pb-8">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl xl:text-6xl">
               {title}
             </h1>
@@ -139,10 +138,9 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
                 </button>
               </div>
             </form>
-          </div>
         </div>
       </div>
-      <div className={`h-full w-full lg:absolute lg:right-0 lg:top-0  lg:w-1/2 `}>
+      <div className={`h-full flex-1 flex-grow`}>
         <img
           src={imageSrc}
           alt={imageAlt}

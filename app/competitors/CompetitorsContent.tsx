@@ -248,11 +248,22 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
         </button>
       </div>
 
-      <CompetitorOverview 
-      ref={competitorOverviewRef}
-      onRefreshRequest={handleRefreshRequest}
-      user={user} />
-      
+      <div className='flex gap-4 mt-8'>
+        <CompetitorOverview 
+          ref={competitorOverviewRef}
+          onRefreshRequest={handleRefreshRequest}
+          user={user} />
+
+        <div className="rounded-lg bg-white shadow ring-slate-900/10 p-8 basis-1/3">
+          <h2 className="text-lg font-bold">What is this?</h2>
+          <p className="text-sm text-gray-600 mb-2">
+            Here we start with a summary of your competitors, knowing your competitors and their SEO strategies is the first step to outranking them.
+          </p>
+          <p className="text-sm text-gray-600">
+            We then go on to look at the keywords that your competitors are ranking for, and their SEO performance.
+          </p>
+        </div>
+      </div>     
       {competitors.length === 0 ? (
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8 mt-4">
         <p className="text-gray-600">No competitors added yet. Please add some using the form above.</p>

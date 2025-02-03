@@ -382,6 +382,19 @@ export function SEOOverview({
 
   return (
     <div className="space-y-8">
+      
+      <div className="rounded-lg bg-white shadow ring-slate-900/10 p-8 mt-8">
+          <h2 className="text-lg font-bold mb-2">Where should we start?</h2>
+          <p className="text-sm text-gray-600 mb-2 w-2/3">
+            First, take a look at your SEO Audit. This looks at your OnPage SEO, it's important to get the foundations right, this will help to ensure you rank as high as possible.
+          </p>
+          <p className="text-sm text-gray-600 mb-2 w-2/3">
+            Next, take a look at your Competitor Analysis. This looks at your competitors and their SEO strategies, this will help you to understand how to outrank them.
+          </p>
+          <p className="text-sm text-gray-600 mb-2 w-2/3">
+            Finally, take a look at your Opportunities. Here, we highlight your best opportunties for content creation to rank higher than your competitors quickly.
+          </p>
+        </div>
       {/* Overview Cards */}
       <dl className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {stats?.map((item: any) => (

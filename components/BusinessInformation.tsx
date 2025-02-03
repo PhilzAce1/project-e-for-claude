@@ -204,6 +204,12 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
                 activeSection={activeSection}
                 onSectionClick={handleSectionChange}
               />
+              </div>
+            <div className="sticky top-4 overflow-hidden rounded-lg bg-white shadow ring-slate-900/10 p-8 mt-4">
+              <h2 className="text-lg font-bold">Why is this important?</h2>
+              <p className="text-sm text-gray-600">
+                This is one of the most important steps in the process. It helps us understand your business which in turn helps us create the best opportunities for you to rank well.
+              </p>
             </div>
           </div>
         </div>

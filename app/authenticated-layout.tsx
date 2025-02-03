@@ -49,7 +49,7 @@ export default function AuthenticatedLayout({
           </div>
         </div>
 
-        <main className="py-4 sm:py-6 lg:py-10 h-full fixed lg:relative top-0 pt-20 sm:pt-24 overflow-auto w-full lg:w-auto">
+        <main className="py-4 sm:py-6 lg:py-10 h-full fixed lg:relative top-0 overflow-auto w-full lg:w-auto">
           <div className="px-4 sm:px-6 lg:px-8 h-full">
             {!disableGateway ? (<PaymentRequired user={user} products={products} subscription={subscription}>{children}</PaymentRequired>) : children}
           </div>

@@ -149,7 +149,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
     return (
         <>
             <div className='justify-between flex mt-8'>
-                <div className='flex items-center gap-4 mb-4'>
+                <div className='flex items-center gap-4'>
                     <Listbox value={selected} onChange={handleCompetitorChange}>
                     <Label className="block text-sm font-medium leading-6 text-gray-900">Show Competitor</Label>
                     <div className="relative">

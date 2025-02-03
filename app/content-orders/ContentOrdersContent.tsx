@@ -90,10 +90,19 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
 
   return (
     <div className="container mx-auto">
-      <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
+      <div className="w-full rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
         <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
           Content Orders
         </h1>
+        <div className="mt-4 border-t border-gray-200 pt-4 w-full">
+          <h2 className="text-lg font-bold">What is this?</h2>
+          <p className="text-sm text-gray-600 mb-2 w-2/3">
+            This is where all your content orders are listed.
+          </p>
+          <p className="text-sm text-gray-600">
+            When you submit a content order, we will create a content piece for you to publish.
+          </p>
+        </div>
       </div>
       <div className="mt-8 flow-root">
         <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">

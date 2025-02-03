@@ -132,10 +132,22 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
 
   return (
     <div className="container mx-auto">
-      <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
+      <div className="w-full rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
         <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
           Opportunities
         </h1>
+        <div className="mt-4 border-t border-gray-200 pt-4 w-full">
+          <h2 className="text-lg font-bold">What is this?</h2>
+          <p className="text-sm text-gray-600 mb-2 w-2/3">
+            This is one of your most important views in Espy Go. Here you can see all the opportunities for your business.
+          </p>
+          <p className="text-sm text-gray-600 mb-2 w-2/3">
+            Our recommendation engine will suggest content opportunities based on your business and your competitors. We recommend you simply start from the top and create and publish content to rank higher than your competitors.
+          </p>
+          <p className="text-sm text-gray-600 w-2/3">
+            You can also submit content orders to create content for your business.
+          </p>
+        </div>
       </div>
 
         <NextContentRecommendation 

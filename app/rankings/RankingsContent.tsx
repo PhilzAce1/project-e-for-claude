@@ -180,9 +180,18 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate, dom
 
   return (
     <div className="container mx-auto">
-      <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-        <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Keyword Rankings</h1>
-      </div>
+        <div className="rounded-lg bg-white shadow ring-slate-900/10 p-8">
+          <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Keyword Rankings</h1>
+          <div className="mt-4 border-t border-gray-200 pt-4">
+            <h2 className="text-lg font-bold">What is this?</h2>
+            <p className="text-sm text-gray-600 mb-2 w-2/3">
+              Here we give you insights into your keyword rankings, including the number of keywords you are ranking for, the number of keywords that have moved up or down in position, and the number of keywords that have been lost.
+            </p>
+            <p className="text-sm text-gray-600 w-2/3">
+              We also give you a breakdown of your organic and paid keyword rankings by position.
+            </p>  
+          </div>
+        </div>
       <div className="flex items-center justify-between mt-6 ml-6">
         <h3 className="text-base font-semibold leading-6 text-gray-900">
           Last Crawled - {new Date(lastCrawlDate).toLocaleDateString()}

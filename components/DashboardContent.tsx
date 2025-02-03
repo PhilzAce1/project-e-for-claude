@@ -227,7 +227,7 @@ export default function DashboardContent({ user, keywordRankings }: {
         <>
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
                 <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                    {(hasCriticalInfo || !hasCompetitors) ? 'Complete your profile' : 'SEO Performance Overview'}
+                    {(hasCriticalInfo || !hasCompetitors) ? 'Complete your profile' : 'Dashboard'}
                 </h1>
             </div>
             {(hasCriticalInfo || !hasCompetitors) ? (

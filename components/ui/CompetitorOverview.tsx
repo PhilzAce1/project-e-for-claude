@@ -94,7 +94,7 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
     }
 
     return (
-      <div className="overflow-hidden bg-white sm:rounded-lg sm:shadow ring-slate-900/10 mt-8">
+      <div className="bg-white sm:rounded-lg sm:shadow ring-slate-900/10 basis-2/3">
         <div className='border-b border-gray-20'>
           <h2 className="text-base font-semibold leading-6 text-gray-900 p-6">
             Summary of {metrics?.competitor_count} competitors analyzed

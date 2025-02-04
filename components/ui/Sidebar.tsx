@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Dialog, Transition, Disclosure } from '@headlessui/react';
-import { XMarkIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronRightIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { Fragment } from 'react';
 import Logo from '@/components/icons/Logo';
 import { navigation } from '@/utils/helpers/navigation';
@@ -174,6 +174,15 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
                       </li>
                       <li className="-mx-6 mt-auto">
                         <Link
+                          href="https://intercom.help/espy-go/en"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-700 hover:text-orange-600 hover:bg-gray-50"
+                        >
+                          <QuestionMarkCircleIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                          Help Center
+                        </Link>
+                        <Link
                           href="/account"
                           className={classNames(
                             'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6',
@@ -216,11 +225,20 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
                   ))}
                 </ul>
               </li>
-              <li className="mt-auto">
+              <li className="-mx-6 mt-auto">
+                <Link
+                  href="https://intercom.help/espy-go/en"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-700 hover:text-orange-600 hover:bg-gray-50"
+                >
+                  <QuestionMarkCircleIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                  Help Center
+                </Link>
                 <Link
                   href="/account"
                   className={classNames(
-                    'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 rounded-md',
+                    'flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6',
                     isActivePath('/account')
                       ? 'bg-gray-50 text-orange-600'
                       : 'text-gray-700 hover:text-orange-600 hover:bg-gray-50'

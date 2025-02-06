@@ -70,7 +70,7 @@ export default async function SiteAuditIssuesPage({
   const { scraped_pages } = seoCrawlData;
 
   // Filter pages based on the issue
-  const filteredPages = scraped_pages.filter((page: ScrapedPage) => page.checks[issue] === true);
+  const filteredPages = scraped_pages?.filter((page: ScrapedPage) => page.checks[issue] === true);
 
   const breadcrumbPages = [
     { name: 'Site Audit', href: '/site-audit', current: false },
@@ -83,7 +83,7 @@ export default async function SiteAuditIssuesPage({
       <div className="container mx-auto">
         <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
           <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-            Affected Pages: {filteredPages.length}
+            Affected Pages: {filteredPages?.length || 0}
           </h1>
         </div>
         <Breadcrumbs pages={breadcrumbPages} />
@@ -100,7 +100,7 @@ export default async function SiteAuditIssuesPage({
           </div>
           <div className="flex flex-col bg-white px-8 py-4">
             <ul className='divide-y divide-gray-200'>
-              {filteredPages.map((page: PageType, index: number) => (
+              {filteredPages?.map((page: PageType, index: number) => (
                 <li key={index} className='whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-0 flex justify-between items-center'>
                   <a href={page.url} className='text-orange-600 hover:text-orange-500' target='_blank'>{removeDomain(page.url)}</a>
                 </li>

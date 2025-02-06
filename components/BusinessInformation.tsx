@@ -5,16 +5,27 @@ import BusinessProgress from './ui/BusinessProgress';
 import { VerificationForm } from '@/components/ui/VerificationForm';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { useParams } from 'next/navigation';
-import {BusinessSummary} from './ui/BusinessSummary';
+import { BusinessSummary } from './ui/BusinessSummary';
+import { CountrySelector } from './ui/CountrySelector';
+import { GlobeAltIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { priorityCountries, otherCountries } from '@/utils/countries';
+import { handleCountrySelect } from '@/utils/supabase/country';
 
 interface BusinessAnalysisProps {
   analysisId: string;
 }
 
+// Add country name lookup helper
+const getCountryName = (countryCode: string) => {
+  const country = [...priorityCountries, ...otherCountries].find(c => c.code === countryCode);
+  return country ? country.name : countryCode;
+};
 
 export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showCountrySelector, setShowCountrySelector] = useState(false);
+  const [targetCountry, setTargetCountry] = useState<string | null>(null);
   const supabase = createClientComponentClient<any>();
   const { toast } = useToast();
   const [confirmedSections, setConfirmedSections] = useState({
@@ -25,42 +36,52 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
   const [activeSection, setActiveSection] = useState<'verification' | 'critical' | 'recommended'>('verification');
 
   useEffect(() => {
-    const fetchAnalysis = async () => {
-      const { data: analysis, error } = await supabase
-        .from('business_analyses')
-        .select('*, completion_status, status')
-        .eq('id', analysisId)
-        .single();
+    const fetchData = async () => {
+      const [analysisResponse, businessInfoResponse] = await Promise.all([
+        supabase
+          .from('business_analyses')
+          .select('*, completion_status, status')
+          .eq('id', analysisId)
+          .single(),
+        supabase
+          .from('business_information')
+          .select('target_country')
+          .single()
+      ]);
 
-      if (error) {
+      if (analysisResponse.error) {
         toast({
           title: 'Error',
-          description: error.message,
+          description: analysisResponse.error.message,
           variant: 'destructive'
         });
         setLoading(false);
         return;
       }
 
-      if(analysis.status === 'completed') {
+      if (businessInfoResponse.data?.target_country) {
+        setTargetCountry(businessInfoResponse.data.target_country);
+      }
+
+      if(analysisResponse.data.status === 'completed') {
         channel.unsubscribe();
       }
 
-      if (analysis) {
-        setData(analysis);
+      if (analysisResponse.data) {
+        setData(analysisResponse.data);
         // Set confirmed sections based on completion_status
-        if (analysis.completion_status) {
+        if (analysisResponse.data.completion_status) {
           setConfirmedSections({
-            verification: analysis.completion_status.verification || false,
-            critical: analysis.completion_status.critical || false,
-            recommended: analysis.completion_status.recommended || false
+            verification: analysisResponse.data.completion_status.verification || false,
+            critical: analysisResponse.data.completion_status.critical || false,
+            recommended: analysisResponse.data.completion_status.recommended || false
           });
         }
         setLoading(false);
       }
     };
 
-    fetchAnalysis();
+    fetchData();
 
     // Set up real-time subscription
     const channel = supabase
@@ -151,6 +172,13 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     }
   };
 
+  const handleCountryUpdate = async (country: string) => {
+    await handleCountrySelect(data.user_id, country, () => {
+      setTargetCountry(country);
+      setShowCountrySelector(false);
+    });
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" />
@@ -163,10 +191,32 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     <div className="container mx-auto">
       {/* Header */}
       <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-        <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-          Business Analysis
-        </h1>
+        <div>
+          <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+            Business Analysis
+          </h1>
+          {targetCountry && (
+            <div className="mt-2 flex items-center text-sm text-gray-500">
+              <GlobeAltIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+              <span>Targeting: {getCountryName(targetCountry)}</span>
+              <button
+                onClick={() => setShowCountrySelector(true)}
+                className="ml-2 inline-flex items-center rounded-md bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                <PencilIcon className="h-4 w-4 mr-1" />
+                Edit
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      <CountrySelector 
+        isOpen={showCountrySelector}
+        onClose={() => setShowCountrySelector(false)}
+        onSubmit={handleCountryUpdate}
+        initialCountry={targetCountry || 'GB'}
+      />
 
       {/* Show form if any section is incomplete */}
       {(!confirmedSections.critical || !confirmedSections.recommended || !confirmedSections.verification) && (

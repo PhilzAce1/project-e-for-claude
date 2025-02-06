@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server'
 import * as client from 'dataforseo-client'
 import { createClient } from '@supabase/supabase-js'
@@ -10,18 +9,50 @@ const serviceRoleClient = createClient(
 )
 
 async function insertBusinessInformation(userId: string, domain: string) {
-    const { data, error } = await serviceRoleClient
-        .from('business_information')
-        .insert([{ user_id: userId, domain }])
-        .select()
+    try {
+        // First check if a record exists
+        const { data: existingRecord, error: fetchError } = await serviceRoleClient
+            .from('business_information')
+            .select('id')
+            .eq('user_id', userId)
+            .single();
 
-    if (error) throw error
-    console.log('Business added:', data)
+        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the "no rows returned" error
+            throw fetchError;
+        }
 
-    // Call get-ranked-keywords endpoint
-    fetchRankedKeywords(userId, domain)
+        let result;
+        if (existingRecord) {
+            // Update existing record
+            const { data, error } = await serviceRoleClient
+                .from('business_information')
+                .update({ domain })
+                .eq('user_id', userId)
+                .select();
+            
+            if (error) throw error;
+            result = data;
+            console.log('Business updated:', data);
+        } else {
+            // Insert new record
+            const { data, error } = await serviceRoleClient
+                .from('business_information')
+                .insert([{ user_id: userId, domain }])
+                .select();
+            
+            if (error) throw error;
+            result = data;
+            console.log('Business added:', data);
+        }
 
-    return data
+        // Call get-ranked-keywords endpoint
+        fetchRankedKeywords(userId, domain);
+
+        return result;
+    } catch (error) {
+        console.error('Error in insertBusinessInformation:', error);
+        throw error;
+    }
 }
 
 async function fetchRankedKeywords(userId: string, domain: string) {

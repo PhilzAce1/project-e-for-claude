@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/ui/Sidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import Logo from '@/components/icons/Logo';
 import PaymentRequired from '@/components/ui/Pricing/PaymentRequired';
+import { CountrySelector } from '@/components/ui/CountrySelector';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useToast } from '@/components/ui/Toasts/use-toast';
+import { handleCountrySelect } from '@/utils/supabase/country';
 
 export default function AuthenticatedLayout({
   children,
@@ -20,9 +24,48 @@ export default function AuthenticatedLayout({
   disableGateway?: boolean;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showCountrySelector, setShowCountrySelector] = useState(false);
+  const [currentCountry, setCurrentCountry] = useState<string>('GB');
+  const supabase = createClientComponentClient();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const checkCountrySettings = async () => {
+      const { data, error } = await supabase
+        .from('business_information')
+        .select('target_country')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error checking country settings:', error);
+      }
+
+      if (data?.target_country) {
+        setCurrentCountry(data.target_country);
+      }
+
+      if (!data?.target_country) {
+        setShowCountrySelector(true);
+      }
+    };
+
+    checkCountrySettings();
+  }, [user.id, supabase]);
+
+  const handleCountryUpdate = async (country: string) => {
+    await handleCountrySelect(user.id, country, () => setShowCountrySelector(false));
+  };
 
   return (
     <div className="min-h-screen h-screen bg-gray-100">
+      <CountrySelector 
+        isOpen={showCountrySelector}
+        onClose={() => setShowCountrySelector(false)}
+        onSubmit={handleCountryUpdate}
+        initialCountry={currentCountry}
+      />
+      
       <Sidebar 
         user={user} 
         sidebarOpen={sidebarOpen} 

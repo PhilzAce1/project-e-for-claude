@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import generateRankingsSummary from '@/utils/helpers/ranking-summary'
 import { Rankings } from '@/utils/helpers/ranking-data-types'
+import { getLocationCodeByCountry } from '@/utils/countries'
 
 const serviceRoleClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -81,6 +82,15 @@ export async function POST(req: Request) {
 
     const cleanedDomain = cleanDomain(domain)
 
+    // Get the user's target country
+    const { data: businessInfo } = await serviceRoleClient
+      .from('business_information')
+      .select('target_country')
+      .eq('user_id', user_id)
+      .single();
+
+    const locationCode = getLocationCodeByCountry(businessInfo?.target_country || 'GB');
+
     // Fetch data from DataForSEO API
     const dataForSEOResponse = await fetch(DATAFORSEO_API_URL, {
       method: 'POST',
@@ -91,7 +101,7 @@ export async function POST(req: Request) {
       body: JSON.stringify([
         {
           "target": cleanedDomain,
-          "location_code": 2826, // Example: UK
+          "location_code": locationCode,
           "language_code": "en",
           "historical_serp_mode":"live", 
           "ignore_synonyms":false, 

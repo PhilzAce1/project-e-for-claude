@@ -1,1 +1,2 @@
- 
+[global]
+env = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "PUBLIC_BASE_URL"] 

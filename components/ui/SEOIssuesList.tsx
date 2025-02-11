@@ -6,6 +6,18 @@ interface SEOIssuesListProps {
   maxIssues?: number;
 }
 
+export const calculateTotalIssues = (page_metrics: any) => {
+  const excludedChecks = ['is_https', 'has_meta_viewport', 'canonical', 'is_www', 'is_redirect'];
+  
+  return Object.entries(page_metrics?.checks || {} as Record<string, number>)
+    .filter(([key, value]: [string, unknown]) => 
+      typeof value === 'number' && 
+      value > 0 && 
+      !excludedChecks.includes(key)
+    )
+    .reduce((sum, [_, value]) => sum + (value as number), 0);
+};
+
 export function SEOIssuesList({ seoAudit, maxIssues = 4 }: SEOIssuesListProps) {
     const { page_metrics } = seoAudit;
     
@@ -29,7 +41,7 @@ export function SEOIssuesList({ seoAudit, maxIssues = 4 }: SEOIssuesListProps) {
             return (valueB as number) - (valueA as number);
         });
         
-    const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as number), 0);
+    const totalIssues = calculateTotalIssues(page_metrics);
 
   return (
     <div className="relative overflow-hidden rounded-xl shadow ring-1 ring-slate-900/10 bg-white">

@@ -34,7 +34,7 @@ export default async function BusinessInformationPage() {
     }
 
     return (
-        <AuthenticatedLayout user={user} products={products} subscription={subscription}>
+        <AuthenticatedLayout user={user} products={products} subscription={subscription} disableGateway={true}>
             {latestAnalysis ? (
                 <BusinessAnalysis analysisId={latestAnalysis.id} />
             ) : (

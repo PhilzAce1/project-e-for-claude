@@ -5,6 +5,9 @@ import { User } from '@supabase/auth-helpers-nextjs';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useEffect, useState } from 'react';
 import Pricing from './Pricing';
+import { Tables } from '@/types_db';
+import { calculateTotalIssues } from '../SEOIssuesList';
+import { fetchContentRecommendations } from '@/utils/helpers/content-recommendations';
 
 interface PaymentRequiredProps {
   user: User;
@@ -25,13 +28,15 @@ export default function PaymentRequired({ user, children, products, subscription
   const [loading, setLoading] = useState(true);
   const [needsPayment, setNeedsPayment] = useState(false);
   const [metrics, setMetrics] = useState<CompetitorMetrics | null>(null);
+  const [totalSEOIssues, setTotalSEOIssues] = useState<number>(0);
+  const [recommendationData, setRecommendationData] = useState<any>(null);
   const supabase = createClientComponentClient();
+  type Product = Tables<'products'>;
 
   useEffect(() => {
     async function checkPaymentStatus() {
       try {
-        // Check if user has completed analysis and competitors
-        const [{ data: analysisData }, { data: businessInfo }] = await Promise.all([
+        const [{ data: analysisData }, { data: businessInfo }, { data: seoData }, { data: rankingsData }] = await Promise.all([
           supabase
             .from('business_analyses')
             .select('completion_status')
@@ -41,16 +46,36 @@ export default function PaymentRequired({ user, children, products, subscription
             .from('business_information')
             .select('competitor_metrics')
             .eq('user_id', user.id)
+            .single(),
+          supabase
+            .from('seo_crawls')
+            .select('page_metrics')
+            .eq('user_id', user.id)
+            .single(),
+          supabase
+            .from('business_information')
+            .select('rankings_data')
+            .eq('user_id', user.id)
             .single()
         ]);
 
         const hasCompletedAnalysis = analysisData?.completion_status;
         const hasCompetitors = businessInfo?.competitor_metrics?.competitor_count > 0;
 
+        // Calculate total SEO issues if we have data
+        if (seoData?.page_metrics) {
+          const issues = calculateTotalIssues(seoData.page_metrics);
+          setTotalSEOIssues(issues);
+        }
+
         // Set metrics if available
         if (businessInfo?.competitor_metrics) {
           setMetrics(businessInfo.competitor_metrics);
         }
+
+        // Fetch content recommendations
+        const recommendations = await fetchContentRecommendations(user.id);
+        setRecommendationData(recommendations);
 
         const hasActiveSubscription = subscription?.status === 'active' || subscription?.status === 'trialing';
         // Set payment required if analysis is complete, has competitors, but no subscription
@@ -88,11 +113,11 @@ export default function PaymentRequired({ user, children, products, subscription
                 <div className="mx-auto flex max-w-xs flex-col">
                   <dt className="text-base leading-7 text-gray-600">Total Keyword Opportunities</dt>
                   <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                    {metrics.total_opportunities.toLocaleString()}
+                    {recommendationData.length > 0 ? recommendationData.length : '20+'}
                   </dd>
                 </div>
                 <div className="mx-auto flex max-w-xs flex-col">
-                  <dt className="text-base leading-7 text-gray-600">Total Keywords Found</dt>
+                  <dt className="text-base leading-7 text-gray-600">Total Competitor Keywords Found</dt>
                   <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                     {metrics.total_keywords.toLocaleString()}
                   </dd>
@@ -105,23 +130,23 @@ export default function PaymentRequired({ user, children, products, subscription
                 </div>
                 </dl>
                 <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-2 p-8 py-8">
-        <div className="mx-auto flex max-w-xs flex-col">
-          <dt className="text-base leading-7 text-gray-600">Articles to implement now</dt>
-          <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            11  
+                <div className="mx-auto flex max-w-xs flex-col">
+                  <dt className="text-base leading-7 text-gray-600">Articles to implement now</dt>
+                  <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    20+
                   </dd>
                 </div>
-        <div className="mx-auto flex max-w-xs flex-col">
-          <dt className="text-base leading-7 text-gray-600">OnPage SEO improvements</dt>
-          <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-            11  
-          </dd>
-        </div>
+                <div className="mx-auto flex max-w-xs flex-col">
+                  <dt className="text-base leading-7 text-gray-600">OnPage SEO improvements</dt>
+                  <dd className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {totalSEOIssues}
+                  </dd>
+                </div>
               </dl>
             </div>
           )}
           
-          <Pricing user={user} products={products} subscription={subscription} />
+          <Pricing user={user} products={products.filter((product: Product) => product.name === 'Base Plan')} subscription={subscription} />
           
         </div>
       </div>

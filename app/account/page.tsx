@@ -32,7 +32,7 @@ export default async function AccountPage() {
 
 
   return (
-    <AuthenticatedLayout subscription={subscription} products={products}  user={user} >
+    <AuthenticatedLayout subscription={subscription} products={products}  user={user} disableGateway={true}>
       <AccountContent user={user} userDetails={userDetails} subscription={subscription} />
     </AuthenticatedLayout>
   );

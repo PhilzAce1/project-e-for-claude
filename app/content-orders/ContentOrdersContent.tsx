@@ -23,7 +23,7 @@ interface ContentOrder {
   competition: string;
   main_intent: string;
   content_upload: string;
-  upload_instructions: string;
+  upload_instruction: string;
 }
 
 export default function ContentOrdersContent({ user }: ContentOrdersContentProps) {
@@ -198,7 +198,7 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
                                   {({ active }) => (
                                     <button
                                       disabled={order.status !== 'completed'}
-                                      onClick={() => router.push(`${order.upload_instructions}`)}
+                                      onClick={() => router.push(`${order.upload_instruction}`)}
                                       className={`
                                         ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'}
                                         ${order.status !== 'completed' ? 'opacity-50 cursor-not-allowed' : ''}

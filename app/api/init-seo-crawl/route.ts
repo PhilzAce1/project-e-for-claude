@@ -94,7 +94,7 @@ async function initiateExternalSEOCrawl(domain: string) {
     task.custom_robots_txt = "User-agent: Mozilla/5.0 (compatible; RSiteAuditor)\nDisallow:"
     task.robots_txt_merge_mode = "override"
     task.switch_pool = true
-    task.crawl_sitemap_only = true
+    // task.crawl_sitemap_only = true
     task.respect_sitemap = true
 
     try {

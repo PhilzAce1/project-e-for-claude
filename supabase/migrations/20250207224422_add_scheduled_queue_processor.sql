@@ -1,3 +1,6 @@
+-- Enable pg_cron extension first
+create extension if not exists "pg_cron";
+
 -- Create a function that processes the queue
 create or replace function process_country_update_queue()
 returns void

@@ -16,33 +16,32 @@ const getCompetitionLevel = (competition: number): string => {
   return "Very Low";
 };
 
-interface NextContentRecommendationProps {
-  contentRecommendation: any;
+interface ContentBriefProps {
+  keyword: string;
   userId: string;
-  onUpdate: () => void;
+  onUpdate?: () => void;
 }
 
 
-export const NextContentRecommendation = ({ contentRecommendation, userId, onUpdate }: NextContentRecommendationProps) => {
+export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [contentBrief, setContentBrief] = useState<any>(null);
   const [isLoadingBrief, setIsLoadingBrief] = useState(false);
   const router = useRouter();
   const currentPath = usePathname();
   const { toast } = useToast();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
     const checkExistingRecommendation = async () => {
-      if (!contentRecommendation?.[0]?.keyword) return;
+      if (!keyword) return;
 
       setIsLoadingBrief(true);
       try {
         const { data, error } = await supabase
           .from('content_recommendations')
           .select('*')
-          .eq('keyword', contentRecommendation[0].keyword)
+          .eq('keyword', keyword)
           .eq('user_id', userId)
           .single();
 
@@ -56,6 +55,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           console.log('Found existing recommendation:', data);
           setContentBrief(data);
         } else {
+          console.log('No existing recommendation found, calling API');
           // No existing recommendation found, call the API
           const response = await fetch('/api/get-detailed-content-recommendation', {
             method: 'POST',
@@ -63,7 +63,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              keyword: contentRecommendation[0].keyword,
+              keyword: keyword,
               user_id: userId
             })
           });
@@ -89,132 +89,16 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
     };
 
     checkExistingRecommendation();
-  }, [contentRecommendation, userId, supabase, toast]);
-
-  const handleCreateContent = (keyword: string) => {
-    router.push(`/create-content/${encodeURIComponent(keyword)}`);
-  };
-
-  const handleContentCompleted = async (url: string, title: string) => {
-    try {
-      const { error: contentError, data: newContent } = await supabase
-        .from('content')
-        .insert({
-          user_id: userId,
-          url,
-          title,
-          status: 'published',
-        }).select();
-
-      if (contentError) throw contentError;
-
-      console.log('New content:', newContent);
+  }, [keyword, userId, supabase, toast]);
 
 
-      const { error: keywordError } = await supabase
-        .from('keyword_suggestions')
-        .update({ 
-          content_completed: true
-        })
-        .eq('user_id', userId)
-        .eq('keyword', contentRecommendation[0].keyword);
 
-      if (keywordError) throw keywordError;
-
-      toast({
-        title: 'Success',
-        description: 'Content has been marked as completed and keyword updated.',
-      });
-      setIsModalOpen(false);
-      // Call the index-site API
-      const indexResponse = await fetch('/api/index-site', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          contentId: newContent[0].id
-        })
-      });
-
-      if (!indexResponse.ok) {
-        console.error('Failed to index site:', await indexResponse.text());
-      }
-      
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to mark content as completed.',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const handleMuteKeyword = async () => {
-    try {
-      const { error: muteError } = await supabase
-        .from('muted_keywords')
-        .insert({ 
-          user_id: userId,
-          keyword: contentRecommendation[0].keyword
-        });
-
-      if (muteError) throw muteError;
-
-      toast({
-        title: 'Success',
-        description: 'Keyword has been muted and won\'t appear in recommendations.',
-      });
-      
-      onUpdate();
-      
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to mute keyword.',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  if (!contentRecommendation || !(contentRecommendation.length > 0)) return null;
+  if (!keyword) return null;
 
   return (
     <>
       {isProcessing && <LoadingOverlay />}
-      <UrlModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleContentCompleted}
-      />
-      <div className="relative md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-4 px-8 mt-4 ">
-        <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">
-          Create this content next
-        </h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className=" rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 absolute top-4 right-6"
-        >
-          Mark as Complete
-        </button>
-      </div>
-      <div className="rounded-lg bg-white ring-1 ring-slate-900/10 mb-4 columns-2 gap-4 my-4 p-2">
-          <div className="p-6 relative break-inside-avoid ">
-            <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4">
-              Content Opportunity
-            </h2>
-            <h3 className="text-sm font-medium text-gray-900 mt-4">Potential Reach</h3>
-            <p className="mt-2 text-sm text-gray-500 capitalize">
-              {contentRecommendation[0]?.search_volume} Searches per Month
-            </p>
-            <h3 className="text-sm font-medium text-gray-900 mt-4">Competition</h3>
-            <p className="mt-2 text-sm text-gray-500 capitalize">
-              {!isNaN(parseFloat(contentRecommendation[0]?.competition)) ? getCompetitionLevel(contentRecommendation[0].competition) : contentRecommendation[0].competition.toLowerCase()}
-            </p>
-          </div>
+      <div className="rounded-lg bg-white ring-1 ring-slate-900/10  p-2">
           <div className="p-6 relative break-inside-avoid ">
           <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4">
             Content Brief
@@ -245,7 +129,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
             </h2>
             <h3 className="text-sm font-medium text-gray-900 mt-4">Focus Keyword</h3>
             <p className="mt-2 text-sm text-gray-500 capitalize">
-              {contentRecommendation[0]?.keyword}
+              {keyword}
             </p>
             <h3 className="text-sm font-medium text-gray-900 mt-4">Secondary Keywords</h3>
             <ul className="mt-2 text-sm text-gray-500 capitalize pl-4 list-disc">
@@ -258,7 +142,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4">
             Meta Information
           </h2>
-          {!contentRecommendation[0] ? (
+          {!keyword ? (
             <div className="flex items-center justify-center h-96">
               <div className="text-gray-500">Loading recommendation...</div>
             </div>
@@ -291,20 +175,6 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
                 <div className="text-gray-500">No content brief available</div>
               )}
               
-              <div>
-              <button
-                onClick={() => handleCreateContent(contentRecommendation[0].keyword)}
-                className="mb-4 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Create Content
-              </button>
-              <button
-                onClick={handleMuteKeyword}
-                className="w-full rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-              >
-                Mute Recommendation
-              </button>
-              </div>
             </div>
           )}
         </div>

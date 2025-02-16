@@ -20,9 +20,10 @@ type SubscriptionWithPriceAndProduct = Subscription & {
 
 interface Props {
   subscription: SubscriptionWithPriceAndProduct | null;
+  userDetails: any;
 }
 
-export default function CustomerPortalForm({ subscription }: Props) {
+export default function CustomerPortalForm({ subscription, userDetails }: Props) {
   const router = useRouter();
   const currentPath = usePathname();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,6 +79,13 @@ export default function CustomerPortalForm({ subscription }: Props) {
                   Choose your plan
                 </Link>
               )}
+            </p>
+          </div>
+
+          <div className="col-span-full">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">Content Credits</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {userDetails?.content_credits}
             </p>
           </div>
 

@@ -20,7 +20,7 @@ type CheckoutResponse = {
 
 export async function checkoutWithStripe(
   price: Price & { metadata?: any },
-  redirectPath: string = '/account'
+  redirectPath: string = '/payment-complete'
 ): Promise<CheckoutResponse> {
   try {
     // Get the user from Supabase auth

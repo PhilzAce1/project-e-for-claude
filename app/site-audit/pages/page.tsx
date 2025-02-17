@@ -1,4 +1,4 @@
-import { getProducts, getSubscription, getUser, getUserDetails } from '@/utils/supabase/queries';
+import { getProducts, getSubscriptions, getUser, getUserDetails } from '@/utils/supabase/queries';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import AuthenticatedLayout from '../../authenticated-layout';
@@ -24,7 +24,7 @@ export default async function SiteAuditIssuesPage() {
   let seoCrawlData = null;
 
   const [subscription, products, user] = await Promise.all([
-    getSubscription(supabase),
+    getSubscriptions(supabase),
     getProducts(supabase),
     getUser(supabase)
   ]);

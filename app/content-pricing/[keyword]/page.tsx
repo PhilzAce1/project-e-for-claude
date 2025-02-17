@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/app/authenticated-layout';
 import { redirect } from 'next/navigation';
-import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import ContentPricing from '@/components/ui/ContentPricing';
@@ -10,7 +10,7 @@ export default async function ContentPricingPage({ params }: { params: { keyword
   const [user, products, subscription] = await Promise.all([
     getUser(supabase),
     getProducts(supabase),
-    getSubscription(supabase)
+    getSubscriptions(supabase)
   ]);
 
 

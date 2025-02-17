@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '../authenticated-layout';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
 import OpportunitiesContent from './OpportunitiesContent';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
@@ -10,7 +10,7 @@ export default async function OpportunitiesPage() {
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),
-      getSubscription(supabase)
+      getSubscriptions(supabase)
     ]);
   
     if (!user) {

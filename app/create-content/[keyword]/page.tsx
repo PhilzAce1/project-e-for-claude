@@ -5,7 +5,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import CreateContentContent from './CreateContentContent';
 
-export default async function CreateContentPage({ params }: { params: { keyword: string } }) {
+export default async function CreateContentPage({ params }: any ) {
   const supabase = createServerComponentClient({ cookies });
   const [user, products, subscription] = await Promise.all([
     getUser(supabase),

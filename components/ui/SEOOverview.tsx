@@ -522,12 +522,7 @@ export function SEOOverview({
               contentRecommendation={contentRecommendation} 
               userId={user.id}
               onUpdate={fetchContentRecommendations}
-            />
-
-            <div>
-              <h3 className="text-lg font-medium mb-4">Content Opportunities</h3>
-              {competitorMetrics?.total_opportunities}
-            </div>  
+            /> 
           </div>
         )}
       </div>

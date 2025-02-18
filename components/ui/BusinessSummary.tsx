@@ -174,7 +174,7 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
   return (
     <>
       {Object.entries(data || {}).map(([category, answers]: [string, any]) => (
-    <div className=" mb-8 rounded-lg ring-1 bg-white ring-slate-900/10 ">
+    <div key={category} className=" mb-8 rounded-lg ring-1 bg-white ring-slate-900/10 ">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-5">

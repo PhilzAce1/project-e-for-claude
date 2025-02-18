@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import {
   getUserDetails,
-  getSubscription,
+  getSubscriptions,
   getProducts,
   getUser
 } from '@/utils/supabase/queries';
@@ -17,7 +17,7 @@ export default async function AccountPage() {
   const [user, products, subscription] = await Promise.all([
     getUser(supabase),
     getProducts(supabase),
-    getSubscription(supabase)
+    getSubscriptions(supabase)
   ]);
 
   const userId = user?.id as string;

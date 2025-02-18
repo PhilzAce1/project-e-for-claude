@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { BusinessAnalysis } from '../../components/BusinessInformation';
 import AuthenticatedLayout from '../authenticated-layout';
 import ZeroStateHero from '@/components/ZeroStateHero';
-import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
 
 export default async function BusinessInformationPage() {
     const cookieStore = await cookies();
@@ -13,7 +13,7 @@ export default async function BusinessInformationPage() {
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),
-      getSubscription(supabase)
+      getSubscriptions(supabase)
     ]);
 
     if (!user) {

@@ -20,7 +20,7 @@ type CheckoutResponse = {
 
 export async function checkoutWithStripe(
   price: Price & { metadata?: any },
-  redirectPath: string = '/account'
+  redirectPath: string = '/payment-complete'
 ): Promise<CheckoutResponse> {
   try {
     // Get the user from Supabase auth
@@ -65,8 +65,6 @@ export async function checkoutWithStripe(
       cancel_url: getURL(),
       success_url: getURL(redirectPath)
     };
-
-    console.log('Creating checkout session with params:', JSON.stringify(params, null, 2));
 
     // Create a checkout session in Stripe
     let session;
@@ -124,7 +122,7 @@ export async function createStripePortal(currentPath: string) {
     }
 
     let customer;
-    console.log('user', user);
+    
     try {
       customer = await createOrRetrieveCustomer({
         uuid: user.id || '',

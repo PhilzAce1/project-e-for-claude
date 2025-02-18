@@ -2,18 +2,15 @@
 
 # Array of URLs
 urls=(
-  "https://playfootball.games/football-bingo/"
-  "https://playfootball.games/football-connections/"
-  "https://playfootball.games/football-wordle/"
-  "https://playfootball.games/quizzes/"
-  "https://www.fourfourtwo.com/football-quiz-quizzes"
-  "https://www.bbc.co.uk/sport/football-quizzes"
-  "https://www.sporcle.com/games/subcategory/football"
-  "https://www.theguardian.com/football/2025/jan/08/football-quiz-in-which-minute-were-these-iconic-goals-scored"
-  "https://www.bbc.com/sport/football/articles/czd468v5zego"
-  "https://www.football365.com/news/football-quiz-missing-men-league-cup-carabao-liverpool-2-1-spurs-tottenham-2016"
-  "https://www.fourfourtwo.com/features/football-quiz-can-you-name-every-club-to-have-ever-reached-the-league-cup-semi-finals"
-  "https://www.howto.co.uk/titles/nick-holt/the-mammoth-football-quiz-book/9781472137630"
+  "https://support.trustpilot.com/hc/da/articles/360019826379-Oversigt-over-Trustpilots-TrustBox-widgets",
+  "https://support.trustpilot.com/hc/en-us/articles/360019826379-TrustBox-widget-overview",
+  "https://business.trustpilot.com/features/trustbox-widgets",
+  "https://dk.business.trustpilot.com/features/trustbox-widgets",
+  "https://support.trustpilot.com/hc/en-us/articles/203840826-Add-a-service-review-TrustBox-widget",
+  "https://support.trustpilot.com/hc/da/articles/203840826-S%C3%A5dan-tilf%C3%B8jer-du-en-TrustBox-widget-med-serviceanmeldelser",
+  "https://support.trustpilot.com/hc/da/articles/360035128794-Hvad-er-en-TrustBox-widget",
+  "https://support.trustpilot.com/hc/en-us/articles/201765546-TrustBox-widgets-FAQ",
+  "https://support.trustpilot.com/hc/en-us/articles/360019539940-Add-a-product-review-TrustBox-widget"
 )
 
 # Create directory for output if it doesn't exist

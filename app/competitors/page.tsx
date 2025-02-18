@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '../authenticated-layout';
 import { redirect } from 'next/navigation';
 import CompetitorsContent from './CompetitorsContent';
-import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
@@ -11,7 +11,7 @@ export default async function CompetitorsPage() {
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),
-      getSubscription(supabase)
+      getSubscriptions(supabase)
     ]);
   
     if (!user) {

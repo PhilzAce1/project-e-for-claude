@@ -3,14 +3,14 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import AuthenticatedLayout from '../authenticated-layout';
-import { getKeywordRankings, getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import { getKeywordRankings, getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
 
 export default async function WelcomePage() {
   const supabase = createServerComponentClient({ cookies });
   const { data: { user } } = await supabase.auth.getUser();
 
   const [subscription, products, keywordRankings] = await Promise.all([
-    getSubscription(supabase),
+    getSubscriptions(supabase),
     getProducts(supabase),
     getKeywordRankings(supabase, user?.id || '')
   ]);

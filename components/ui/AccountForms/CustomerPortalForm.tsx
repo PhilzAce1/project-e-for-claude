@@ -19,21 +19,23 @@ type SubscriptionWithPriceAndProduct = Subscription & {
 };
 
 interface Props {
-  subscription: SubscriptionWithPriceAndProduct | null;
+  subscriptions: SubscriptionWithPriceAndProduct[] | null;
+  userDetails: any;
 }
 
-export default function CustomerPortalForm({ subscription }: Props) {
+export default function CustomerPortalForm({ subscriptions, userDetails }: Props) {
   const router = useRouter();
   const currentPath = usePathname();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const subscriptionPrice =
-    subscription &&
-    new Intl.NumberFormat('en-US', {
+  const formatPrice = (subscription: SubscriptionWithPriceAndProduct) => {
+    if (!subscription?.prices?.currency) return null;
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: subscription?.prices?.currency!,
+      currency: subscription.prices.currency,
       minimumFractionDigits: 0
     }).format((subscription?.prices?.unit_amount || 0) / 100);
+  };
 
   const handleStripePortalRequest = async () => {
     setIsSubmitting(true);
@@ -42,11 +44,12 @@ export default function CustomerPortalForm({ subscription }: Props) {
       router.push(redirectUrl);
     } catch (error) {
       console.error('Failed to create Stripe portal session:', error);
-      // Handle error (e.g., show an error message to the user)
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  console.log(subscriptions);
 
   return (
     <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-3">
@@ -60,24 +63,32 @@ export default function CustomerPortalForm({ subscription }: Props) {
       <form className="md:col-span-2">
         <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
           <div className="col-span-full">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Your Plan</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {subscription
-                ? `You are currently on the ${subscription?.prices?.products?.name} plan.`
-                : 'You are not currently subscribed to any plan.'}
-            </p>
-          </div>
-
-          <div className="col-span-full">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Price</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {subscription ? (
-                `${subscriptionPrice}/${subscription?.prices?.interval}`
-              ) : (
+            <h3 className="text-lg font-medium leading-6 text-gray-900">Your Plans</h3>
+            {subscriptions && subscriptions.length > 0 ? (
+              subscriptions.map((subscription, index) => (
+                <div key={subscription.id} className="mt-4 space-y-2">
+                  <p className="text-sm text-gray-500">
+                    {subscription?.prices?.products?.name || 'Unknown Plan'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {formatPrice(subscription)}/{subscription?.prices?.interval}
+                  </p>
+                  {index < subscriptions.length - 1 && <hr className="my-4" />}
+                </div>
+              ))
+            ) : (
+              <p className="mt-1 text-sm text-gray-500">
                 <Link href="/" className="text-orange-600 hover:text-orange-500">
                   Choose your plan
                 </Link>
-              )}
+              </p>
+            )}
+          </div>
+
+          <div className="col-span-full">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">Content Credits</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {userDetails?.content_credits}
             </p>
           </div>
 

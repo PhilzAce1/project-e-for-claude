@@ -1,7 +1,7 @@
 
 import { redirect } from 'next/navigation';
 import AuthenticatedLayout from './authenticated-layout';
-import { getSubscription, getLatestSeoCrawl, getProducts, getKeywordRankings, getUser } from '@/utils/supabase/queries';
+import { getSubscriptions, getLatestSeoCrawl, getProducts, getKeywordRankings, getUser } from '@/utils/supabase/queries';
 import DashboardContent from '@/components/DashboardContent';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   }
 
   const [subscription, products, keywordRankings] = await Promise.all([
-    getSubscription(supabase),
+    getSubscriptions(supabase),
     getProducts(supabase),
     getKeywordRankings(supabase, user.id)
   ]);

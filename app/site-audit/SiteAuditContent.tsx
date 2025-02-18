@@ -233,7 +233,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
     useEffect(() => {
         if (!user?.id || !seoCrawlData?.domain) return;
 
-        console.log('Subscribing to real-time updates');
 
         const channel = supabase
             .channel('seo_crawl_updates')
@@ -246,7 +245,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                     filter: `user_id=eq.${user.id} AND domain=eq.${seoCrawlData.domain}`
                 },
                 (payload) => {
-                    console.log('Received update:', payload);
                     setLocalSEOData(payload.new);
                     
                     // If the crawl is complete, show a notification

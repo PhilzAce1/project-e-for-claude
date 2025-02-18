@@ -53,66 +53,8 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   };
 
-  const handleCreateContent = async (keyword: {
-    keyword: string;
-    search_volume: number;
-    competition: number;
-    main_intent: string;
-  }) => {
-    setIsProcessing(true);
-
-    try {
-      // Get the price for the product
-      const response = await fetch('/api/get-product-price', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          productId: 'prod_RJ5FCKb73rXqQM',
-          userId,
-          metadata: {
-            keyword: keyword.keyword,
-            search_volume: keyword.search_volume,
-            competition: keyword.competition,
-            main_intent: keyword.main_intent
-          }
-        })
-      });
-
-      const { price } = await response.json();
-      
-      if (!price) {
-        throw new Error('No price found for this product');
-      }
-
-      const { errorRedirect, sessionId } = await checkoutWithStripe(
-        price,
-        `${currentPath}?keyword=${encodeURIComponent(keyword.keyword)}`
-      );
-
-      if (errorRedirect) {
-        setIsProcessing(false);
-        return router.push(errorRedirect);
-      }
-
-      if (!sessionId) {
-        throw new Error('No session id returned');
-      }
-
-      const stripe = await getStripe();
-      stripe?.redirectToCheckout({ sessionId });
-
-      setIsProcessing(false);
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to start checkout process. Please try again.',
-        variant: 'destructive'
-      });
-      setIsProcessing(false);
-    }
+  const handleCreateContent = (keyword: string) => {
+    router.push(`/create-content/${encodeURIComponent(keyword)}`);
   };
 
   return (
@@ -168,7 +110,7 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">{item.main_intent}</td>
                 <td className=''>
                   <button
-                    onClick={() => handleCreateContent(item)}
+                    onClick={() => handleCreateContent(item.keyword)}
                     className="rounded-md px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   >
                     Create Content

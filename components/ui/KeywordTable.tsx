@@ -122,6 +122,10 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords, userId, showPayLi
     }
   };
 
+  const handleRankForThis = (keyword: string) => {
+    router.push(`/create-content/${encodeURIComponent(keyword)}`);
+  };
+
   return (
     <>
       {isProcessing && <LoadingOverlay />}
@@ -175,7 +179,7 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords, userId, showPayLi
           </thead>
           <tbody className="bg-white">
             {currentKeywords.map((item, index) => (
-              <tr key={item.keyword_data.keyword + 'index'} className="even:bg-gray-50">
+              <tr key={item.keyword_data.keyword + 'index' + index} className="even:bg-gray-50">
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left">
                   <a href={item.ranked_serp_element.serp_item.url} target="_blank" rel="noopener noreferrer">{item.keyword_data.keyword}</a>
                 </td>
@@ -205,10 +209,10 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords, userId, showPayLi
                 <td className=''>
                   {showPayLink ? (
                     <button
-                      onClick={() => handleCreateContent(item)}
-                    className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm whitespace-nowrap hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                      Rank for this
+                      onClick={() => handleRankForThis(item.keyword_data.keyword)}
+                      className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                      Rank for This
                     </button>
                   ) : (
                     <a href={item.ranked_serp_element.serp_item.url} target="_blank" rel="noopener noreferrer">Link</a>

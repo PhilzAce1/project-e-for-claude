@@ -8,14 +8,16 @@ export const getUser = cache(async (supabase: SupabaseClient) => {
   return user;
 });
 
-export const getSubscription = cache(async (supabase: SupabaseClient) => {
-  const { data: subscription, error } = await supabase
+export const getSubscriptions = cache(async (supabase: SupabaseClient) => {
+  const { data: subscriptions, error } = await supabase
     .from('subscriptions')
-    .select('*, prices(*, products(*))')
+    .select('*, prices(*, products(*))') 
     .in('status', ['trialing', 'active'])
-    .maybeSingle();
+    // .maybeSingle();
 
-  return subscription;
+  console.log(subscriptions );
+
+  return subscriptions;
 });
 
 export const getProducts = cache(async (supabase: SupabaseClient) => {

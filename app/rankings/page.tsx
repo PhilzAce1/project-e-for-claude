@@ -3,14 +3,14 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import RankingsContent from './RankingsContent';
 import AuthenticatedLayout from '../authenticated-layout';
-import { getProducts, getSubscription, getUser } from '@/utils/supabase/queries';
+import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
 
 export default async function RankingsPage() {
     const supabase = createServerComponentClient({ cookies });
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),
-      getSubscription(supabase)
+      getSubscriptions(supabase)
     ]);
 
     if (!user) {
@@ -24,7 +24,6 @@ export default async function RankingsPage() {
         .eq('user_id', user.id)
         .single();
 
-    console.log(rankingsData)
     if (error) {
         console.error('Error fetching rankings data:', error);
     }

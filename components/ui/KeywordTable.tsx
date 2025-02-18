@@ -179,7 +179,7 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords, userId, showPayLi
           </thead>
           <tbody className="bg-white">
             {currentKeywords.map((item, index) => (
-              <tr key={item.keyword_data.keyword + 'index'} className="even:bg-gray-50">
+              <tr key={item.keyword_data.keyword + 'index' + index} className="even:bg-gray-50">
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left">
                   <a href={item.ranked_serp_element.serp_item.url} target="_blank" rel="noopener noreferrer">{item.keyword_data.keyword}</a>
                 </td>

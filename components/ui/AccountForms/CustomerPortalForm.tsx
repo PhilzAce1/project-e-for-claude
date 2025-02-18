@@ -29,12 +29,12 @@ export default function CustomerPortalForm({ subscription, userDetails }: Props)
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const subscriptionPrice =
-    subscription &&
+    subscription[0]?.prices?.currency &&
     new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: subscription?.prices?.currency!,
+      currency: subscription[0]?.prices?.currency,
       minimumFractionDigits: 0
-    }).format((subscription?.prices?.unit_amount || 0) / 100);
+    }).format((subscription[0]?.prices?.unit_amount || 0) / 100);
 
   const handleStripePortalRequest = async () => {
     setIsSubmitting(true);
@@ -64,7 +64,7 @@ export default function CustomerPortalForm({ subscription, userDetails }: Props)
             <h3 className="text-lg font-medium leading-6 text-gray-900">Your Plan</h3>
             <p className="mt-1 text-sm text-gray-500">
               {subscription
-                ? `You are currently on the ${subscription?.prices?.products?.name} plan.`
+                ? `You are currently on the ${subscription[0]?.prices?.products?.name} plan.`
                 : 'You are not currently subscribed to any plan.'}
             </p>
           </div>
@@ -73,7 +73,7 @@ export default function CustomerPortalForm({ subscription, userDetails }: Props)
             <h3 className="text-lg font-medium leading-6 text-gray-900">Price</h3>
             <p className="mt-1 text-sm text-gray-500">
               {subscription ? (
-                `${subscriptionPrice}/${subscription?.prices?.interval}`
+                `${subscriptionPrice}/${subscription[0]?.prices?.interval}`
               ) : (
                 <Link href="/" className="text-orange-600 hover:text-orange-500">
                   Choose your plan

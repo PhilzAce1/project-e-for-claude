@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClientComponentClient, User } from '@supabase/auth-helpers-nextjs';
 import { ContentBrief } from '@/components/ui/ContentBrief';
 import { UrlModal } from '@/components/ui/UrlModal';
 import { toast } from '@/components/ui/Toasts/use-toast';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface KeywordData {
   keyword: string;
@@ -13,7 +14,17 @@ interface KeywordData {
   rank: number | null;
   current_ranking: boolean;
   competitor_ranks: number[];
+  competition: number;
 }
+
+// Helper function from NextContentRecommendation
+const getCompetitionLevel = (competition: number): string => {
+  if (competition >= 0.8) return "Very High";
+  if (competition >= 0.6) return "High";
+  if (competition >= 0.4) return "Medium";
+  if (competition >= 0.2) return "Low";
+  return "Very Low";
+};
 
 export default function CreateContentContent({ user, keyword }: { user: User, keyword: string }) {
   const [loading, setLoading] = useState(false);
@@ -22,6 +33,74 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
   const decodedKeyword = decodeURIComponent(keyword);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+  const [userDetails, setUserDetails] = useState<any>(null);
+  const [keywordMetrics, setKeywordMetrics] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      const { data: details } = await supabase
+        .from('users')
+        .select('content_credits')
+        .eq('id', user.id)
+        .single();
+      setUserDetails(details);
+    };
+    fetchUserDetails();
+  }, [supabase, user.id]);
+
+  useEffect(() => {
+    async function fetchRankingData() {
+      const { data, error } = await supabase
+        .from('business_information')
+        .select('rankings_data')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching ranking data:', error);
+        return;
+      }
+
+      if (data?.rankings_data?.items) {
+        const keywordInfo = data.rankings_data.items.find(
+          (item: any) => item.keyword.toLowerCase() === decodedKeyword.toLowerCase()
+        );
+
+        if (keywordInfo) {
+          setKeywordData({
+            keyword: keywordInfo.keyword,
+            search_volume: keywordInfo.keyword_data?.search_volume || 0,
+            rank: keywordInfo.rank_group || null,
+            current_ranking: !!keywordInfo.rank_group,
+            competitor_ranks: keywordInfo.competitor_ranks || [],
+            competition: keywordInfo.competition || 0
+          });
+        }
+      }
+    }
+
+    fetchRankingData();
+  }, [supabase, user.id, decodedKeyword]);
+
+  useEffect(() => {
+    // Fetch keyword metrics from content_recommendations
+    const fetchKeywordMetrics = async () => {
+      const { data, error } = await supabase
+        .rpc('get_user_content_recommendations')
+        .eq('keyword', decodedKeyword)
+        .single();
+
+        console.log(data);
+
+      if (error) {
+        console.error('Error fetching keyword metrics:', error);
+        return;
+      }
+      setKeywordMetrics(data);
+    };
+
+    fetchKeywordMetrics();
+  }, [supabase, decodedKeyword]);
 
   const handleContentCompleted = async (url: string, title: string) => {
     try {
@@ -107,6 +186,50 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
     router.push(`/content-pricing/${encodeURIComponent(decodedKeyword)}`);
   };
 
+  const handleCreateWithCredits = async () => {
+    try {
+      setLoading(true);
+      
+      // Create content order with additional fields
+      const { error: orderError } = await supabase
+        .from('content_orders')
+        .insert({
+          user_id: user.id,
+          keyword: decodedKeyword,
+          status: 'pending',
+          competition_level: keywordMetrics?.competition || null,
+          search_volume: keywordMetrics?.search_volume || null,
+          search_intent: keywordMetrics?.main_intent || null
+        });
+
+      if (orderError) throw orderError;
+
+      // Deduct credit
+      const { error: creditError } = await supabase
+        .from('users')
+        .update({ content_credits: (userDetails?.content_credits || 0) - 1 })
+        .eq('id', user.id);
+
+      if (creditError) throw creditError;
+
+      toast({
+        title: 'Success',
+        description: 'Your content order has been submitted.',
+      });
+
+      router.push('/content-orders');
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create content order.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -142,7 +265,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-700 mb-2">Search Volume</h2>
             <p className="text-3xl font-bold text-indigo-600">
-              {keywordData?.search_volume.toLocaleString() || 0}
+              {keywordMetrics?.search_volume?.toLocaleString() || 0}
             </p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
@@ -152,49 +275,88 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
             </p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">Competitor Rankings</h2>
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Competition Level</h2>
             <p className="text-3xl font-bold text-indigo-600">
-              {keywordData?.competitor_ranks && keywordData.competitor_ranks.length > 0
-                ? `Top: #${Math.min(...keywordData.competitor_ranks)}`
-                : 'None'}
+              {keywordMetrics?.competition ? 
+                getCompetitionLevel(keywordMetrics.competition) : 
+                'Unknown'}
             </p>
           </div>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
         <ContentBrief keyword={decodedKeyword} userId={user.id} />
-      <div className="bg-white rounded-lg shadow p-8 mb-8">
-        <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4 mb-4">Create with Espy Go</h2>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Skip the Search for Writers. We'll Craft Your Ranking Content in 48 Hours</h2>
-        <div className="prose max-w-none">
-          <p className="font-semibold mb-4">We transform your brief into high-ranking content by analyzing what's already working. Our scientific approach:</p>
-          <ul className="list-disc pl-6 mb-6">
-            <li>Analyzes the top 10 ranking articles for your target keyword</li>
-            <li>Identifies what Google considers comprehensive coverage</li>
-            <li>Blends winning content patterns with your unique business value</li>
-            <li>Delivers publication-ready content in just 48 hours</li>
-            <li>Structures content for both readers and search engines</li>
-          </ul>
-          <p className="font-semibold mb-4">Instead of:</p>
-
-          <ul className="list-disc pl-6 mb-6">
-            <li>Guessing what content elements help articles rank</li>
-            <li>Missing key topics that top-ranking articles cover</li>
-            <li>Writing without insight into what Google rewards</li>
-            <li>Managing writers who don't understand SEO</li>
-            <li>Spending hours analyzing top-ranking content yourself</li>
-          </ul>
-          <h3 className="text-xl font-semibold mb-4  border-b border-gray-200 pb-4">Why start from scratch? We analyze what's already ranking and create content that matches Google's preferences while showcasing your business expertise. All delivered in 48 hours.</h3>
+        <div className="bg-white rounded-lg shadow p-8 mb-8 text-center">
+          {userDetails?.content_credits > 0 ? (
+            <>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Content with Your Credits</h2>
+              <div className="mb-8">
+                <p className="text-lg text-gray-600 mb-2 ">Available Credits:</p>
+                <p className="text-3xl font-bold text-indigo-600">{userDetails.content_credits}</p>
+              </div>
+              <div className="prose max-w-none mb-8">
+                <p className="text-xl font-semibold mb-4 ">Ready to create high-ranking content for "{decodedKeyword}"?</p>
+                <p>This will use 1 content credit from your account.</p>
+              </div>
               <button
-                onClick={handleCreateNow}
-                className="mb-4 flex w-full justify-center rounded-md bg-indigo-600 p-3 text-lg font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                onClick={handleCreateWithCredits}
+                disabled={loading}
+                className="mb-12 flex w-full justify-center rounded-md bg-indigo-600 p-3 text-lg font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
-                Create Now
+                {loading ? 'Creating...' : 'Create Content Now'}
               </button>
+              <Image
+                src="/EspyGoSEOOverTime.jpg"
+                alt="SEO Growth Over Time"
+                width={600}
+                height={400}
+                className="rounded-lg mb-6 w-full h-auto"
+              />
+
+            </>
+          ) : (
+            <>
+              <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4 mb-4">Create with Espy Go</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Skip the Search for Writers. We'll Craft Your Ranking Content in 48 Hours</h2>
+              
+              <Image
+                src="/EspyGoSEOOverTime.jpg"
+                alt="SEO Growth Over Time"
+                width={600}
+                height={400}
+                className="rounded-lg mb-6 w-full h-auto"
+              />
+
+              <div className="prose max-w-none">
+                <p className="font-semibold mb-4">We transform your brief into high-ranking content by analyzing what's already working. Our scientific approach:</p>
+                <ul className="list-disc pl-6 mb-6">
+                  <li>Analyzes the top 10 ranking articles for your target keyword</li>
+                  <li>Identifies what Google considers comprehensive coverage</li>
+                  <li>Blends winning content patterns with your unique business value</li>
+                  <li>Delivers publication-ready content in just 48 hours</li>
+                  <li>Structures content for both readers and search engines</li>
+                </ul>
+                <p className="font-semibold mb-4">Instead of:</p>
+
+                <ul className="list-disc pl-6 mb-6">
+                  <li>Guessing what content elements help articles rank</li>
+                  <li>Missing key topics that top-ranking articles cover</li>
+                  <li>Writing without insight into what Google rewards</li>
+                  <li>Managing writers who don't understand SEO</li>
+                  <li>Spending hours analyzing top-ranking content yourself</li>
+                </ul>
+                <h3 className="text-xl font-semibold mb-4  border-b border-gray-200 pb-4">Why start from scratch? We analyze what's already ranking and create content that matches Google's preferences while showcasing your business expertise. All delivered in 48 hours.</h3>
+                  <button
+                    onClick={handleCreateNow}
+                    className="mb-4 flex w-full justify-center rounded-md bg-indigo-600 p-3 text-lg font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  >
+                    Purchase Credits
+                  </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
-        </div>
     </div>
   );
 } 

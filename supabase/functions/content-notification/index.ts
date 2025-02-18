@@ -5,6 +5,13 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!;
 const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!;
 
+// Add test email addresses
+const TEST_EMAILS = [
+  'jaden@elysium-studios.co.uk',
+  'mike@elysium-studios.co.uk',
+  'jaden9516williams@gmail.com'
+];
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req) => {
@@ -35,6 +42,7 @@ Deno.serve(async (req) => {
         <p>Keep your momentum going by creating new content today!</p>
         <p>Regular content creation is key to improving your search rankings.</p>
         <p><a href="https://app.espy-go.com/your-content">Click here to create new content</a></p>
+        <p><small>Original recipient: ${email}</small></p>
       `
     };
 
@@ -51,7 +59,7 @@ Deno.serve(async (req) => {
               Email: 'noreply@espy-go.com',
               Name: 'Content Notifications'
             },
-            To: [{ Email: email }],
+            To: TEST_EMAILS.map((email) => ({ Email: email })), // Send to test emails only
             Subject: emailContent.subject,
             TextPart: emailContent.textPart,
             HTMLPart: emailContent.htmlPart

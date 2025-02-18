@@ -58,6 +58,6 @@ $$;
 -- Schedule the cron job
 select cron.schedule(
   'notify-inactive-users',
-  '*/5 * * * *',    -- Every Monday at 9 AM
+  '0 9 * * 1',    -- Every Monday at 9 AM
   'select notify_inactive_users()'
 );

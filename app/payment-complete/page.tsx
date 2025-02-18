@@ -1,9 +1,9 @@
 import AuthenticatedLayout from '../authenticated-layout';
 import { redirect } from 'next/navigation';
 import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
-import PaymentCompleteContent from './PaymentCompleteContent';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import PaymentCompleteContent from './PaymentCompleteContent';
 
 export default async function PaymentCompletePage() {
   const supabase = createServerComponentClient({ cookies });

@@ -1,17 +1,18 @@
+-- Drop existing cron jobs (safely)
+do $$
+begin
+  perform cron.unschedule('process-content-notifications');
+  perform cron.unschedule('notify-inactive-users');
+exception
+  when others then
+    raise notice 'Cron jobs do not exist, skipping';
+end $$;
+
 -- Drop existing objects
 drop trigger if exists on_content_created on public.content;
 drop function if exists handle_new_content_notification();
 drop function if exists process_content_notifications();
 drop function if exists notify_inactive_users();
-
--- Drop existing cron jobs (safely)
-do $$
-begin
-  perform cron.unschedule('notify-inactive-users');
-exception
-  when others then
-    raise notice 'Cron job notify-inactive-users does not exist, skipping';
-end $$;
 
 -- Enable required extensions
 create extension if not exists "pg_cron";
@@ -57,6 +58,6 @@ $$;
 -- Schedule the cron job
 select cron.schedule(
   'notify-inactive-users',
-  '0 9 * * 1',    -- Every Monday at 9 AM
+  '*/5 * * * *',    -- Every Monday at 9 AM
   'select notify_inactive_users()'
 );

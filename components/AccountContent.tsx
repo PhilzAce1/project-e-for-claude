@@ -38,7 +38,6 @@ export default function AccountContent({ user, userDetails, subscription }: {
       window.location.href = '/';
     }
   };
-  console.log(user, userDetails);
 
   return (
     <section className="mb-32">

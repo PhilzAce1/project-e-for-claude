@@ -53,7 +53,6 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
 
         if (data) {
           // Use existing recommendation
-          console.log('Found existing recommendation:', data);
           setContentBrief(data);
         } else {
           // No existing recommendation found, call the API
@@ -73,7 +72,6 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           }
 
           const result = await response.json();
-          console.log('Content recommendation created:', result);
           setContentBrief(result.data);
         }
       } catch (error) {
@@ -107,8 +105,6 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
         }).select();
 
       if (contentError) throw contentError;
-
-      console.log('New content:', newContent);
 
 
       const { error: keywordError } = await supabase

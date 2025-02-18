@@ -52,10 +52,8 @@ export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) =
 
         if (data) {
           // Use existing recommendation
-          console.log('Found existing recommendation:', data);
           setContentBrief(data);
         } else {
-          console.log('No existing recommendation found, calling API');
           // No existing recommendation found, call the API
           const response = await fetch('/api/get-detailed-content-recommendation', {
             method: 'POST',
@@ -73,7 +71,6 @@ export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) =
           }
 
           const result = await response.json();
-          console.log('Content recommendation created:', result);
           setContentBrief(result.data);
         }
       } catch (error) {

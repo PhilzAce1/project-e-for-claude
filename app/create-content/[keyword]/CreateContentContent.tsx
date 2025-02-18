@@ -90,8 +90,6 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
         .eq('keyword', decodedKeyword)
         .single();
 
-        console.log(data);
-
       if (error) {
         console.error('Error fetching keyword metrics:', error);
         return;

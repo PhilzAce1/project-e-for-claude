@@ -5,14 +5,19 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import ContentPricing from '@/components/ui/ContentPricing';
 
-export default async function ContentPricingPage({ params }: { params: { keyword: string } }) {
+interface PageProps {
+  params: {
+    keyword: string;
+  };
+}
+
+export default async function ContentPricingPage({ params }: PageProps) {
   const supabase = createServerComponentClient({ cookies });
   const [user, products, subscription] = await Promise.all([
     getUser(supabase),
     getProducts(supabase),
     getSubscriptions(supabase)
   ]);
-
 
   if (!user) {
     redirect('/signin/password_signin');

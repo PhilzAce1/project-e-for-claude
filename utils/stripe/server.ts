@@ -66,8 +66,6 @@ export async function checkoutWithStripe(
       success_url: getURL(redirectPath)
     };
 
-    console.log('Creating checkout session with params:', JSON.stringify(params, null, 2));
-
     // Create a checkout session in Stripe
     let session;
     try {
@@ -124,7 +122,7 @@ export async function createStripePortal(currentPath: string) {
     }
 
     let customer;
-    console.log('user', user);
+    
     try {
       customer = await createOrRetrieveCustomer({
         uuid: user.id || '',

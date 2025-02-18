@@ -24,7 +24,6 @@ export default async function RankingsPage() {
         .eq('user_id', user.id)
         .single();
 
-    console.log(rankingsData)
     if (error) {
         console.error('Error fetching rankings data:', error);
     }

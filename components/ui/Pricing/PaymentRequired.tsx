@@ -76,10 +76,9 @@ export default function PaymentRequired({ user, children, products, subscription
         // Fetch content recommendations
         const recommendations = await fetchContentRecommendations(user.id);
         setRecommendationData(recommendations);
-        subscription.filter((sub: { status: string; prices: { product_id: string; }; }) => (sub?.status === 'active' || sub?.status === 'trialing') && sub.prices.product_id === "prod_RJ6CHDZl8mv1QM")
-        const hasActiveSubscription = subscription.filter((sub: { status: string; }) => sub?.status === 'active' || sub?.status === 'trialing');
-        // Set payment required if analysis is complete, has competitors, but no subscription
-        setNeedsPayment(hasCompletedAnalysis && hasCompetitors && !hasActiveSubscription);
+        const hasActiveSubscription = subscription.filter((sub: { status: string; prices: { product_id: string; }; }) => (sub?.status === 'active' || sub?.status === 'trialing') && sub.prices.product_id === "prod_RJ6CHDZl8mv1QM").length > 0;
+                // Set payment required if analysis is complete, has competitors, but no subscription
+        setNeedsPayment(!hasActiveSubscription);
         setLoading(false);
       } catch (error) {
         console.error('Error checking payment status:', error);
@@ -97,7 +96,7 @@ export default function PaymentRequired({ user, children, products, subscription
       </div>
     );
   }
-
+  
   if (needsPayment) {
     return (
       <div className="bg-white py-8">

@@ -5,7 +5,7 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!;
 const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!;
 
-// Add test email addresses
+// Test email addresses
 const TEST_EMAILS = [
   'jaden@elysium-studios.co.uk',
   'mike@elysium-studios.co.uk',
@@ -14,7 +14,7 @@ const TEST_EMAILS = [
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const TEMPLATE_ID = 6740736; // need to update this to the new template
+const TEMPLATE_ID = 6744408;
 
 Deno.serve(async (req) => {
   try {
@@ -45,10 +45,11 @@ Deno.serve(async (req) => {
             TemplateID: TEMPLATE_ID,
             TemplateLanguage: true,
             Variables: {
-              ranking_change: Math.abs(rankingChange),
               is_positive: isPositive,
+              ranking_change: Math.abs(rankingChange),
               dashboard_url: 'https://app.espy-go.com/rankings',
-              opportunities_url: 'https://app.espy-go.com/opportunities'
+              opportunities_url: 'https://app.espy-go.com/opportunities',
+              original_recipient: email // Added original recipient email
             }
           }
         ]
@@ -56,13 +57,22 @@ Deno.serve(async (req) => {
     });
 
     if (!emailResponse.ok) {
+      const errorData = await emailResponse.json();
+      console.error('Mailjet API Error:', errorData);
       throw new Error('Failed to send email notification');
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: 'Ranking change notification sent successfully'
+      }),
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   } catch (error) {
+    console.error('Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

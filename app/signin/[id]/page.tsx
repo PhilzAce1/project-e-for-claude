@@ -16,7 +16,8 @@ import UpdatePassword from '@/components/ui/AuthForms/UpdatePassword';
 import SignUp from '@/components/ui/AuthForms/Signup';
 import ConfirmEmailContent from '@/components/ui/AuthForms/ConfirmEmail';
 import Image from 'next/image';
-
+import authBgImage from '@/public/authbg.jpg';
+import growthImage from '@/public/growth-starts-here.jpg';
 export default async function SignIn({
   params,
   searchParams
@@ -49,8 +50,8 @@ export default async function SignIn({
   }
 
   return (
-    <div className="flex min-h-full flex-1 h-screen bg-white">
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+    <div className="flex min-h-full flex-1 h-screen bg-white sm:flex-row flex-col">
+      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div>
             <Logo width="64" height="64" className="h-20 w-auto" />
@@ -114,14 +115,12 @@ export default async function SignIn({
           </div>
         </div>
       </div>
-      <div className="relative hidden w-0 flex-1 lg:block">
-        <img
-          src="/public/authbg.jpg"
-          alt="SEO Growth Over Time"
-          width={600}
-          height={800}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+      <div className="flex flex-1 flex-col justify-center px-16 py-12" style={{ backgroundImage: `url(${authBgImage.src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className='m-auto bg-transparent bg-white rounded-lg p-8 max-w-lg'>
+          <h1 className="text-gray-900 text-4xl font-bold mb-4">You're Moments Away From Your First Rankings Win</h1>
+          <p className="text-gray-900 text-lg mb-4">Join 88% of our partners already outranking their competitors</p>
+          <Image src={growthImage} alt="Growth Starts Now" className='m-auto' />
+        </div>
       </div>
     </div>
   );

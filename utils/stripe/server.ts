@@ -66,6 +66,14 @@ export async function checkoutWithStripe(
       success_url: getURL(redirectPath)
     };
 
+    console.log(price);
+
+    if(price.product_id === 'prod_RJ6CHDZl8mv1QM') {
+      params.subscription_data = {
+        trial_period_days: 7
+      }
+    }
+
     // Create a checkout session in Stripe
     let session;
     try {

@@ -174,6 +174,7 @@ export default function Pricing({ user, products, subscription }: Props) {
                       <span className="text-5xl font-semibold tracking-tight text-gray-900">{priceString}</span>
                       <span className="text-sm/6 font-semibold tracking-wide text-gray-600">GBP</span>
                     </p>
+                    <p>7 Day Free Trial</p>
                     <button
                       onClick={() => handleStripeCheckout(price)}
                       className="mt-10 block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"

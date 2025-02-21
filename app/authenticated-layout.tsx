@@ -29,9 +29,10 @@ export default function AuthenticatedLayout({
   const [currentCountry, setCurrentCountry] = useState<string>('GB');
   const supabase = createClientComponentClient();
   const { toast } = useToast();
+  if (user) {
   posthog.identify(
     user.id, // Required. Replace 'distinct_id' with your user's unique identifier
-    { email: user.email, name: user.metadata.full_name || user.metadata.email },  // $set, optional
+    { email: user?.email, name: user?.metadata?.full_name || user?.metadata?.email },  // $set, optional
 );
 
   useEffect(() => {

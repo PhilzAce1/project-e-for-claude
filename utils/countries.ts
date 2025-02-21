@@ -32,6 +32,7 @@ export const otherCountries: Country[] = [
     { code: 'FR', name: 'France', languages: ['fr'], locationCode: 2250 },
     { code: 'DE', name: 'Germany', languages: ['de'], locationCode: 2276 },
     { code: 'GR', name: 'Greece', languages: ['el'], locationCode: 2300 },
+    { code: 'HT', name: 'Haiti', languages: ['ht', 'fr'], locationCode: 2332 },
     { code: 'HK', name: 'Hong Kong', languages: ['zh', 'en'], locationCode: 2344 },
     { code: 'HU', name: 'Hungary', languages: ['hu'], locationCode: 2348 },
     { code: 'IN', name: 'India', languages: ['hi', 'en'], locationCode: 2356 },

@@ -105,6 +105,7 @@ export default function PaymentRequired({ user, children, products, subscription
             <h2 className=" mt-8 text-pretty text-5xl font-semibold tracking-tight text-gray-900 sm:text-balance sm:text-6xl">
               Simple no-tricks pricing
             </h2>
+            <h3 className="text-gray-600 text-2xl">7 Day Free Trial</h3>
           </div>
           {metrics && (
             <div className="bg-white rounded-2xl ring-1 ring-inset ring-gray-900/5 shadow mt-6">

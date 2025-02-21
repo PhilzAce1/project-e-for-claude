@@ -12,6 +12,8 @@ const TEST_EMAILS = [
   'jaden9516williams@gmail.com'
 ];
 
+const TEMPLATE_ID = 6740736;
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req) => {
@@ -33,19 +35,6 @@ Deno.serve(async (req) => {
         )
       : null;
 
-    const emailContent = {
-      subject: 'Create Your Next Content Piece',
-      textPart: `It's been ${daysInactive ? `${daysInactive} days` : 'a while'} since your last content creation. Keep your momentum going!`,
-      htmlPart: `
-        <h3>Time to Create More Content!</h3>
-        <p>We noticed it's been ${daysInactive ? `${daysInactive} days` : 'a while'} since your last content creation.</p>
-        <p>Keep your momentum going by creating new content today!</p>
-        <p>Regular content creation is key to improving your search rankings.</p>
-        <p><a href="https://app.espy-go.com/your-content">Click here to create new content</a></p>
-        <p><small>Original recipient: ${email}</small></p>
-      `
-    };
-
     const emailResponse = await fetch('https://api.mailjet.com/v3.1/send', {
       method: 'POST',
       headers: {
@@ -59,10 +48,14 @@ Deno.serve(async (req) => {
               Email: 'noreply@espy-go.com',
               Name: 'Content Notifications'
             },
-            To: TEST_EMAILS.map((email) => ({ Email: email })), // Send to test emails only
-            Subject: emailContent.subject,
-            TextPart: emailContent.textPart,
-            HTMLPart: emailContent.htmlPart
+            To: TEST_EMAILS.map((email) => ({ Email: email })),
+            TemplateID: TEMPLATE_ID,
+            TemplateLanguage: true,
+            Variables: {
+              days_inactive: daysInactive || 'a while',
+              original_recipient: email,
+              content_url: 'https://app.espy-go.com/your-content'
+            }
           }
         ]
       })

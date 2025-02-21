@@ -9,6 +9,7 @@ import { CountrySelector } from '@/components/ui/CountrySelector';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { handleCountrySelect } from '@/utils/supabase/country';
+import posthog from 'posthog-js';
 
 export default function AuthenticatedLayout({
   children,
@@ -28,6 +29,10 @@ export default function AuthenticatedLayout({
   const [currentCountry, setCurrentCountry] = useState<string>('GB');
   const supabase = createClientComponentClient();
   const { toast } = useToast();
+  posthog.identify(
+    user.id, // Required. Replace 'distinct_id' with your user's unique identifier
+    { email: user.email, name: user.metadata.full_name || user.metadata.email },  // $set, optional
+);
 
   useEffect(() => {
     const checkCountrySettings = async () => {

@@ -63,7 +63,7 @@ export async function checkoutWithStripe(
       ],
       metadata: price.metadata || {},
       cancel_url: getURL(),
-      success_url: getURL(redirectPath)
+      success_url: getURL('/payment-complete')
     };
 
     console.log(price);

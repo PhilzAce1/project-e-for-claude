@@ -10,6 +10,9 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { handleCountrySelect } from '@/utils/supabase/country';
 import posthog from 'posthog-js';
+import { getStripe } from '@/utils/stripe/client';
+import { checkoutWithStripe } from '@/utils/stripe/server';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function AuthenticatedLayout({
   children,
@@ -29,6 +32,14 @@ export default function AuthenticatedLayout({
   const [currentCountry, setCurrentCountry] = useState<string>('GB');
   const supabase = createClientComponentClient();
   const { toast } = useToast();
+  const router = useRouter();
+  const currentPath = usePathname();
+
+  // Check if user has the base plan
+  const hasBasePlan = subscription?.some((sub: any) => 
+    sub.prices?.products?.id === 'prod_RJ6CHDZl8mv1QM'
+  );
+
   if (user) {
     posthog.identify(
       user.id, // Required. Replace 'distinct_id' with your user's unique identifier
@@ -59,6 +70,48 @@ export default function AuthenticatedLayout({
 
     checkCountrySettings();
   }, [user.id, supabase]);
+
+  useEffect(() => {
+    const initiateCheckout = async () => {
+      if (!hasBasePlan && user) {
+        // Find the base plan price
+        const basePlan = products?.find((p: any) => p.id === 'prod_RJ6CHDZl8mv1QM');
+        const monthlyPrice = basePlan?.prices?.find((p: any) => p.interval === 'month');
+        console.log(currentPath);
+        if (monthlyPrice) {
+          try {
+            const { errorRedirect, sessionId } = await checkoutWithStripe(
+              monthlyPrice,
+              currentPath
+            );
+
+            if (errorRedirect) {
+              toast({
+                title: 'Error',
+                description: 'Failed to initiate checkout',
+                variant: 'destructive'
+              });
+              return;
+            }
+
+            if (sessionId) {
+              const stripe = await getStripe();
+              stripe?.redirectToCheckout({ sessionId });
+            }
+          } catch (error) {
+            console.error('Checkout error:', error);
+            toast({
+              title: 'Error',
+              description: 'Failed to initiate checkout',
+              variant: 'destructive'
+            });
+          }
+        }
+      }
+    };
+
+    initiateCheckout();
+  }, [user, hasBasePlan, products, currentPath]);
 
   const handleCountryUpdate = async (country: string) => {
     await handleCountrySelect(user.id, country, () => setShowCountrySelector(false));

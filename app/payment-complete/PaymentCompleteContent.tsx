@@ -33,7 +33,7 @@ export default function PaymentCompleteContent({ user }: PaymentCompleteContentP
               View Your Content Orders
             </Link>
             <Link
-              href="/dashboard"
+              href="/"
               className="rounded-md bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-200"
             >
               Go to Dashboard

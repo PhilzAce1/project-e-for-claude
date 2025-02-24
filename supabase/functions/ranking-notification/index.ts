@@ -19,14 +19,17 @@ const TEMPLATE_ID = 6744408;
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
-    const { type, email, old_rankings, current_rankings } = body;
+    const { type, email, ranking_changes } = body;
 
     if (type !== 'ranking_change') {
       throw new Error('Invalid notification type');
     }
 
-    const rankingChange = Number(current_rankings) - Number(old_rankings);
-    const isPositive = rankingChange > 0;
+    const { is_up, is_down, is_new, is_lost } = ranking_changes;
+
+    // Calculate if overall trend is positive
+    const isPositive =
+      Number(is_up) + Number(is_new) >= Number(is_down) + Number(is_lost);
 
     const emailResponse = await fetch('https://api.mailjet.com/v3.1/send', {
       method: 'POST',
@@ -46,7 +49,10 @@ Deno.serve(async (req) => {
             TemplateLanguage: true,
             Variables: {
               is_positive: isPositive,
-              ranking_change: Math.abs(rankingChange),
+              keywords_up: Number(is_up),
+              keywords_down: Number(is_down),
+              keywords_new: Number(is_new),
+              keywords_lost: Number(is_lost),
               dashboard_url: 'https://app.espy-go.com/rankings',
               opportunities_url: 'https://app.espy-go.com/opportunities',
               original_recipient: email // Added original recipient email

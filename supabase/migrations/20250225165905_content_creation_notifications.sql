@@ -1,22 +1,15 @@
+-- Add column for last notification date
+alter table content 
+add column if not exists last_inactivity_notification timestamp with time zone;
+
 -- Drop existing cron jobs (safely)
 do $$
 begin
-  perform cron.unschedule('process-content-notifications');
   perform cron.unschedule('notify-inactive-users');
 exception
   when others then
-    raise notice 'Cron jobs do not exist, skipping';
+    raise notice 'Cron job does not exist, skipping';
 end $$;
-
--- Drop existing objects
-drop trigger if exists on_content_created on public.content;
-drop function if exists handle_new_content_notification();
-drop function if exists process_content_notifications();
-drop function if exists notify_inactive_users();
-
--- Enable required extensions
-create extension if not exists "pg_cron";
-create extension if not exists "pg_net";
 
 -- Create function to notify inactive users
 create or replace function notify_inactive_users()
@@ -35,9 +28,15 @@ begin
     from auth.users u
     left join content c on u.id = c.user_id
     group by u.id, u.email
-    having max(c.created_at) < now() - interval '1 week'
-       or max(c.created_at) is null
+    having (
+      -- User hasn't created content in over a week
+      (max(c.created_at) < now() - interval '1 week' or max(c.created_at) is null)
+      and
+      -- And either never received a notification or received it more than 7 days ago
+      (max(c.last_inactivity_notification) is null or max(c.last_inactivity_notification) < now() - interval '7 days')
+    )
   loop
+    -- Send notification
     perform net.http_post(
       url := 'https://aryklmppwuliidmvzwpo.supabase.co/functions/v1/content-notification',
       headers := jsonb_build_object(
@@ -51,6 +50,26 @@ begin
         'last_content_date', inactive_user.last_content_date
       )
     );
+
+    -- Update the last notification timestamp on the most recent content
+    update content 
+    set last_inactivity_notification = now()
+    where user_id = inactive_user.user_id
+    and created_at = inactive_user.last_content_date;
+
+    -- If user has no content, create a record to track notifications
+    if inactive_user.last_content_date is null then
+      insert into content (
+        user_id,
+        last_inactivity_notification,
+        created_at
+      ) values (
+        inactive_user.user_id,
+        now(),
+        now()
+      );
+    end if;
+
   end loop;
 end;
 $$;

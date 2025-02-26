@@ -270,9 +270,9 @@ export default function KeywordResearchContent({ user }: { user: any }) {
           keyword: suggestion.keyword,
           search_volume: suggestion.search_volume,
           competition: suggestion.competition,
-          competition_ir: suggestion.competition_index || 0,
+          competition_index: suggestion.competition_index || 0,
           cpc: suggestion.cpc || 0,
-          monthly_search: suggestion.monthly_searches || [],
+          monthly_searches: suggestion.monthly_searches || [],
           created_at: new Date().toISOString()
         })
         .select()

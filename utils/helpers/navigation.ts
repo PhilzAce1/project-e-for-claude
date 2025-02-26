@@ -6,9 +6,12 @@ import {
   BuildingOfficeIcon,
   SparklesIcon,
   DocumentTextIcon,
-  DocumentDuplicateIcon,
   ChartBarIcon,
-  BuildingLibraryIcon
+  BuildingLibraryIcon,
+  MagnifyingGlassIcon,
+  ListBulletIcon,
+  DocumentIcon,
+  ArrowRightCircleIcon
 } from '@heroicons/react/24/outline'
 
 interface NavigationItem {
@@ -27,15 +30,20 @@ export const navigation: NavigationItem[] = [
   { 
     name: 'Opportunities', 
     href: '/opportunities', 
-    icon: SparklesIcon 
+    icon: SparklesIcon,
+    items: [
+      { name: 'Next Opportunity', href: '/opportunities', icon: ArrowRightCircleIcon },
+      { name: 'Keyword Research', href: '/keyword-research', icon: MagnifyingGlassIcon },
+      { name: 'Your Keywords', href: '/keyword-list', icon: ListBulletIcon }
+    ]
   },
   {
     name: 'Content Management',
     href: '#',
     icon: DocumentTextIcon,
     items: [
-      { name: 'Your Content', href: '/your-content', icon: DocumentDuplicateIcon },
-      { name: 'Content Orders', href: '/content-orders', icon: DocumentTextIcon }
+      { name: 'Your Content', href: '/your-content', icon: DocumentIcon },
+      { name: 'Content Orders', href: '/content-orders', icon: DocumentTextIcon },
     ]
   },
   {
@@ -44,7 +52,8 @@ export const navigation: NavigationItem[] = [
     icon: ChartBarIcon,
     items: [
       { name: 'Keyword Rankings', href: '/rankings', icon: ArrowTrendingUpIcon },
-      { name: 'Site Audit', href: '/site-audit', icon: ShieldExclamationIcon }
+      { name: 'Site Audit', href: '/site-audit', icon: ShieldExclamationIcon },
+      { name: 'Competitors', href: '/competitors', icon: RocketLaunchIcon }
     ]
   },
   {
@@ -53,7 +62,6 @@ export const navigation: NavigationItem[] = [
     icon: BuildingLibraryIcon,
     items: [
       { name: 'Your Business', href: '/business-information', icon: BuildingOfficeIcon },
-      { name: 'Competitors', href: '/competitors', icon: RocketLaunchIcon }
     ]
   }
 ]

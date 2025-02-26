@@ -20,21 +20,27 @@ as $$
 declare
   inactive_user record;
 begin
+  -- Get users who need notifications
   for inactive_user in 
-    select 
+    select distinct on (u.id)
       u.id as user_id,
       u.email,
-      max(c.created_at) as last_content_date
+      c.id as content_id,
+      c.created_at as last_content_date,
+      c.last_inactivity_notification
     from auth.users u
-    left join content c on u.id = c.user_id
-    group by u.id, u.email
-    having (
-      -- User hasn't created content in over a week
-      (max(c.created_at) < now() - interval '1 week' or max(c.created_at) is null)
-      and
-      -- And either never received a notification or received it more than 7 days ago
-      (max(c.last_inactivity_notification) is null or max(c.last_inactivity_notification) < now() - interval '7 days')
-    )
+    left join lateral (
+      select id, created_at, last_inactivity_notification
+      from content
+      where user_id = u.id
+      order by created_at desc
+      limit 1
+    ) c on true
+    where 
+      -- Either no content or content older than a week
+      (c.created_at is null or c.created_at < now() - interval '1 week')
+      -- And either no notification or notification older than 7 days
+      and (c.last_inactivity_notification is null or c.last_inactivity_notification < now() - interval '7 days')
   loop
     -- Send notification
     perform net.http_post(
@@ -51,14 +57,13 @@ begin
       )
     );
 
-    -- Update the last notification timestamp on the most recent content
-    update content 
-    set last_inactivity_notification = now()
-    where user_id = inactive_user.user_id
-    and created_at = inactive_user.last_content_date;
-
-    -- If user has no content, create a record to track notifications
-    if inactive_user.last_content_date is null then
+    -- If user has existing content, update the timestamp on their most recent content
+    if inactive_user.content_id is not null then
+      update content 
+      set last_inactivity_notification = now()
+      where id = inactive_user.content_id;
+    else
+      -- If user has no content, create a record to track notifications
       insert into content (
         user_id,
         last_inactivity_notification,

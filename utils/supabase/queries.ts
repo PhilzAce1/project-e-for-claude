@@ -61,7 +61,6 @@ export async function getLatestSeoCrawl(supabase: SupabaseClient, userId: string
     return false;
   }
 
-  // Check if all required fields are present and not null/undefined
   const requiredFields = [ 'lighthouse_data', 'total_pages', 'page_metrics', 'scraped_pages'];
   const isComplete = requiredFields.every(field => data && data[field] != null);
   return isComplete;
@@ -95,9 +94,7 @@ export const getKeywordRankings = cache(async (supabase: SupabaseClient, userId:
   }
 });
 
-
-
-export const getUserDomainLinks = cache(async (supabase: SupabaseClient, userId: string) => {
+export const getUserContent = cache(async (supabase: SupabaseClient, userId: string) => {
   try {
     const { data, error } = await supabase
       .from('content')
@@ -111,7 +108,7 @@ export const getUserDomainLinks = cache(async (supabase: SupabaseClient, userId:
 
     return data;
   } catch (error) {
-    console.error('Error in getUserDomainLinks:', error);
+    console.error('Error in getUserContent:', error);
     return null;
   }
 });

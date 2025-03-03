@@ -7,7 +7,7 @@ import { UrlModal } from '@/components/ui/UrlModal';
 import { Menu, Transition } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { Fragment } from 'react';
-import { getUserDomainLinks } from '@/utils/supabase/queries';
+import { getUserContent } from '@/utils/supabase/queries';
 
 interface YourContentContentProps {
   user: User;
@@ -95,6 +95,9 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         .select()
         .single();
 
+
+
+        console.log("data", data)
       if (error) {
         console.error('Error inserting content:', error);
         throw error;
@@ -118,6 +121,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
 
       if (!syncResponse.ok) {
         console.error('Failed to sync sitemap:', await syncResponse.text());
+        throw new Error('Failed to sync sitemap');
       }
 
       // Also trigger site indexing
@@ -164,6 +168,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
 
   const handleSyncSitemap = async (url: string) => {
     try {
+      setLoading(true)
       const domain = new URL(url).hostname;
       const syncResponse = await fetch('/api/sitemap-sync', {
         method: 'POST',
@@ -177,22 +182,26 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       });
 
       if (!syncResponse.ok) {
+        console.error('Failed to sync sitemap:', await syncResponse.text());
         throw new Error('Failed to sync sitemap');
       }
 
-      // Refresh content list
       const { data, error } = await supabase
         .from('content')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+        if (error) {
+          console.error('Error fetching content:', error);
+          throw error;
+        }
       setContent(data || []);
 
     } catch (error) {
       console.error('Error syncing sitemap:', error);
-      // You might want to add toast notification here
+    }finally {
+      setLoading(false)
     }
   };
 

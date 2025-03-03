@@ -44,7 +44,6 @@ export async function syncSitemapContent(domain: string, userId: string): Promis
       const existing = existingUrls.get(page.url);
       
       if (!existing) {
-        // New page
         try {
           await serviceRoleClient
             .from('content')
@@ -66,7 +65,6 @@ export async function syncSitemapContent(domain: string, userId: string): Promis
           result.errors.push(`Failed to add ${page.url}: ${error}`);
         }
       } else if (page.lastModified && existing.last_modified !== page.lastModified) {
-        // Updated page
         try {
           await serviceRoleClient
             .from('content')

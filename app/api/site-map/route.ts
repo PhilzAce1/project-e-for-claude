@@ -6,9 +6,6 @@ import { discoverAndScrapeSitemap } from '@/utils/site-map-helper';
 export async function POST(request: Request) {
   try {
     const { domain, maxPages, userId } = await request.json();
-
- 
-
     const supabase = createClientComponentClient({
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
         supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!

@@ -94,3 +94,24 @@ export const getKeywordRankings = cache(async (supabase: SupabaseClient, userId:
     return null;
   }
 });
+
+
+
+export const getUserDomainLinks = cache(async (supabase: SupabaseClient, userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('content')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error fetching user domain links:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in getUserDomainLinks:', error);
+    return null;
+  }
+});

@@ -19,11 +19,28 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
-    const { type, email, order_id, keyword, title } = body;
+    console.log('Received notification request:', body);
 
-    if (type !== 'content_ready') {
+    const { type, email, content_id, order_id, keyword, title } = body;
+
+    // Validate required fields
+    if (!type || type !== 'content_ready') {
       throw new Error('Invalid notification type');
     }
+
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    // Ensure we have values for template variables
+    const templateVars = {
+      keyword: keyword || 'Not specified',
+      title: title || 'Not specified',
+      orders_url: `https://app.espy-go.com/orders/${order_id || ''}`,
+      email: email
+    };
+
+    console.log('Sending email with variables:', templateVars);
 
     const emailResponse = await fetch('https://api.mailjet.com/v3.1/send', {
       method: 'POST',
@@ -41,22 +58,22 @@ Deno.serve(async (req) => {
             To: TEST_EMAILS.map((email) => ({ Email: email })),
             TemplateID: TEMPLATE_ID,
             TemplateLanguage: true,
-            Variables: {
-              keyword: keyword,
-              title: title,
-              orders_url: `https://app.espy-go.com/orders/${order_id}`,
-              email: email
-            }
+            Variables: templateVars
           }
         ]
       })
     });
 
+    const emailData = await emailResponse.json();
+
     if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error('Mailjet API Error:', errorData);
-      throw new Error('Failed to send email notification');
+      console.error('Mailjet API Error:', emailData);
+      throw new Error(
+        `Failed to send email notification: ${JSON.stringify(emailData.Messages[0]?.Errors || emailData)}`
+      );
     }
+
+    console.log('Email sent successfully:', emailData);
 
     return new Response(
       JSON.stringify({
@@ -68,10 +85,16 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('Error in notification function:', error);
+    return new Response(
+      JSON.stringify({
+        error: error.message,
+        details: error.stack
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 });

@@ -95,9 +95,6 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         .select()
         .single();
 
-
-
-        console.log("data", data)
       if (error) {
         console.error('Error inserting content:', error);
         throw error;

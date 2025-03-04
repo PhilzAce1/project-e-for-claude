@@ -60,7 +60,8 @@ export async function getLatestSeoCrawl(supabase: SupabaseClient, userId: string
     console.error('Error fetching SEO crawl data:', error);
     return false;
   }
-
+  
+  // Check if all required fields are present and not null/undefined
   const requiredFields = [ 'lighthouse_data', 'total_pages', 'page_metrics', 'scraped_pages'];
   const isComplete = requiredFields.every(field => data && data[field] != null);
   return isComplete;

@@ -21,21 +21,16 @@ Deno.serve(async (req) => {
     const body = await req.json();
     console.log('Received notification request:', body);
 
-    const { type, email, content_id, order_id, keyword, title } = body;
+    const { type, email, order_id, keyword } = body;
 
     // Validate required fields
     if (!type || type !== 'content_ready') {
       throw new Error('Invalid notification type');
     }
 
-    if (!email) {
-      throw new Error('Email is required');
-    }
-
     // Ensure we have values for template variables
     const templateVars = {
       keyword: keyword || 'Not specified',
-      title: title || 'Not specified',
       orders_url: `https://app.espy-go.com/orders/${order_id || ''}`,
       email: email
     };

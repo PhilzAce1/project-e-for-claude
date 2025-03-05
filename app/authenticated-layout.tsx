@@ -80,8 +80,7 @@ export default function AuthenticatedLayout({
         console.log(currentPath);
         if (monthlyPrice) {
           try {
-            const { errorRedirect, sessionId } = await checkoutWithStripe(
-              monthlyPrice,
+            const { errorRedirect, sessionId } = await createStripePortal(
               currentPath
             );
 

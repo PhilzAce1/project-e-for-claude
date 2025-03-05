@@ -285,7 +285,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ContentBrief keyword={decodedKeyword} userId={user.id} />
         <div className="bg-white rounded-lg shadow p-8 mb-8 text-center">
-          {userDetails?.content_credits > 0 ? (
+          { (userDetails?.content_credits > 0) && (
             <>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Content with Your Credits</h2>
               <div className="mb-8">
@@ -303,18 +303,9 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
               >
                 {loading ? 'Creating...' : 'Create Content Now'}
               </button>
-              <Image
-                src="/EspyGoSEOOverTime.jpg"
-                alt="SEO Growth Over Time"
-                width={600}
-                height={400}
-                className="rounded-lg mb-6 w-full h-auto"
-              />
 
             </>
-          ) : (
-            <>
-              <h2 className="font-serif text-lg font-bold leading-7 text-gray-900 sm:truncate sm:tracking-tight border-b border-gray-200 pb-4 mb-4">Create with Espy Go</h2>
+          )}
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Skip the Search for Writers. We'll Craft Your Ranking Content in 48 Hours</h2>
               
               <Image
@@ -351,8 +342,6 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
                     Purchase Credits
                   </button>
               </div>
-            </>
-          )}
         </div>
       </div>
     </div>

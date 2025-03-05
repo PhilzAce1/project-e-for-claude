@@ -60,7 +60,7 @@ export default function AccountContent({ user, userDetails, subscription }: {
         </div>
       </div>
       <div className="w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8 py-16 mt-8">
-        <CustomerPortalForm subscriptions={subscription} userDetails={userDetails} />
+        <CustomerPortalForm subscriptions={subscription} userDetails={userDetails} supabase={supabase} />
         
         <div className="border-t border-gray-200 my-16" aria-hidden="true" /> 
         

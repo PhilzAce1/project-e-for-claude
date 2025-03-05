@@ -11,7 +11,7 @@ import { useToast } from '@/components/ui/Toasts/use-toast';
 import { handleCountrySelect } from '@/utils/supabase/country';
 import posthog from 'posthog-js';
 import { getStripe } from '@/utils/stripe/client';
-import { checkoutWithStripe } from '@/utils/stripe/server';
+import { checkoutWithStripe, createStripePortal } from '@/utils/stripe/server';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function AuthenticatedLayout({
@@ -80,9 +80,11 @@ export default function AuthenticatedLayout({
         console.log(currentPath);
         if (monthlyPrice) {
           try {
-            const { errorRedirect, sessionId } = await createStripePortal(
-              currentPath
-            );
+            try {
+              const { errorRedirect, sessionId } = await checkoutWithStripe(
+                monthlyPrice,
+                currentPath
+              );
 
             if (errorRedirect) {
               toast({

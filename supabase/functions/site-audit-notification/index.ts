@@ -16,6 +16,19 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const TEMPLATE_ID = 6774183;
 
+// Helper function to format date
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  return formatter.format(date); // Will output: "06 Mar, 2024"
+}
+
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
@@ -53,7 +66,7 @@ Deno.serve(async (req) => {
               previous_score: previous_score || 'N/A',
               score_difference: scoreDiff,
               is_improved: isImproved,
-              audit_date: new Date(audit_date).toLocaleDateString(),
+              audit_date: formatDate(audit_date),
               site_audit_url: `https://app.espy-go.com/site-audit/${domain}`,
               original_recipient: email
             }

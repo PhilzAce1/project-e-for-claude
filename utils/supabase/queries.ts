@@ -60,7 +60,7 @@ export async function getLatestSeoCrawl(supabase: SupabaseClient, userId: string
     console.error('Error fetching SEO crawl data:', error);
     return false;
   }
-
+  
   // Check if all required fields are present and not null/undefined
   const requiredFields = [ 'lighthouse_data', 'total_pages', 'page_metrics', 'scraped_pages'];
   const isComplete = requiredFields.every(field => data && data[field] != null);
@@ -91,6 +91,25 @@ export const getKeywordRankings = cache(async (supabase: SupabaseClient, userId:
     return null;
   } catch (error) {
     console.error('Error in getKeywordRankings:', error);
+    return null;
+  }
+});
+
+export const getUserContent = cache(async (supabase: SupabaseClient, userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('content')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error fetching user domain links:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in getUserContent:', error);
     return null;
   }
 });

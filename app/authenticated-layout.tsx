@@ -80,11 +80,10 @@ export default function AuthenticatedLayout({
         console.log(currentPath);
         if (monthlyPrice) {
           try {
-            try {
-              const { errorRedirect, sessionId } = await checkoutWithStripe(
-                monthlyPrice,
-                currentPath
-              );
+            const { errorRedirect, sessionId } = await checkoutWithStripe(
+              monthlyPrice,
+              currentPath
+            );
 
             if (errorRedirect) {
               toast({

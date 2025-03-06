@@ -76,7 +76,7 @@ export default function PaymentRequired({ user, children, products, subscription
         // Fetch content recommendations
         const recommendations = await fetchContentRecommendations(user.id);
         setRecommendationData(recommendations);
-        const hasActiveSubscription = subscription.filter((sub: { status: string; prices: { product_id: string; }; }) => (sub?.status === 'active' || sub?.status === 'trialing') && sub.prices.product_id === "prod_RJ6CHDZl8mv1QM").length > 0;
+        const hasActiveSubscription = subscription.filter((sub: { status: string; prices: { product_id: string; }; }) => (sub?.status === 'active' || sub?.status === 'trialing')).length > 0;
                 // Set payment required if analysis is complete, has competitors, but no subscription
         setNeedsPayment(!hasActiveSubscription);
         setLoading(false);

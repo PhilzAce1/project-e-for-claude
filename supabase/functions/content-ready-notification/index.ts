@@ -5,13 +5,6 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!;
 const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!;
 
-// Add test email addresses
-const TEST_EMAILS = [
-  'jaden@elysium-studios.co.uk',
-  'mike@elysium-studios.co.uk',
-  'jaden9516williams@gmail.com'
-];
-
 const TEMPLATE_ID = 6777865;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -31,8 +24,7 @@ Deno.serve(async (req) => {
     // Ensure we have values for template variables
     const templateVars = {
       keyword: keyword || 'Not specified',
-      orders_url: `https://app.espy-go.com/orders/${order_id || ''}`,
-      email: email
+      orders_url: `https://app.espy-go.com/orders/${order_id || ''}`
     };
 
     console.log('Sending email with variables:', templateVars);
@@ -50,7 +42,11 @@ Deno.serve(async (req) => {
               Email: 'noreply@espy-go.com',
               Name: 'Espy-Go Content Team'
             },
-            To: TEST_EMAILS.map((email) => ({ Email: email })),
+            To: [
+              {
+                Email: email
+              }
+            ],
             TemplateID: TEMPLATE_ID,
             TemplateLanguage: true,
             Variables: templateVars

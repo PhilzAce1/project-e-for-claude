@@ -32,7 +32,7 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
         .single();
 
       if (error) {
-        console.error('Error fetching competitor metrics:', error);
+        // console.error('Error fetching competitor metrics:', error);
         setLoading(false);
         return;
       }

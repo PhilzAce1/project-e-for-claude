@@ -81,7 +81,7 @@ export default function PaymentRequired({ user, children, products, subscription
         setNeedsPayment(!hasActiveSubscription);
         setLoading(false);
       } catch (error) {
-        console.error('Error checking payment status:', error);
+        // console.error('Error checking payment status:', error);
         setLoading(false);
       }
     }

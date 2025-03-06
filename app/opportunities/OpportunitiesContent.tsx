@@ -74,7 +74,7 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
       .rpc('get_user_content_recommendations');
 
     if (error) {
-      console.error('Error fetching recommendations:', error);
+      // console.error('Error fetching recommendations:', error);
       return;
     }
     setContentRecommendations(recommendations);
@@ -89,7 +89,7 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
         .single();
 
       if (error) {
-        console.error('Error fetching ranking data:', error);
+        // console.error('Error fetching ranking data:', error);
         return;
       }
       setRankingData(data);

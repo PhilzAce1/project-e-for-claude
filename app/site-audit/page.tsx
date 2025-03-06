@@ -33,7 +33,7 @@ export default async function SiteAuditPage() {
       .single();
 
     if (error) {
-      console.error('Error fetching SEO crawl data:', error);
+      // console.error('Error fetching SEO crawl data:', error);
     } else {
       const needsRefresh = !data.lighthouse_data && 
         !data.onpage_score &&
@@ -45,10 +45,10 @@ export default async function SiteAuditPage() {
           try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback?id=${data.external_job_id}`);
             if (!response.ok) {
-              console.error('Error refreshing SEO data:', await response.text());
+              // console.error('Error refreshing SEO data:', await response.text());
             } 
           } catch (error) {
-            console.error('Error calling SEO pingback endpoint:', error);
+            // console.error('Error calling SEO pingback endpoint:', error);
           }
         }
 
@@ -57,10 +57,10 @@ export default async function SiteAuditPage() {
           try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/pageforseo/pingback?id=${data.lighthouse_task_id}&tag=lighthouse_audit`);
             if (!response.ok) {
-              console.error('Error refreshing Lighthouse data:', await response.text());
+              // console.error('Error refreshing Lighthouse data:', await response.text());
             } 
           } catch (error) {
-            console.error('Error calling Lighthouse pingback endpoint:', error);
+            // console.error('Error calling Lighthouse pingback endpoint:', error);
           }
         }
       }

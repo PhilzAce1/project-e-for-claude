@@ -25,7 +25,7 @@ export default async function RankingsPage() {
         .single();
 
     if (error) {
-        console.error('Error fetching rankings data:', error);
+        // console.error('Error fetching rankings data:', error);
     }
 
     return (

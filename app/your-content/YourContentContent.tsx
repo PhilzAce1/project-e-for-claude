@@ -38,7 +38,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching content:', error);
+        // console.error('Error fetching content:', error);
         return;
       }
 
@@ -86,7 +86,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         .single();
 
       if (error) {
-        console.error('Error inserting content:', error);
+        // console.error('Error inserting content:', error);
         throw error;
       }
 
@@ -106,10 +106,10 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       });
 
       if (!indexResponse.ok) {
-        console.error('Failed to index site:', await indexResponse.text());
+        // console.error('Failed to index site:', await indexResponse.text());
       }
     } catch (error) {
-      console.error('Error submitting content:', error);
+      // console.error('Error submitting content:', error);
       throw error;
     }
   };
@@ -123,14 +123,14 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error removing content:', error);
+        // console.error('Error removing content:', error);
         throw error;
       }
 
       // Remove the content from the local state
       setContent(prev => prev.filter(item => item.id !== contentId));
     } catch (error) {
-      console.error('Error removing content:', error);
+      // console.error('Error removing content:', error);
       throw error;
     }
   };

@@ -60,7 +60,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
         .eq('user_id', user.id);
   
       if (error) {
-        console.error('Error fetching competitors:', error);
+        // // console.error('Error fetching competitors:', error);
         return;
       }
 
@@ -159,7 +159,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
           description: `Rankings data updated for ${competitor.domain}`,
         })
       } catch (error) {
-        console.error('Error fetching competitor rankings:', error)
+        // // console.error('Error fetching competitor rankings:', error)
         toast({
           title: "Error",
           description: `Failed to update rankings for ${competitor.domain}`,
@@ -200,7 +200,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
             .single();
   
           if (error) {
-            console.error('Error adding competitor:', error);
+            // console.error('Error adding competitor:', error);
             throw error;
           } else {
             // Fetch rankings data for the new competitor

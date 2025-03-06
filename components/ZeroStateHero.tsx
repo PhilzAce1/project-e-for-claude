@@ -91,7 +91,7 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
             router.push(`/business-information?id=${businessData.data.analysisId}`);
 
         } catch (error: any) {
-            console.error('Error:', error);
+            // console.error('Error:', error);
             setError(error.message || 'Failed to submit domain. Please try again.');
         } finally {
             setIsSubmitting(false);

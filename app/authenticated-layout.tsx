@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/ui/Sidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import Logo from '@/components/icons/Logo';
@@ -11,34 +11,34 @@ import { useToast } from '@/components/ui/Toasts/use-toast';
 import { handleCountrySelect } from '@/utils/supabase/country';
 import posthog from 'posthog-js';
 import { getStripe } from '@/utils/stripe/client';
-import { checkoutWithStripe, createStripePortal } from '@/utils/stripe/server';
+import { checkoutWithStripe } from '@/utils/stripe/server';
 import { useRouter, usePathname } from 'next/navigation';
+import ZeroStateHero from '@/components/ZeroStateHero';
 
 export default function AuthenticatedLayout({
   children,
   user,
   products,
   subscription,
+  disableZeroStateForm = false,
   disableGateway = false
 }: {
   children: React.ReactNode;
   user: any;
   products: any;
-  subscription: any; 
-  disableGateway?: boolean;
+  subscription: any;
+  disableZeroStateForm: boolean;
+  disableGateway: boolean;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCountrySelector, setShowCountrySelector] = useState(false);
   const [currentCountry, setCurrentCountry] = useState<string>('GB');
+  const [domain, setDomain] = useState('')
+  const [existingDomain, setExistingDomain] = useState(false)
   const supabase = createClientComponentClient();
   const { toast } = useToast();
   const router = useRouter();
   const currentPath = usePathname();
-
-  // Check if user has the base plan
-  const hasBasePlan = subscription?.some((sub: any) => 
-    sub.prices?.products?.id === 'prod_RJ6CHDZl8mv1QM'
-  );
 
   if (user) {
     posthog.identify(
@@ -55,9 +55,9 @@ export default function AuthenticatedLayout({
         .eq('user_id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error checking country settings:', error);
-      }
+      // if (error) {
+      //   // console.error('Error checking country settings:', error);
+      // }
 
       if (data?.target_country) {
         setCurrentCountry(data.target_country);
@@ -71,52 +71,30 @@ export default function AuthenticatedLayout({
     checkCountrySettings();
   }, [user.id, supabase]);
 
-  useEffect(() => {
-    const initiateCheckout = async () => {
-      if (!hasBasePlan && user) {
-        // Find the base plan price
-        const basePlan = products?.find((p: any) => p.id === 'prod_RJ6CHDZl8mv1QM');
-        const monthlyPrice = basePlan?.prices?.find((p: any) => p.interval === 'month');
-        console.log(currentPath);
-        if (monthlyPrice) {
-          try {
-            try {
-              const { errorRedirect, sessionId } = await checkoutWithStripe(
-                monthlyPrice,
-                currentPath
-              );
-
-            if (errorRedirect) {
-              toast({
-                title: 'Error',
-                description: 'Failed to initiate checkout',
-                variant: 'destructive'
-              });
-              return;
-            }
-
-            if (sessionId) {
-              const stripe = await getStripe();
-              stripe?.redirectToCheckout({ sessionId });
-            }
-          } catch (error) {
-            console.error('Checkout error:', error);
-            toast({
-              title: 'Error',
-              description: 'Failed to initiate checkout',
-              variant: 'destructive'
-            });
-          }
-        }
-      }
-    };
-
-    initiateCheckout();
-  }, [user, hasBasePlan, products, currentPath]);
-
   const handleCountryUpdate = async (country: string) => {
     await handleCountrySelect(user.id, country, () => setShowCountrySelector(false));
   };
+  const checkExistingDomain = useCallback(async () => {
+      try {
+          const { data, error } = await supabase
+              .from('business_information')
+              .select('domain')
+              .eq('user_id', user.id)
+              .single()
+
+          if (error) throw error
+
+          if (data) {
+              setExistingDomain(data.domain)
+          }
+      } catch (error) {
+          // console.error('Error checking existing domain:', error)
+      }
+  }, [supabase, user.id]);
+
+  useEffect(() => {
+      checkExistingDomain();
+  }, [checkExistingDomain]);
 
   return (
     <div className="min-h-screen h-screen bg-gray-100">
@@ -155,7 +133,21 @@ export default function AuthenticatedLayout({
 
         <main className="py-4 sm:py-6 lg:py-10 h-full fixed lg:relative top-0 overflow-auto w-full lg:w-auto">
           <div className="px-4 sm:px-6 lg:px-8 h-full">
-            {!disableGateway ? (<PaymentRequired user={user} products={products} subscription={subscription}>{children}</PaymentRequired>) : children}
+
+          {(!existingDomain && !domain) && !disableZeroStateForm ? (
+              <ZeroStateHero 
+                  title="Kickstart Your SEO Strategy Now!"
+                  subtitle="We need to start by learning about your business."
+                  description="Enter your domain below to begin."
+                  ctaText="Start Now"
+                  user={user}
+                  imageSrc="/rank-image.webp"
+                  fullPage={true}
+                  domainHandler={setDomain}
+              />
+          ) :
+            children
+          }
           </div>
         </main>
       </div>

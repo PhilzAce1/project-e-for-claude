@@ -34,7 +34,7 @@ export default async function SiteAuditIssuesPage() {
       .single();
 
     if (error) {
-      console.error('Error fetching SEO crawl data:', error);
+      // console.error('Error fetching SEO crawl data:', error);
     } else {
       seoCrawlData = data;
     }

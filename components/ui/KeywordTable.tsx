@@ -112,7 +112,7 @@ const KeywordTable: React.FC<KeywordTableProps> = ({ keywords, userId, showPayLi
 
       setIsProcessing(false);
     } catch (error) {
-      console.error('Error:', error);
+      // console.error('Error:', error);
       toast({
         title: 'Error',
         description: 'Failed to start checkout process. Please try again.',

@@ -36,9 +36,7 @@ export default function AuthenticatedLayout({
   const currentPath = usePathname();
 
   // Check if user has the base plan
-  const hasBasePlan = subscription?.some((sub: any) => 
-    sub.prices?.products?.id === 'prod_RJ6CHDZl8mv1QM'
-  );
+  const hasPlan = subscription.length > 0;
 
   if (user) {
     posthog.identify(
@@ -73,7 +71,7 @@ export default function AuthenticatedLayout({
 
   useEffect(() => {
     const initiateCheckout = async () => {
-      if (!hasBasePlan && user) {
+      if (!hasPlan && user) {
         // Find the base plan price
         const basePlan = products?.find((p: any) => p.id === 'prod_RJ6CHDZl8mv1QM');
         const monthlyPrice = basePlan?.prices?.find((p: any) => p.interval === 'month');
@@ -111,7 +109,7 @@ export default function AuthenticatedLayout({
     };
 
     initiateCheckout();
-  }, [user, hasBasePlan, products, currentPath]);
+  }, [user, hasPlan, products, currentPath]);
 
   const handleCountryUpdate = async (country: string) => {
     await handleCountrySelect(user.id, country, () => setShowCountrySelector(false));

@@ -5,24 +5,44 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!;
 const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!;
 
+// Test email addresses
+const TEST_EMAILS = [
+  'jaden@elysium-studios.co.uk',
+  'mike@elysium-studios.co.uk',
+  'jaden9516williams@gmail.com'
+];
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-const TEMPLATE_ID = 6744408;
+const TEMPLATE_ID = 6774183;
+
+// Helper function to format date
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  return formatter.format(date); // Will output: "06 Mar, 2024"
+}
 
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
-    const { type, email, ranking_changes } = body;
+    const { type, email, domain, current_score, previous_score, audit_date } =
+      body;
 
-    if (type !== 'ranking_change') {
+    if (type !== 'site_audit_change') {
       throw new Error('Invalid notification type');
     }
 
-    const { is_up, is_down, is_new, is_lost } = ranking_changes;
-
-    // Calculate if overall trend is positive
-    const isPositive =
-      Number(is_up) + Number(is_new) >= Number(is_down) + Number(is_lost);
+    const isImproved = previous_score ? current_score > previous_score : true;
+    const scoreDiff = previous_score
+      ? Math.abs(current_score - previous_score).toFixed(1)
+      : 'N/A';
 
     const emailResponse = await fetch('https://api.mailjet.com/v3.1/send', {
       method: 'POST',
@@ -35,23 +55,20 @@ Deno.serve(async (req) => {
           {
             From: {
               Email: 'noreply@espy-go.com',
-              Name: 'Espy-Go Ranking Alerts'
+              Name: 'Espy-Go Site Audit'
             },
-            To: [
-              {
-                Email: email
-              }
-            ],
+            To: TEST_EMAILS.map((email) => ({ Email: email })),
             TemplateID: TEMPLATE_ID,
             TemplateLanguage: true,
             Variables: {
-              is_positive: isPositive,
-              keywords_up: Number(is_up),
-              keywords_down: Number(is_down),
-              keywords_new: Number(is_new),
-              keywords_lost: Number(is_lost),
-              dashboard_url: 'https://app.espy-go.com/rankings',
-              opportunities_url: 'https://app.espy-go.com/opportunities'
+              domain: domain,
+              current_score: current_score,
+              previous_score: previous_score || 'N/A',
+              score_difference: scoreDiff,
+              is_improved: isImproved,
+              audit_date: formatDate(audit_date),
+              site_audit_url: `https://app.espy-go.com/site-audit/${domain}`,
+              original_recipient: email
             }
           }
         ]
@@ -67,7 +84,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Ranking change notification sent successfully'
+        message: 'Site audit notification sent successfully'
       }),
       {
         headers: { 'Content-Type': 'application/json' }

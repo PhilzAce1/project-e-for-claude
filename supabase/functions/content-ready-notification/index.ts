@@ -5,24 +5,29 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!;
 const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const TEMPLATE_ID = 6777865;
 
-const TEMPLATE_ID = 6744408;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
-    const { type, email, ranking_changes } = body;
+    console.log('Received notification request:', body);
 
-    if (type !== 'ranking_change') {
+    const { type, email, order_id, keyword } = body;
+
+    // Validate required fields
+    if (!type || type !== 'content_ready') {
       throw new Error('Invalid notification type');
     }
 
-    const { is_up, is_down, is_new, is_lost } = ranking_changes;
+    // Ensure we have values for template variables
+    const templateVars = {
+      keyword: keyword || 'Not specified',
+      orders_url: `https://app.espy-go.com/orders/${order_id || ''}`
+    };
 
-    // Calculate if overall trend is positive
-    const isPositive =
-      Number(is_up) + Number(is_new) >= Number(is_down) + Number(is_lost);
+    console.log('Sending email with variables:', templateVars);
 
     const emailResponse = await fetch('https://api.mailjet.com/v3.1/send', {
       method: 'POST',
@@ -35,7 +40,7 @@ Deno.serve(async (req) => {
           {
             From: {
               Email: 'noreply@espy-go.com',
-              Name: 'Espy-Go Ranking Alerts'
+              Name: 'Espy-Go Content Team'
             },
             To: [
               {
@@ -44,40 +49,43 @@ Deno.serve(async (req) => {
             ],
             TemplateID: TEMPLATE_ID,
             TemplateLanguage: true,
-            Variables: {
-              is_positive: isPositive,
-              keywords_up: Number(is_up),
-              keywords_down: Number(is_down),
-              keywords_new: Number(is_new),
-              keywords_lost: Number(is_lost),
-              dashboard_url: 'https://app.espy-go.com/rankings',
-              opportunities_url: 'https://app.espy-go.com/opportunities'
-            }
+            Variables: templateVars
           }
         ]
       })
     });
 
+    const emailData = await emailResponse.json();
+
     if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error('Mailjet API Error:', errorData);
-      throw new Error('Failed to send email notification');
+      console.error('Mailjet API Error:', emailData);
+      throw new Error(
+        `Failed to send email notification: ${JSON.stringify(emailData.Messages[0]?.Errors || emailData)}`
+      );
     }
+
+    console.log('Email sent successfully:', emailData);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Ranking change notification sent successfully'
+        message: 'Content ready notification sent successfully'
       }),
       {
         headers: { 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('Error in notification function:', error);
+    return new Response(
+      JSON.stringify({
+        error: error.message,
+        details: error.stack
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   }
 });

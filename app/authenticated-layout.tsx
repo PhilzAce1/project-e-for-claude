@@ -40,6 +40,9 @@ export default function AuthenticatedLayout({
   const router = useRouter();
   const currentPath = usePathname();
 
+  // Check if user has the base plan
+  const hasPlan = subscription.length > 0;
+
   if (user) {
     posthog.identify(
       user.id, // Required. Replace 'distinct_id' with your user's unique identifier
@@ -70,6 +73,7 @@ export default function AuthenticatedLayout({
 
     checkCountrySettings();
   }, [user.id, supabase]);
+
 
   const handleCountryUpdate = async (country: string) => {
     await handleCountrySelect(user.id, country, () => setShowCountrySelector(false));

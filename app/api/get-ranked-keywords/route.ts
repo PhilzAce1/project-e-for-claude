@@ -90,6 +90,7 @@ export async function POST(req: Request) {
       .single();
 
     const locationCode = getLocationCodeByCountry(businessInfo?.target_country || 'GB');
+    console.log('locationCode', locationCode);
 
     // Fetch data from DataForSEO API
     const dataForSEOResponse = await fetch(DATAFORSEO_API_URL, {
@@ -102,7 +103,7 @@ export async function POST(req: Request) {
         {
           "target": cleanedDomain,
           "location_code": locationCode,
-          "language_code": "en",
+          // "language_code": "en",
           "historical_serp_mode":"live", 
           "ignore_synonyms":false, 
           "include_clickstream_data":false, 
@@ -118,6 +119,7 @@ export async function POST(req: Request) {
     }
 
     const dataForSEOData = await dataForSEOResponse.json()
+    console.log('dataForSEOData', dataForSEOData);
 
     // Process the data (example - adjust according to your needs)
     const processedData = {

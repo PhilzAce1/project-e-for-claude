@@ -5,24 +5,26 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!;
 const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const TEMPLATE_ID = 6765809;
 
-const TEMPLATE_ID = 6744408;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
-    const { type, email, ranking_changes } = body;
+    const { type, email, last_login_date } = body;
 
-    if (type !== 'ranking_change') {
+    if (type !== 'login_reminder') {
       throw new Error('Invalid notification type');
     }
 
-    const { is_up, is_down, is_new, is_lost } = ranking_changes;
-
-    // Calculate if overall trend is positive
-    const isPositive =
-      Number(is_up) + Number(is_new) >= Number(is_down) + Number(is_lost);
+    const lastLoginDate = last_login_date ? new Date(last_login_date) : null;
+    const daysInactive = lastLoginDate
+      ? Math.floor(
+          (new Date().getTime() - lastLoginDate.getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
+      : null;
 
     const emailResponse = await fetch('https://api.mailjet.com/v3.1/send', {
       method: 'POST',
@@ -35,7 +37,7 @@ Deno.serve(async (req) => {
           {
             From: {
               Email: 'noreply@espy-go.com',
-              Name: 'Espy-Go Ranking Alerts'
+              Name: 'Espy-Go Login Reminder'
             },
             To: [
               {
@@ -45,12 +47,7 @@ Deno.serve(async (req) => {
             TemplateID: TEMPLATE_ID,
             TemplateLanguage: true,
             Variables: {
-              is_positive: isPositive,
-              keywords_up: Number(is_up),
-              keywords_down: Number(is_down),
-              keywords_new: Number(is_new),
-              keywords_lost: Number(is_lost),
-              dashboard_url: 'https://app.espy-go.com/rankings',
+              days_inactive: daysInactive || 'a while',
               opportunities_url: 'https://app.espy-go.com/opportunities'
             }
           }
@@ -67,7 +64,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Ranking change notification sent successfully'
+        message: 'Login reminder notification sent successfully'
       }),
       {
         headers: { 'Content-Type': 'application/json' }

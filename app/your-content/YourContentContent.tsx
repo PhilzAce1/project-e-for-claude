@@ -7,6 +7,7 @@ import { UrlModal } from '@/components/ui/UrlModal';
 import { Menu, Transition } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { Fragment } from 'react';
+import { getUserContent } from '@/utils/supabase/queries';
 
 interface YourContentContentProps {
   user: User;
@@ -21,6 +22,9 @@ interface Content {
   title: string;
   status: string;
   site_indexed: boolean;
+  sitemap_discovered: boolean;
+  sync_status: string;
+  last_sync: string;
 }
 
 export default function YourContentContent({ user }: YourContentContentProps) {
@@ -73,6 +77,10 @@ export default function YourContentContent({ user }: YourContentContentProps) {
 
   const handleContentSubmit = async (url: string, title: string) => {
     try {
+      // Try to extract domain from URL
+      const domain = new URL(url).hostname;
+
+      // First, insert the content record
       const { data, error } = await supabase
         .from('content')
         .insert({ 
@@ -80,7 +88,9 @@ export default function YourContentContent({ user }: YourContentContentProps) {
           url: url,
           title: title,
           status: 'published',
-          site_indexed: false
+          site_indexed: false,
+          sitemap_discovered: false,
+          sync_status: 'pending'
         })
         .select()
         .single();
@@ -94,6 +104,24 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       setContent(prev => [data, ...prev]);
       setIsModalOpen(false);
 
+      // Trigger sitemap discovery and content sync
+      const syncResponse = await fetch('/api/sitemap-sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          domain,
+          userId: user.id
+        })
+      });
+
+      if (!syncResponse.ok) {
+        console.error('Failed to sync sitemap:', await syncResponse.text());
+        throw new Error('Failed to sync sitemap');
+      }
+
+      // Also trigger site indexing
       const indexResponse = await fetch('/api/index-site', {
         method: 'POST',
         headers: {
@@ -101,7 +129,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         },
         body: JSON.stringify({
           url,
-          contentId: data[0].id
+          contentId: data.id
         })
       });
 
@@ -132,6 +160,45 @@ export default function YourContentContent({ user }: YourContentContentProps) {
     } catch (error) {
       // console.error('Error removing content:', error);
       throw error;
+    }
+  };
+
+  const handleSyncSitemap = async (url: string) => {
+    try {
+      setLoading(true)
+      const domain = new URL(url).hostname;
+      const syncResponse = await fetch('/api/sitemap-sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          domain,
+          userId: user.id
+        })
+      });
+
+      if (!syncResponse.ok) {
+        console.error('Failed to sync sitemap:', await syncResponse.text());
+        throw new Error('Failed to sync sitemap');
+      }
+
+      const { data, error } = await supabase
+        .from('content')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching content:', error);
+          throw error;
+        }
+      setContent(data || []);
+
+    } catch (error) {
+      console.error('Error syncing sitemap:', error);
+    }finally {
+      setLoading(false)
     }
   };
 
@@ -207,6 +274,12 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                   Indexed
                 </th>
                 <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                  Sitemap Status
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                  Last Sync
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
                   Date
                 </th>
                 <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-3">
@@ -246,6 +319,29 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                     }`}>
                       {item.site_indexed ? 'Indexed' : 'Pending'}
                     </span>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                        item.sync_status === 'synced'
+                          ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
+                          : item.sync_status === 'pending'
+                          ? 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
+                          : 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20'
+                      }`}>
+                        {item.sync_status === 'synced' ? 'Synced' : 
+                         item.sync_status === 'pending' ? 'Pending' : 'Error'}
+                      </span>
+                      <button
+                        onClick={() => handleSyncSitemap(item.url)}
+                        className="text-indigo-600 hover:text-indigo-500 text-xs"
+                      >
+                        Sync Now
+                      </button>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    {item.last_sync ? new Date(item.last_sync).toLocaleDateString() : 'Never'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                     {new Date(item.created_at).toLocaleDateString()}

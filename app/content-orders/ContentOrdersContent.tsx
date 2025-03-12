@@ -41,7 +41,7 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching orders:', error);
+        // // console.error('Error fetching orders:', error);
         return;
       }
 

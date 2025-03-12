@@ -8,7 +8,6 @@ import { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import KeywordTable from '@/components/ui/KeywordTable';
 import { RankingItem } from '@/utils/helpers/ranking-data-types';
-import ZeroStateHero from '@/components/ZeroStateHero';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/components/ui/Toasts/use-toast';
 
@@ -58,19 +57,6 @@ interface RankingsContentProps {
 }
 
 export default function RankingsContent({ user, rankingsData, lastCrawlDate, domain }: RankingsContentProps) {
-  if (!rankingsData) {
-    return (
-      <ZeroStateHero 
-        title="Kickstart Your SEO Strategy Now!"
-        subtitle="We need to start by learning about your business."
-        description="Enter your domain below to begin."
-        ctaText="Start Now"
-        user={user}
-        imageSrc="/rank-image.webp"
-        fullPage={true}
-    />
-    );
-  }
   const [showNoKeywordsModal, setShowNoKeywordsModal] = useState(false);
   const [hasCompetitors, setHasCompetitors] = useState(false);
   const supabase = createClientComponentClient();
@@ -167,7 +153,7 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate, dom
       // Refresh the page to show new data
       window.location.reload();
     } catch (error) {
-      console.error('Error refreshing rankings:', error);
+      // console.error('Error refreshing rankings:', error);
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to refresh rankings',

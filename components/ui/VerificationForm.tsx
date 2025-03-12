@@ -196,7 +196,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         return newData;
       });
     } catch (error: any) {
-      console.error('Error updating answer:', error);
+      // console.error('Error updating answer:', error);
       toast({
         title: 'Error updating answer',
         description: error.message || 'Failed to save your answer',
@@ -578,7 +578,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       }
 
     } catch (error: any) {
-      console.error('Error confirming section:', error);
+      // console.error('Error confirming section:', error);
       toast({
         title: 'Error saving section',
         description: error.message || 'Failed to save section',
@@ -604,7 +604,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
           await handleSectionConfirm('recommended');
         }
       } catch (error) {
-        console.error('Error auto-confirming empty sections:', error);
+        // console.error('Error auto-confirming empty sections:', error);
       }
     };
 

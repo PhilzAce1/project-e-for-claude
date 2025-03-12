@@ -46,7 +46,7 @@ export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) =
           .single();
 
         if (error && error.code !== 'PGRST116') {
-          console.error('Error checking recommendations:', error);
+          // console.error('Error checking recommendations:', error);
           return;
         }
 
@@ -74,7 +74,7 @@ export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) =
           setContentBrief(result.data);
         }
       } catch (error) {
-        console.error('Error creating content recommendation:', error);
+        // console.error('Error creating content recommendation:', error);
         toast({
           title: 'Error',
           description: 'Failed to create content recommendation.',

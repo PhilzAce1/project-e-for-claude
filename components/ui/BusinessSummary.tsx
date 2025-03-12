@@ -41,7 +41,7 @@ export const BusinessSummary: React.FC<BusinessSummaryProps> = ({ analysisId }) 
         setData(groupedData);
         setLoading(false);
       } catch (error: any) {
-        console.error('Error fetching answers:', error);
+        // console.error('Error fetching answers:', error);
         toast({
           title: 'Error loading business summary',
           description: error.message,

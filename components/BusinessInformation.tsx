@@ -150,7 +150,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
       });
       
     } catch (error: any) {
-      console.error('Error updating business information:', error);
+      // console.error('Error updating business information:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to update information',

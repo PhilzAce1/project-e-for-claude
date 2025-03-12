@@ -6,7 +6,6 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Spinner from '@/components/ui/Spinner';
 import LighthouseAudits from '@/components/ui/LighthouseAudits';
 import { siteAuditDictionary, siteAutitPriority } from '@/utils/helpers/site-audit-dictionary';
-import ZeroStateHero from '@/components/ZeroStateHero';
 import { toast } from "@/components/ui/Toasts/use-toast";
 
 // Define the type for your audit items
@@ -23,21 +22,6 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
 }) {
     if (!user) {
         return <div>Please sign in to view your site audit.</div>;
-    }
-
-    if (!seoCrawlData) {
-        return (
-            
-            <ZeroStateHero 
-                title="Kickstart Your SEO Strategy Now!"
-                subtitle="We need to start by learning about your business."
-                description="Enter your domain below to begin."
-                ctaText="Start Now"
-                user={user}
-                imageSrc="/rank-image.webp"
-                fullPage={true}
-            />
-        );
     }
 
     const { onpage_score, lighthouse_data, page_metrics } = seoCrawlData;
@@ -72,7 +56,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
             });
 
         } catch (error) {
-            console.error('Error refreshing audit:', error);
+            // console.error('Error refreshing audit:', error);
             toast({
                 title: "Error",
                 description: "Failed to start site audit. Please try again.",

@@ -56,7 +56,7 @@ export default function KeywordListContent({ user }: { user: any }) {
 
       setKeywords(data || []);
     } catch (error) {
-      console.error('Error loading keywords:', error);
+    //   // console.error('Error loading keywords:', error);
       toast({
         title: 'Error',
         description: 'Failed to load your keywords',

@@ -67,7 +67,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
         .single();
 
       if (error) {
-        console.error('Error fetching competitor:', error);
+        // console.error('Error fetching competitor:', error);
         return;
       }
 
@@ -78,7 +78,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
         try {
             setKeywords(competitor.items || []);
         } catch (error) {
-            console.error('Error fetching keywords:', error);
+            // console.error('Error fetching keywords:', error);
             setKeywords([]);
         } finally {
             setIsLoading(false);
@@ -100,7 +100,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
                 .eq('user_id', userId);
 
             if (error) {
-                console.error('Supabase delete error:', error);
+                // console.error('Supabase delete error:', error);
                 throw error;
             }
 
@@ -129,7 +129,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
             });
 
         } catch (error) {
-            console.error('Error removing competitor:', error);
+            // console.error('Error removing competitor:', error);
             toast({
                 title: "Error",
                 description: "Failed to remove competitor. Please try again.",

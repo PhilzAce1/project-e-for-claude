@@ -33,7 +33,7 @@ export default function AccountContent({ user, userDetails, subscription }: {
     try {
       await supabase.auth.signOut();
     } catch (error) {
-      console.error('Error logging out:', error);
+      // console.error('Error logging out:', error);
     } finally {
       window.location.href = '/';
     }

@@ -47,7 +47,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           .single();
 
         if (error && error.code !== 'PGRST116') {
-          console.error('Error checking recommendations:', error);
+          // console.error('Error checking recommendations:', error);
           return;
         }
 
@@ -75,7 +75,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           setContentBrief(result.data);
         }
       } catch (error) {
-        console.error('Error creating content recommendation:', error);
+        // console.error('Error creating content recommendation:', error);
         toast({
           title: 'Error',
           description: 'Failed to create content recommendation.',
@@ -135,11 +135,11 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
       });
 
       if (!indexResponse.ok) {
-        console.error('Failed to index site:', await indexResponse.text());
+        // console.error('Failed to index site:', await indexResponse.text());
       }
       
     } catch (error) {
-      console.error('Error:', error);
+      // console.error('Error:', error);
       toast({
         title: 'Error',
         description: 'Failed to mark content as completed.',
@@ -167,7 +167,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
       onUpdate();
       
     } catch (error) {
-      console.error('Error:', error);
+      // console.error('Error:', error);
       toast({
         title: 'Error',
         description: 'Failed to mute keyword.',

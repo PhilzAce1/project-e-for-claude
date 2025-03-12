@@ -72,7 +72,7 @@ export default async function SiteAuditPage() {
   }
 
   return (
-    <AuthenticatedLayout user={user} products={products} subscription={subscription} disableGateway={true}>
+    <AuthenticatedLayout user={user} products={products} subscription={subscription}>
         <SiteAuditContent user={user} seoCrawlData={seoCrawlData} />
     </AuthenticatedLayout>)
 }

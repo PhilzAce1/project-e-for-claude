@@ -148,10 +148,10 @@ export default function ContentPricing({ user, products, keyword, search_volume,
     );
   }
 
-  const renderProduct = (product: ProductWithPrices & { isPayAsYouGo: boolean; isRecommended: boolean }) => {
+  const renderProduct = (product: ProductWithPrices & { isPayAsYouGo: boolean; isRecommended: boolean } ) => {
       if (product.isPayAsYouGo) {
         return (
-          <div className="col-start-2 justify-center">
+          <div className="col-start-2 justify-center" key={product.id}>
           <div
             key={product.id}
             className="rounded-3xl p-8 ring-1 ring-gray-200 bg-white justify-center"

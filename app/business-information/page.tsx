@@ -33,7 +33,7 @@ export default async function BusinessInformationPage() {
     // }
 
     return (
-        <AuthenticatedLayout user={user} products={products} subscription={subscription} disableGateway={true}>
+        <AuthenticatedLayout user={user} products={products} subscription={subscription}>
             {latestAnalysis && (
                 <BusinessAnalysis analysisId={latestAnalysis.id} />
             )}

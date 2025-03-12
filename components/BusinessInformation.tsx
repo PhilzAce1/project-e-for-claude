@@ -179,6 +179,68 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     });
   };
 
+  const handleEdit = async () => {
+    try {
+      // First, fetch any existing answers
+      const { data: existingAnswers, error: fetchError } = await supabase
+        .from('business_analyses')
+        .select('verification_questions, information_needed')
+        .eq('id', analysisId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Reset confirmed sections while preserving existing answers
+      const { error: updateError } = await supabase
+        .from('business_analyses')
+        .update({
+          completion_status: {
+            verification: false,
+            critical: false,
+            recommended: false
+          },
+          // Preserve existing answers if they exist, otherwise use empty structures
+          verification_questions: existingAnswers?.verification_questions || [],
+          information_needed: existingAnswers?.information_needed || {
+            critical: [],
+            recommended: []
+          }
+        })
+        .eq('id', analysisId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setConfirmedSections({
+        verification: false,
+        critical: false,
+        recommended: false
+      });
+
+      // If we have existing data, update the form state
+      if (existingAnswers) {
+        setData(prevData => ({
+          ...prevData,
+          verification_questions: existingAnswers.verification_questions,
+          information_needed: existingAnswers.information_needed
+        }));
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Analysis reset for editing',
+      });
+
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to reset analysis status',
+        variant: 'destructive'
+      });
+      console.error('Error resetting analysis:', error);
+    }
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" />
@@ -188,89 +250,102 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
   if (!data) return null;
 
   return (
-    <div className="container mx-auto">
-      {/* Header */}
-      <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
-        <div>
-          <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-            Business Analysis
-          </h1>
-          {targetCountry && (
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <GlobeAltIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-              <span>Targeting: {getCountryName(targetCountry)}</span>
-              <button
-                onClick={() => setShowCountrySelector(true)}
-                className="ml-2 inline-flex items-center rounded-md bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                <PencilIcon className="h-4 w-4 mr-1" />
-                Edit
-              </button>
-            </div>
-          )}
-        </div>
+    <div className="w-full max-w-5xl mx-auto p-4 space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Business Analysis</h1>
+        <button
+          onClick={handleEdit}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <PencilIcon className="h-4 w-4" />
+          Edit Information
+        </button>
       </div>
 
-      <CountrySelector 
-        isOpen={showCountrySelector}
-        onClose={() => setShowCountrySelector(false)}
-        onSubmit={handleCountryUpdate}
-        initialCountry={targetCountry || 'GB'}
-      />
-
-      {/* Show form if any section is incomplete */}
-      {(!confirmedSections.critical || !confirmedSections.recommended || !confirmedSections.verification) && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="mt-5 col-span-2 relative bg-gray-900 px-6 py-16 text-center shadow-2xl sm:rounded-xl sm:px-8">
-            <VerificationForm 
-              analysisId={analysisId} 
-              questions={data.verification_questions}
-              informationNeeded={data.information_needed}
-              onSubmit={handleSubmit}
-              activeSection={activeSection}
-              onSectionChange={handleSectionChange}
-              onSectionConfirm={(section) => {
-                setConfirmedSections(prev => ({
-                  ...prev,
-                  [section]: true
-                }));
-                if (section === 'verification') {
-                  setActiveSection('critical');
-                } else if (section === 'critical') {
-                  setActiveSection('recommended');
-                }
-              }}
-              status={data.status}
-              progress={data.progress}
-            />
-          </div>
-          
-          <div className="mt-5">
-            <div className="sticky top-4 overflow-hidden rounded-lg bg-white shadow ring-slate-900/10 p-8">
-              <BusinessProgress 
-                verificationQuestions={data.verification_questions}
-                informationNeeded={data.information_needed}
-                confirmedSections={confirmedSections}
-                activeSection={activeSection}
-                onSectionClick={handleSectionChange}
-              />
+      <div className="container mx-auto">
+        {/* Header */}
+        <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">
+          <div>
+            <h1 className="font-serif text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+              Business Analysis
+            </h1>
+            {targetCountry && (
+              <div className="mt-2 flex items-center text-sm text-gray-500">
+                <GlobeAltIcon className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                <span>Targeting: {getCountryName(targetCountry)}</span>
+                <button
+                  onClick={() => setShowCountrySelector(true)}
+                  className="ml-2 inline-flex items-center rounded-md bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  <PencilIcon className="h-4 w-4 mr-1" />
+                  Edit
+                </button>
               </div>
-            <div className="sticky top-4 overflow-hidden rounded-lg bg-white shadow ring-slate-900/10 p-8 mt-4">
-              <h2 className="text-lg font-bold">Why is this important?</h2>
-              <p className="text-sm text-gray-600">
-                This is one of the most important steps in the process. It helps us understand your business which in turn helps us create the best opportunities for you to rank well.
-              </p>
+            )}
+          </div>
+        </div>
+
+        <CountrySelector 
+          isOpen={showCountrySelector}
+          onClose={() => setShowCountrySelector(false)}
+          onSubmit={handleCountryUpdate}
+          initialCountry={targetCountry || 'GB'}
+        />
+
+        {/* Show form if any section is incomplete */}
+        {(!confirmedSections.critical || !confirmedSections.recommended || !confirmedSections.verification) && (
+          <div className="grid grid-cols-3 gap-4">
+            <div className="mt-5 col-span-2 relative bg-gray-900 px-6 py-16 text-center shadow-2xl sm:rounded-xl sm:px-8">
+              <VerificationForm 
+                analysisId={analysisId} 
+                questions={data.verification_questions}
+                informationNeeded={data.information_needed}
+                onSubmit={handleSubmit}
+                activeSection={activeSection}
+                onSectionChange={handleSectionChange}
+                onSectionConfirm={(section) => {
+                  setConfirmedSections(prev => ({
+                    ...prev,
+                    [section]: true
+                  }));
+                  if (section === 'verification') {
+                    setActiveSection('critical');
+                  } else if (section === 'critical') {
+                    setActiveSection('recommended');
+                  }
+                }}
+                status={data.status}
+                progress={data.progress}
+              />
+            </div>
+            
+            <div className="mt-5">
+              <div className="sticky top-4 overflow-hidden rounded-lg bg-white shadow ring-slate-900/10 p-8">
+                <BusinessProgress 
+                  verificationQuestions={data.verification_questions}
+                  informationNeeded={data.information_needed}
+                  confirmedSections={confirmedSections}
+                  activeSection={activeSection}
+                  onSectionClick={handleSectionChange}
+                />
+                </div>
+              <div className="sticky top-4 overflow-hidden rounded-lg bg-white shadow ring-slate-900/10 p-8 mt-4">
+                <h2 className="text-lg font-bold">Why is this important?</h2>
+                <p className="text-sm text-gray-600">
+                  This is one of the most important steps in the process. It helps us understand your business which in turn helps us create the best opportunities for you to rank well.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Show summary if all sections are complete */}
-      {(confirmedSections.critical && confirmedSections.recommended && confirmedSections.verification) && (
-        <div className="my-6 pb-1">
-          <BusinessSummary analysisId={analysisId} />
-        </div>
-      )}
+        {/* Show summary if all sections are complete */}
+        {(confirmedSections.critical && confirmedSections.recommended && confirmedSections.verification) && (
+          <div className="my-6 pb-1">
+            <BusinessSummary analysisId={analysisId} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

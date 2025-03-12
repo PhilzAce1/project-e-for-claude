@@ -5,13 +5,6 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!;
 const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!;
 
-// Test email addresses
-const TEST_EMAILS = [
-  'jaden@elysium-studios.co.uk',
-  'mike@elysium-studios.co.uk',
-  'jaden9516williams@gmail.com'
-];
-
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const TEMPLATE_ID = 6774183;
@@ -57,7 +50,11 @@ Deno.serve(async (req) => {
               Email: 'noreply@espy-go.com',
               Name: 'Espy-Go Site Audit'
             },
-            To: TEST_EMAILS.map((email) => ({ Email: email })),
+            To: [
+              {
+                Email: email
+              }
+            ],
             TemplateID: TEMPLATE_ID,
             TemplateLanguage: true,
             Variables: {
@@ -67,8 +64,7 @@ Deno.serve(async (req) => {
               score_difference: scoreDiff,
               is_improved: isImproved,
               audit_date: formatDate(audit_date),
-              site_audit_url: `https://app.espy-go.com/site-audit/${domain}`,
-              original_recipient: email
+              site_audit_url: `https://app.espy-go.com/site-audit/${domain}`
             }
           }
         ]

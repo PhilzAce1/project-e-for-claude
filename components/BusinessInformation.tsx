@@ -219,7 +219,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
 
       // If we have existing data, update the form state
       if (existingAnswers) {
-        setData(prevData => ({
+        setData((prevData: any) => ({
           ...prevData,
           verification_questions: existingAnswers.verification_questions,
           information_needed: existingAnswers.information_needed

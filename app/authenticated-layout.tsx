@@ -20,15 +20,13 @@ export default function AuthenticatedLayout({
   user,
   products,
   subscription,
-  disableZeroStateForm = false,
-  disableGateway = false
+  disableZeroStateForm = false
 }: {
   children: React.ReactNode;
   user: any;
   products: any;
   subscription: any;
-  disableZeroStateForm: boolean;
-  disableGateway: boolean;
+  disableZeroStateForm?: boolean;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCountrySelector, setShowCountrySelector] = useState(false);

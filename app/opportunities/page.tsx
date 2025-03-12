@@ -18,7 +18,7 @@ export default async function OpportunitiesPage() {
     }
 
   return (
-    <AuthenticatedLayout user={user} products={products} subscription={subscription} disableGateway={false}>
+    <AuthenticatedLayout user={user} products={products} subscription={subscription}>
       <OpportunitiesContent user={user} />
     </AuthenticatedLayout>
   );

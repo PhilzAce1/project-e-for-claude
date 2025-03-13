@@ -21,6 +21,11 @@ const NameForm = dynamic(
   { ssr: false }
 );
 
+const ConnectionsForm = dynamic(
+  () => import('@/components/ui/AccountForms/ConnectionsForm'),
+  { ssr: false }
+);
+
 export default function AccountContent({ user, userDetails, subscription }: {
   user: User; // Replace 'User' with the actual type of your user object
   userDetails: any; // Replace 'any' with the actual type of userDetails
@@ -69,6 +74,10 @@ export default function AccountContent({ user, userDetails, subscription }: {
         <div className="border-t border-gray-200 my-16" aria-hidden="true" />
         
         <EmailForm userEmail={user.email} />
+
+        <div className="border-t border-gray-200 my-16" aria-hidden="true" />
+
+        <ConnectionsForm />
       </div>
     </section>
   );

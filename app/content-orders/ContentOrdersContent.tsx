@@ -141,7 +141,7 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
                         {order.keyword}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {order.search_volume.toLocaleString()}
+                        {order.search_volume?.toLocaleString()}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">
                         {order.competition_level}

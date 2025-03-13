@@ -43,7 +43,7 @@ export default function CustomerPortalForm({ subscriptions, userDetails }: Props
       const redirectUrl = await createStripePortal(currentPath);
       router.push(redirectUrl);
     } catch (error) {
-      console.error('Failed to create Stripe portal session:', error);
+      // console.error('Failed to create Stripe portal session:', error);
     } finally {
       setIsSubmitting(false);
     }

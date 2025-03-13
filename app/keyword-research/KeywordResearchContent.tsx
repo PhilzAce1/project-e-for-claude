@@ -171,7 +171,7 @@ export default function KeywordResearchContent({ user }: { user: any }) {
       }
 
     } catch (error) {
-      console.error('Search error:', error);
+      // console.error('Search error:', error);
       toast({
         title: 'Error',
         description: (error as Error).message || 'Failed to fetch keyword suggestions',
@@ -252,7 +252,7 @@ export default function KeywordResearchContent({ user }: { user: any }) {
       });
 
     } catch (error) {
-      console.error('Error adding keywords:', error);
+      // console.error('Error adding keywords:', error);
       toast({
         title: 'Error',
         description: 'Failed to add keywords',
@@ -301,7 +301,7 @@ export default function KeywordResearchContent({ user }: { user: any }) {
       });
 
     } catch (error) {
-      console.error('Error adding keyword:', error);
+      // console.error('Error adding keyword:', error);
       toast({
         title: 'Error',
         description: 'Failed to add keyword to your list',
@@ -350,7 +350,7 @@ export default function KeywordResearchContent({ user }: { user: any }) {
       setShowSuggestionsModal(true);
 
     } catch (error) {
-      console.error('Error loading suggested keywords:', error);
+      // console.error('Error loading suggested keywords:', error);
       toast({
         title: 'Error',
         description: 'Failed to load suggested keywords',

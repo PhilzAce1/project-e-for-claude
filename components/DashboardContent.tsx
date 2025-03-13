@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
-import ZeroStateHero from '@/components/ZeroStateHero';
 import { SEOOverview } from './ui/SEOOverview';
 
 export default function DashboardContent({ user, keywordRankings }: {
@@ -19,9 +18,7 @@ export default function DashboardContent({ user, keywordRankings }: {
     const supabase = createClientComponentClient()
     const [keywordSuggestions, setKeywordSuggestions] = useState<any>(null);
     
-    const [domain, setDomain] = useState('')
     const [error, setError] = useState<string | null>(null)
-    const [existingDomain, setExistingDomain] = useState<string | null>(null)
     const [seoAudit, setSeoAudit] = useState<any>(null)
     const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false)
     const [hasCompetitors, setHasCompetitors] = useState<boolean>(false);
@@ -55,7 +52,7 @@ export default function DashboardContent({ user, keywordRankings }: {
     
             setSeoAudit(seoData)
           } catch (error) {
-            console.error('Error fetching SEO audit:', error)
+            // console.error('Error fetching SEO audit:', error)
           } finally {
             // setLoading(false)
           }
@@ -74,7 +71,7 @@ export default function DashboardContent({ user, keywordRankings }: {
             }
 
             if (error) {
-                console.error('Error fetching welcome status:', error);
+                // console.error('Error fetching welcome status:', error);
                 return;
             }
 
@@ -101,28 +98,6 @@ export default function DashboardContent({ user, keywordRankings }: {
         setIsWelcomeModalOpen(pathname === '/welcome');
     }, [pathname]);
 
-    const checkExistingDomain = useCallback(async () => {
-        try {
-            const { data, error } = await supabase
-                .from('business_information')
-                .select('domain')
-                .eq('user_id', user.id)
-                .single()
-
-            if (error) throw error
-
-            if (data) {
-                setExistingDomain(data.domain)
-            }
-        } catch (error) {
-            console.error('Error checking existing domain:', error)
-        }
-    }, [supabase, user.id]);
-
-    useEffect(() => {
-        checkExistingDomain();
-    }, [checkExistingDomain]);
-
     const closeWelcomeModal = async () => {
         setIsWelcomeModalOpen(false);
         
@@ -136,7 +111,7 @@ export default function DashboardContent({ user, keywordRankings }: {
             .eq('id', user.id);
 
         if (error) {
-            console.error('Error updating welcome status:', error);
+            // console.error('Error updating welcome status:', error);
         }
 
         router.push('/');
@@ -162,7 +137,7 @@ export default function DashboardContent({ user, keywordRankings }: {
                 if (error) throw error
 
             } catch (error) {
-                console.error('Error updating user referral data:', error)
+                // console.error('Error updating user referral data:', error)
             }
         }
 
@@ -201,27 +176,12 @@ export default function DashboardContent({ user, keywordRankings }: {
                 setHasCompetitors(competitors && competitors.length > 0);
 
             } catch (error) {
-                console.error('Error checking profile completion:', error);
+                // console.error('Error checking profile completion:', error);
             }
         };
 
         checkProfileCompletion();
     }, [supabase, user.id]);
-
-    if (!existingDomain && !domain) {
-        return (
-            <ZeroStateHero 
-                title="Kickstart Your SEO Strategy Now!"
-                subtitle="We need to start by learning about your business."
-                description="Enter your domain below to begin."
-                ctaText="Start Now"
-                user={user}
-                imageSrc="/rank-image.webp"
-                fullPage={true}
-                domainHandler={setDomain}
-            />
-        );
-    }
 
     return (
         <>

@@ -34,7 +34,7 @@ export default async function SiteAuditIssuesPage() {
       .single();
 
     if (error) {
-      console.error('Error fetching SEO crawl data:', error);
+      // console.error('Error fetching SEO crawl data:', error);
     } else {
       seoCrawlData = data;
     }
@@ -80,7 +80,7 @@ const pages = [
 
 const totalIssues = filteredChecks.reduce((sum, [_, value]) => sum + (value as number), 0);
   return (
-    <AuthenticatedLayout products={products} subscription={subscription} user={user} disableGateway={true}>
+    <AuthenticatedLayout products={products} subscription={subscription} user={user}>
         
         <div className="container mx-auto">
             <div className="md:flex md:items-center md:justify-between w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8">

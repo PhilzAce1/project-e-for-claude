@@ -57,7 +57,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
         .single();
 
       if (error) {
-        console.error('Error fetching ranking data:', error);
+        // // console.error('Error fetching ranking data:', error);
         return;
       }
 
@@ -91,7 +91,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
         .single();
 
       if (error) {
-        console.error('Error fetching keyword metrics:', error);
+        // // console.error('Error fetching keyword metrics:', error);
         return;
       }
       setKeywordMetrics(data);
@@ -141,11 +141,11 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
       });
 
       if (!indexResponse.ok) {
-        console.error('Failed to index site:', await indexResponse.text());
+        // // console.error('Failed to index site:', await indexResponse.text());
       }
       
     } catch (error) {
-      console.error('Error:', error);
+      // // console.error('Error:', error);
       toast({
         title: 'Error',
         description: 'Failed to mark content as completed.',
@@ -171,7 +171,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
       });
       
     } catch (error) {
-      console.error('Error:', error);
+      // // console.error('Error:', error);
       toast({
         title: 'Error',
         description: 'Failed to mute keyword.',
@@ -217,7 +217,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
 
       router.push('/content-orders');
     } catch (error) {
-      console.error('Error:', error);
+      // // console.error('Error:', error);
       toast({
         title: 'Error',
         description: 'Failed to create content order.',

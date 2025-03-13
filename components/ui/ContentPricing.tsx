@@ -46,6 +46,14 @@ const PRODUCT_ORDER = [
     name: 'Enterprise',
     isPayAsYouGo: false,
     isRecommended: false
+  }
+];
+const PRODUCT_ORDER_SECOND = [
+  {
+    id: 'prod_RJ6CHDZl8mv1QM',
+    name: 'Growth Plan',
+    isPayAsYouGo: false,
+    isRecommended: false
   },
   {
     id: 'prod_RJ5FCKb73rXqQM',
@@ -53,7 +61,7 @@ const PRODUCT_ORDER = [
     isPayAsYouGo: true,
     isRecommended: false
   }
-];
+]
 
 export default function ContentPricing({ user, products, keyword, search_volume, competition, main_intent }: Props) {
   const router = useRouter();
@@ -63,6 +71,17 @@ export default function ContentPricing({ user, products, keyword, search_volume,
 
   // Update the sorting logic
   const sortedProducts = PRODUCT_ORDER
+  .map(orderItem => {
+    const product = products.find(p => p.id === orderItem.id);
+    if (!product) return null;
+    return {
+      ...product,
+      isPayAsYouGo: orderItem.isPayAsYouGo,
+      isRecommended: orderItem.isRecommended
+    };
+  })
+  .filter((p): p is (ProductWithPrices & { isPayAsYouGo: boolean; isRecommended: boolean }) => p !== undefined && p !== null);
+  const sortedProductsSecond = PRODUCT_ORDER_SECOND
     .map(orderItem => {
       const product = products.find(p => p.id === orderItem.id);
       if (!product) return null;
@@ -129,6 +148,146 @@ export default function ContentPricing({ user, products, keyword, search_volume,
     );
   }
 
+  const renderProduct = (product: ProductWithPrices & { isPayAsYouGo: boolean; isRecommended: boolean } ) => {
+      if (product.isPayAsYouGo) {
+        return (
+          <div className="col-start-2 justify-center" key={product.id}>
+          <div
+            key={product.id}
+            className="rounded-3xl p-8 ring-1 ring-gray-200 bg-white justify-center"
+          >
+            <h3 className="text-2xl font-bold text-gray-900">
+              {product.name}
+            </h3>
+            <p className="mt-4 text-sm text-gray-600">
+              {product.description}
+            </p>
+            <p className="mt-6 flex items-baseline gap-x-1 text-gray-900">
+              <span className="text-4xl font-bold">{new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: product.prices[0].currency!,
+        minimumFractionDigits: 0
+      }).format((product.prices[0].unit_amount || 0) / 100)}</span>
+              <span className="text-sm font-semibold">
+                /per piece of content
+              </span>
+            </p>
+            <ul role="list" className="mt-8 space-y-3 text-sm text-gray-600">
+              {product.features?.map((feature) => (
+                <li key={feature.name} className="flex gap-x-3">
+                  <CheckIcon 
+                    className="h-6 w-5 flex-none text-indigo-600" 
+                    aria-hidden="true" 
+                  />
+                  {feature.name}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => handleStripeCheckout(product.prices[0])}
+              disabled={priceIdLoading === product.prices[0]?.id}
+              className="mt-8 block w-full rounded-md px-3 py-2 text-center text-sm font-semibold shadow-sm bg-indigo-600 text-white hover:bg-indigo-500"
+            >
+              {priceIdLoading === product.prices[0]?.id ? 'Loading...' : 'Pay for Content'}
+            </button>
+          </div>
+          </div>
+        );
+      }
+
+      // Regular subscription products
+      const price = product?.prices?.find(
+        (price) => price.interval === billingInterval
+      );
+      if (!price) return null;
+
+      const priceString = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: price.currency!,
+        minimumFractionDigits: 0
+      }).format((price?.unit_amount || 0) / 100);
+
+      const isPopular = product.name === 'Pro';
+
+      return (
+        <div
+          key={product.id}
+          className={`rounded-3xl p-8 ring-1 ${
+            product.isRecommended 
+              ? 'ring-2 ring-indigo-600 bg-white' 
+              : 'ring-gray-200 bg-white'
+          } relative`}
+        >
+          {product.isRecommended && (
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <span className="inline-flex items-center rounded-full bg-indigo-600 px-4 py-1 text-sm font-medium text-white ring-1 ring-inset ring-indigo-600/20">
+                Recommended
+              </span>
+            </div>
+          )}
+          <h3 
+            className={`text-2xl font-bold ${
+              isPopular ? 'text-white' : 'text-gray-900'
+            }`}
+          >
+            {product.name}
+          </h3>
+          
+          {isPopular && (
+            <p className="mt-4 text-sm text-white">
+              <span className="bg-indigo-600 px-3 py-1 rounded-full text-white text-xs font-semibold">
+                Most popular
+              </span>
+            </p>
+          )}
+
+          {/* <p className={`mt-4 text-sm ${
+            isPopular ? 'text-gray-300' : 'text-gray-600'
+          }`}>
+            {product.description}
+          </p> */}
+
+          <p className={`mt-6 flex items-baseline gap-x-1 ${
+            isPopular ? 'text-white' : 'text-gray-900'
+          }`}>
+            <span className="text-4xl font-bold">{priceString}</span>
+            <span className="text-sm font-semibold">
+              /{billingInterval}
+            </span>
+          </p>
+
+          <ul role="list" className={`mt-8 space-y-3 text-sm ${
+            isPopular ? 'text-gray-300' : 'text-gray-600'
+          }`}>
+            {product.features?.map((feature) => (
+              <li key={feature.name} className="flex gap-x-3">
+                <CheckIcon 
+                  className={`h-6 w-5 flex-none ${
+                    isPopular ? 'text-white' : 'text-indigo-600'
+                  }`} 
+                  aria-hidden="true" 
+                />
+                {feature.name}
+              </li>
+            ))}
+          </ul>
+
+          <button
+            onClick={() => handleStripeCheckout(price)}
+            disabled={priceIdLoading === price.id}
+            className={`mt-8 block w-full rounded-md px-3 py-2 text-center text-sm font-semibold shadow-sm ${
+              isPopular
+                ? 'bg-indigo-600 text-white hover:bg-indigo-500'
+                : 'bg-indigo-600 text-white hover:bg-indigo-500'
+            }`}
+          >
+            {priceIdLoading === price.id ? 'Loading...' : 'Choose Plan'}
+          </button>
+        </div>
+      );
+    
+  }
+
   return (
     <div className="bg-white py-8 sm:py-8">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -169,146 +328,14 @@ export default function ContentPricing({ user, products, keyword, search_volume,
         </div>
 
         <div className="isolate mx-auto mt-10 grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-          {sortedProducts.map((product) => {
-            // Special handling for Pay As You Go
-            if (product.isPayAsYouGo) {
-              return (
-                <div className="col-start-2 justify-center">
-                <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">Or</h2>
-                <div
-                  key={product.id}
-                  className="rounded-3xl p-8 ring-1 ring-gray-200 bg-white justify-center"
-                >
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {product.name}
-                  </h3>
-                  <p className="mt-4 text-sm text-gray-600">
-                    {product.description}
-                  </p>
-                  <p className="mt-6 flex items-baseline gap-x-1 text-gray-900">
-                    <span className="text-4xl font-bold">{new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: product.prices[0].currency!,
-              minimumFractionDigits: 0
-            }).format((product.prices[0].unit_amount || 0) / 100)}</span>
-                    <span className="text-sm font-semibold">
-                      /per piece of content
-                    </span>
-                  </p>
-                  <ul role="list" className="mt-8 space-y-3 text-sm text-gray-600">
-                    {product.features?.map((feature) => (
-                      <li key={feature.name} className="flex gap-x-3">
-                        <CheckIcon 
-                          className="h-6 w-5 flex-none text-indigo-600" 
-                          aria-hidden="true" 
-                        />
-                        {feature.name}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => handleStripeCheckout(product.prices[0])}
-                    disabled={priceIdLoading === product.prices[0]?.id}
-                    className="mt-8 block w-full rounded-md px-3 py-2 text-center text-sm font-semibold shadow-sm bg-indigo-600 text-white hover:bg-indigo-500"
-                  >
-                    {priceIdLoading === product.prices[0]?.id ? 'Loading...' : 'Pay for Content'}
-                  </button>
-                </div>
-                </div>
-              );
-            }
+          {sortedProducts.map((product) => renderProduct(product))}
+        </div>
 
-            // Regular subscription products
-            const price = product?.prices?.find(
-              (price) => price.interval === billingInterval
-            );
-            if (!price) return null;
 
-            const priceString = new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: price.currency!,
-              minimumFractionDigits: 0
-            }).format((price?.unit_amount || 0) / 100);
 
-            const isPopular = product.name === 'Pro';
-
-            return (
-              <div
-                key={product.id}
-                className={`rounded-3xl p-8 ring-1 ${
-                  product.isRecommended 
-                    ? 'ring-2 ring-indigo-600 bg-white' 
-                    : 'ring-gray-200 bg-white'
-                } relative`}
-              >
-                {product.isRecommended && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="inline-flex items-center rounded-full bg-indigo-600 px-4 py-1 text-sm font-medium text-white ring-1 ring-inset ring-indigo-600/20">
-                      Recommended
-                    </span>
-                  </div>
-                )}
-                <h3 
-                  className={`text-2xl font-bold ${
-                    isPopular ? 'text-white' : 'text-gray-900'
-                  }`}
-                >
-                  {product.name}
-                </h3>
-                
-                {isPopular && (
-                  <p className="mt-4 text-sm text-white">
-                    <span className="bg-indigo-600 px-3 py-1 rounded-full text-white text-xs font-semibold">
-                      Most popular
-                    </span>
-                  </p>
-                )}
-
-                <p className={`mt-4 text-sm ${
-                  isPopular ? 'text-gray-300' : 'text-gray-600'
-                }`}>
-                  {product.description}
-                </p>
-
-                <p className={`mt-6 flex items-baseline gap-x-1 ${
-                  isPopular ? 'text-white' : 'text-gray-900'
-                }`}>
-                  <span className="text-4xl font-bold">{priceString}</span>
-                  <span className="text-sm font-semibold">
-                    /{billingInterval}
-                  </span>
-                </p>
-
-                <ul role="list" className={`mt-8 space-y-3 text-sm ${
-                  isPopular ? 'text-gray-300' : 'text-gray-600'
-                }`}>
-                  {product.features?.map((feature) => (
-                    <li key={feature.name} className="flex gap-x-3">
-                      <CheckIcon 
-                        className={`h-6 w-5 flex-none ${
-                          isPopular ? 'text-white' : 'text-indigo-600'
-                        }`} 
-                        aria-hidden="true" 
-                      />
-                      {feature.name}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => handleStripeCheckout(price)}
-                  disabled={priceIdLoading === price.id}
-                  className={`mt-8 block w-full rounded-md px-3 py-2 text-center text-sm font-semibold shadow-sm ${
-                    isPopular
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-500'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-500'
-                  }`}
-                >
-                  {priceIdLoading === price.id ? 'Loading...' : 'Choose Plan'}
-                </button>
-              </div>
-            );
-          })}
+        <h2 className="text-2xl font-bold text-gray-900 text-center mt-16 mb-6">Or</h2>
+        <div className="isolate mx-auto mt-10 max-w-md  gap-8 lg:mx-0 lg:max-w-none flex justify-center">
+          {sortedProductsSecond.map((product) => renderProduct(product))}
         </div>
       </div>
     </div>

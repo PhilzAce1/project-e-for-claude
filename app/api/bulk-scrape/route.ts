@@ -161,14 +161,3 @@ export async function GET(request: Request) {
     );
   }
 }
-
-// To call this API route, use the following URL:
-// GET https://your-domain.com/api/bulk-scrape
-//
-// Optional query parameters:
-// - maxPages: Maximum number of pages to scrape per domain (default: 100, max: 500)
-// - delay: Milliseconds to wait between processing batches (default: 1000)
-// - concurrent: Number of users to process concurrently (default: 1)
-//
-// Example:
-// GET https://your-domain.com/api/bulk-scrape?maxPages=200&delay=2000&concurrent=2

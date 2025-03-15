@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowUpIcon, ArrowDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import CompetitionBadge from './CompetitionBadge';
 import { getStripe } from '@/utils/stripe/client';
@@ -6,6 +6,7 @@ import { checkoutWithStripe } from '@/utils/stripe/server';
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { LoadingOverlay } from './LoadingOverlay';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface OpportunitiesTableProps {
   opportunities: any;
@@ -16,9 +17,14 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currentOpportunities, setCurrentOpportunities] = useState(opportunities);
   const router = useRouter();
-  const currentPath = usePathname();
   const { toast } = useToast();
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    setCurrentOpportunities(opportunities);
+  }, [opportunities]);
 
   if (!opportunities || opportunities.length === 0) {
     return null;
@@ -55,6 +61,34 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
 
   const handleCreateContent = (keyword: string) => {
     router.push(`/create-content/${encodeURIComponent(keyword)}`);
+  };
+
+  const handleMuteKeyword = async (keyword: string) => {
+    try {
+      const { error: muteError } = await supabase
+        .from('muted_keywords')
+        .insert({ 
+          user_id: userId,
+          keyword: keyword
+        });
+
+      if (muteError) throw muteError;
+
+      // Remove the muted keyword from the current opportunities
+      setCurrentOpportunities(prev => prev.filter(opp => opp.keyword !== keyword));
+
+      toast({
+        title: 'Success',
+        description: 'Keyword has been muted and won\'t appear in recommendations.',
+      });
+      
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to mute keyword.',
+        variant: 'destructive'
+      });
+    }
   };
 
   return (
@@ -97,9 +131,12 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
               <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
                 Intent
               </th>
+              <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                Actions
+              </th>
             </tr>
           </thead>
-          <tbody className="bg-white">
+          <tbody className="divide-y divide-gray-200">
             {currentopportunities.map((item: any, index: any) => (
               <tr key={item.keyword + index} className="even:bg-gray-50">
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-3 text-left">
@@ -108,13 +145,21 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.search_volume}</td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><CompetitionBadge value={isNaN(parseFloat(item.competition)) ? item.competition : parseFloat(item.competition)} /></td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 capitalize">{item.main_intent}</td>
-                <td className=''>
-                  <button
-                    onClick={() => handleCreateContent(item.keyword)}
-                    className="rounded-md px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    Create Content
-                  </button>
+                <td className="px-3 py-4 text-sm text-gray-500">
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => handleCreateContent(item.keyword)}
+                      className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                      Create Content
+                    </button>
+                    <button
+                      onClick={() => handleMuteKeyword(item.keyword)}
+                      className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                    >
+                      Mute
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

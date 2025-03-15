@@ -75,7 +75,7 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
       if (muteError) throw muteError;
 
       // Remove the muted keyword from the current opportunities
-      setCurrentOpportunities(prev => prev.filter(opp => opp.keyword !== keyword));
+      setCurrentOpportunities((prev: any[]) => prev.filter((opp: { keyword: string; }) => opp.keyword !== keyword));
 
       toast({
         title: 'Success',

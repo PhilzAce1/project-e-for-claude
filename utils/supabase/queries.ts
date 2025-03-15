@@ -11,11 +11,9 @@ export const getUser = cache(async (supabase: SupabaseClient) => {
 export const getSubscriptions = cache(async (supabase: SupabaseClient) => {
   const { data: subscriptions, error } = await supabase
     .from('subscriptions')
-    .select('*, prices(*, products(*))') 
-    .in('status', ['trialing', 'active'])
-    // .maybeSingle();
-
-  console.log(subscriptions );
+    .select('*, prices(*, products(*))')
+    .in('status', ['trialing', 'active']);
+  // .maybeSingle();
 
   return subscriptions;
 });
@@ -32,22 +30,27 @@ export const getProducts = cache(async (supabase: SupabaseClient) => {
   return products;
 });
 
-export const getUserDetails = cache(async (supabase: SupabaseClient, userId: string) => {
-  const { data: userDetails, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single();
+export const getUserDetails = cache(
+  async (supabase: SupabaseClient, userId: string) => {
+    const { data: userDetails, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-  if (error) {
-    console.error('Error fetching user details:', error);
-    return null;
+    if (error) {
+      console.error('Error fetching user details:', error);
+      return null;
+    }
+
+    return userDetails;
   }
+);
 
-  return userDetails;
-});
-
-export async function getLatestSeoCrawl(supabase: SupabaseClient, userId: string) {
+export async function getLatestSeoCrawl(
+  supabase: SupabaseClient,
+  userId: string
+) {
   const { data, error } = await supabase
     .from('seo_crawls')
     .select('*')
@@ -60,56 +63,67 @@ export async function getLatestSeoCrawl(supabase: SupabaseClient, userId: string
     console.error('Error fetching SEO crawl data:', error);
     return false;
   }
-  
+
   // Check if all required fields are present and not null/undefined
-  const requiredFields = [ 'lighthouse_data', 'total_pages', 'page_metrics', 'scraped_pages'];
-  const isComplete = requiredFields.every(field => data && data[field] != null);
+  const requiredFields = [
+    'lighthouse_data',
+    'total_pages',
+    'page_metrics',
+    'scraped_pages'
+  ];
+  const isComplete = requiredFields.every(
+    (field) => data && data[field] != null
+  );
   return isComplete;
 }
 
-export const getKeywordRankings = cache(async (supabase: SupabaseClient, userId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('business_information')
-      .select('rankings_data')
-      .eq('user_id', userId)
-      .single();
+export const getKeywordRankings = cache(
+  async (supabase: SupabaseClient, userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('business_information')
+        .select('rankings_data')
+        .eq('user_id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching keyword rankings:', error);
+      if (error) {
+        console.error('Error fetching keyword rankings:', error);
+        return null;
+      }
+
+      // If rankingsData exists, parse it (if it's stored as a JSON string)
+      // or return it directly if it's already an object
+      if (data?.rankings_data) {
+        return typeof data.rankings_data === 'string'
+          ? JSON.parse(data.rankings_data)
+          : data.rankings_data;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error in getKeywordRankings:', error);
       return null;
     }
-
-    // If rankingsData exists, parse it (if it's stored as a JSON string)
-    // or return it directly if it's already an object
-    if (data?.rankings_data) {
-      return typeof data.rankings_data === 'string' 
-        ? JSON.parse(data.rankings_data) 
-        : data.rankings_data;
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error in getKeywordRankings:', error);
-    return null;
   }
-});
+);
 
-export const getUserContent = cache(async (supabase: SupabaseClient, userId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('content')
-      .select('*')
-      .eq('user_id', userId);
+export const getUserContent = cache(
+  async (supabase: SupabaseClient, userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('content')
+        .select('*')
+        .eq('user_id', userId);
 
-    if (error) {
-      console.error('Error fetching user domain links:', error);
+      if (error) {
+        console.error('Error fetching user domain links:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getUserContent:', error);
       return null;
     }
-
-    return data;
-  } catch (error) {
-    console.error('Error in getUserContent:', error);
-    return null;
   }
-});
+);

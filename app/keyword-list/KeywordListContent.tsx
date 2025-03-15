@@ -5,6 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon } fro
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 
 interface MonthlySearch {
   year: number;
@@ -33,6 +34,7 @@ export default function KeywordListContent({ user }: { user: any }) {
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [sortField, setSortField] = useState<SortField>('opportunity_score');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const supabase = createClientComponentClient();
   const router = useRouter();
@@ -93,25 +95,29 @@ export default function KeywordListContent({ user }: { user: any }) {
   };
 
   const getSortedKeywords = () => {
-    return [...keywords].sort((a, b) => {
-      let aValue = a[sortField as keyof KeywordSuggestion];
-      let bValue = b[sortField as keyof KeywordSuggestion];
+    return [...keywords]
+      .filter(keyword => 
+        keyword.keyword.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        let aValue = a[sortField as keyof KeywordSuggestion];
+        let bValue = b[sortField as keyof KeywordSuggestion];
 
-      if (sortField === 'opportunity_score') {
-        aValue = calculateOpportunityScore(a);
-        bValue = calculateOpportunityScore(b);
-      }
+        if (sortField === 'opportunity_score') {
+          aValue = calculateOpportunityScore(a);
+          bValue = calculateOpportunityScore(b);
+        }
 
-      if (sortField === 'competition') {
-        const competitionValues = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, '0': 0 };
-        aValue = competitionValues[a.competition as keyof typeof competitionValues] || 0;
-        bValue = competitionValues[b.competition as keyof typeof competitionValues] || 0;
-      }
+        if (sortField === 'competition') {
+          const competitionValues = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, '0': 0 };
+          aValue = competitionValues[a.competition as keyof typeof competitionValues] || 0;
+          bValue = competitionValues[b.competition as keyof typeof competitionValues] || 0;
+        }
 
-      return sortDirection === 'asc' ? 
-        (aValue > bValue ? 1 : -1) : 
-        (aValue < bValue ? 1 : -1);
-    });
+        return sortDirection === 'asc' ? 
+          (aValue > bValue ? 1 : -1) : 
+          (aValue < bValue ? 1 : -1);
+      });
   };
 
   const sortedKeywords = getSortedKeywords();
@@ -168,25 +174,44 @@ export default function KeywordListContent({ user }: { user: any }) {
         ) : (
           <>
             <div className="flex justify-between items-center mb-4">
-              <div>
-                <label htmlFor="itemsPerPage" className="mr-2 text-sm font-medium text-gray-700">Show</label>
-                <select
-                  id="itemsPerPage"
-                  value={itemsPerPage}
-                  onChange={handleItemsPerPageChange}
-                  className="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                >
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                  <option value={150}>150</option>
-                </select>
+              <div className="flex items-center gap-4">
+                <div>
+                  <label htmlFor="itemsPerPage" className="mr-2 text-sm font-medium text-gray-700">Show</label>
+                  <select
+                    id="itemsPerPage"
+                    value={itemsPerPage}
+                    onChange={handleItemsPerPageChange}
+                    className="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={150}>150</option>
+                  </select>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search keywords..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1); // Reset to first page when searching
+                    }}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
               </div>
               <div>
                 <p className="text-sm text-gray-700">
                   Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-                  <span className="font-medium">{Math.min(startIndex + itemsPerPage, keywords.length)}</span> of{' '}
-                  <span className="font-medium">{keywords.length}</span> keywords
+                  <span className="font-medium">
+                    {Math.min(startIndex + itemsPerPage, sortedKeywords.length)}
+                  </span> of{' '}
+                  <span className="font-medium">{sortedKeywords.length}</span> keywords
                 </p>
               </div>
             </div>

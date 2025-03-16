@@ -4,16 +4,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/ui/Sidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import Logo from '@/components/icons/Logo';
-import PaymentRequired from '@/components/ui/Pricing/PaymentRequired';
 import { CountrySelector } from '@/components/ui/CountrySelector';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { handleCountrySelect } from '@/utils/supabase/country';
 import posthog from 'posthog-js';
-import { getStripe } from '@/utils/stripe/client';
-import { checkoutWithStripe } from '@/utils/stripe/server';
 import { useRouter, usePathname } from 'next/navigation';
 import ZeroStateHero from '@/components/ZeroStateHero';
+import TrialCountdown from '@/components/ui/TrialCountdown';
 
 export default function AuthenticatedLayout({
   children,
@@ -100,6 +98,7 @@ export default function AuthenticatedLayout({
 
   return (
     <div className="min-h-screen h-screen bg-gray-100">
+      
       <CountrySelector 
         isOpen={showCountrySelector}
         onClose={() => setShowCountrySelector(false)}
@@ -134,6 +133,7 @@ export default function AuthenticatedLayout({
         </div>
 
         <main className="py-4 sm:py-6 lg:py-10 h-full fixed lg:relative top-0 overflow-auto w-full lg:w-auto">
+          {!hasPlan && <TrialCountdown user={user} />}
           <div className="px-4 sm:px-6 lg:px-8 h-full">
 
           {(!existingDomain && !domain) && !disableZeroStateForm ? (

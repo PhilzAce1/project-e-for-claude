@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { getAllGoogleConnections } from './authenticate/route';
+import { getAllGoogleConnections } from './authenticate/utils';
 
 export async function GET() {
   try {

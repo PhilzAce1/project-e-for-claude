@@ -374,7 +374,7 @@ async function isGoogleServiceConnected(
   return true;
 }
 
-export async function getAllGoogleConnections(supabase: any, userId: string) {
+ async function getAllGoogleConnections(supabase: any, userId: string) {
   const [gsc, gtm, ga] = await Promise.all([
     getGSCConnections(supabase, userId),
     getGTMConnections(supabase, userId),

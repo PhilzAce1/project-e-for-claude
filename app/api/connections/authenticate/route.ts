@@ -237,7 +237,7 @@ export async function POST(req: Request) {
 }
 
 // Get user's Google Search Console connections
-export async function getGSCConnections(supabase: any, userId: string) {
+async function getGSCConnections(supabase: any, userId: string) {
   const isConnected = await isGoogleServiceConnected(
     supabase,
     userId,
@@ -263,7 +263,7 @@ export async function getGSCConnections(supabase: any, userId: string) {
 }
 
 // Get user's Google Tag Manager connections
-export async function getGTMConnections(supabase: any, userId: string) {
+async function getGTMConnections(supabase: any, userId: string) {
   const isConnected = await isGoogleServiceConnected(
     supabase,
     userId,
@@ -287,7 +287,7 @@ export async function getGTMConnections(supabase: any, userId: string) {
 }
 
 // Get user's Google Analytics connections
-export async function getGAConnections(supabase: any, userId: string) {
+async function getGAConnections(supabase: any, userId: string) {
   const isConnected = await isGoogleServiceConnected(
     supabase,
     userId,

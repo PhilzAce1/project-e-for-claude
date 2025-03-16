@@ -310,7 +310,7 @@ async function getGAConnections(supabase: any, userId: string) {
   return data;
 }
 
-export async function isGoogleServiceConnected(
+async function isGoogleServiceConnected(
   supabase: any,
   userId: string,
   service: string

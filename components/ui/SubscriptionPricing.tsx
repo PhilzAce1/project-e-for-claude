@@ -19,10 +19,6 @@ interface Props {
   user: User | null | undefined;
   products: ProductWithPrices[];
   subscription: any;
-  keyword: string;
-  search_volume?: number;
-  competition?: string;
-  main_intent?: string;
 }
 
 type BillingInterval = 'year' | 'month';
@@ -57,7 +53,7 @@ const PRODUCT_ORDER_SECOND = [
   }
 ]
 
-export default function SubscriptionPricing({ user, products, keyword, search_volume, competition, main_intent }: Props) {
+export default function SubscriptionPricing({ user, products, subscription }: Props) {
   const router = useRouter();
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('month');
   const [priceIdLoading, setPriceIdLoading] = useState<string>();
@@ -99,10 +95,6 @@ export default function SubscriptionPricing({ user, products, keyword, search_vo
       ...price,
       metadata: {
         user_id: user.id,
-        keyword: keyword,
-        search_volume: search_volume,
-        competition: competition,
-        main_intent: main_intent
       }
     };
 

@@ -387,3 +387,5 @@ async function isGoogleServiceConnected(
     analytics: ga?.[0] || null
   };
 }
+
+export { getAllGoogleConnections };

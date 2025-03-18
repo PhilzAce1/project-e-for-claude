@@ -77,7 +77,7 @@ export default function AccountContent({ user, userDetails, subscription }: {
 
         <div className="border-t border-gray-200 my-16" aria-hidden="true" />
 
-        <ConnectionsForm />
+        {/* <ConnectionsForm /> */}
       </div>
     </section>
   );

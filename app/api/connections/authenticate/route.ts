@@ -84,30 +84,18 @@ export async function POST(req: Request) {
               auth: oauth2Client
             });
 
-            if (accounts.data.account && accounts.data.account.length > 0) {
-              const account = accounts.data.account[0];
-              if (account.path) {
-                const containers = await tagmanager.accounts.containers.list({
-                  parent: account.path,
-                  auth: oauth2Client
-                });
+            if (accounts.status === 200) {
+              const account = accounts.data.account?.[0];
 
-                connectionData = {
-                  ...connectionData,
-                  account_id: account.accountId,
-                  container_id: containers.data.container?.[0]?.containerId
-                };
-
-                await supabase
-                  .from('gtm_connections')
-                  .upsert({
-                    user_id: user.id,
-                    access_token: tokens.access_token,
-                    refresh_token: tokens.refresh_token,
-                    expires_at: expiresAt?.toISOString()
-                  })
-                  .eq('user_id', user.id);
-              }
+              const { error, data: newConnection } = await supabase
+                .from('gtm_connections')
+                .upsert({
+                  user_id: user.id,
+                  access_token: tokens.access_token,
+                  refresh_token: tokens.refresh_token,
+                  expires_at: expiresAt?.toISOString()
+                })
+                .eq('user_id', user.id);
             }
             break;
           }
@@ -134,6 +122,7 @@ export async function POST(req: Request) {
               })
               .eq('user_id', user.id);
 
+            console.log('NEW CONNECTION', newConnection);
             if (error) {
               console.error('Error inserting GSC connection:', error);
             } else {

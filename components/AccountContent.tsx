@@ -26,7 +26,11 @@ const ConnectionsForm = dynamic(
   { ssr: false }
 );
 
-export default function AccountContent({ user, userDetails, subscription }: {
+export default function AccountContent({
+  user,
+  userDetails,
+  subscription
+}: {
   user: User; // Replace 'User' with the actual type of your user object
   userDetails: any; // Replace 'any' with the actual type of userDetails
   subscription: any; // Replace 'any' with the actual type of subscription
@@ -65,19 +69,22 @@ export default function AccountContent({ user, userDetails, subscription }: {
         </div>
       </div>
       <div className="w-full overflow-hidden rounded-lg ring-1 bg-white ring-slate-900/10 p-8 py-16 mt-8">
-        <CustomerPortalForm subscriptions={subscription} userDetails={userDetails} />
-        
-        <div className="border-t border-gray-200 my-16" aria-hidden="true" /> 
-        
-        <NameForm userName={user?.user_metadata?.full_name ?? ''} />
-        
+        <CustomerPortalForm
+          subscriptions={subscription}
+          userDetails={userDetails}
+        />
+
         <div className="border-t border-gray-200 my-16" aria-hidden="true" />
-        
+
+        <NameForm userName={user?.user_metadata?.full_name ?? ''} />
+
+        <div className="border-t border-gray-200 my-16" aria-hidden="true" />
+
         <EmailForm userEmail={user.email} />
 
         <div className="border-t border-gray-200 my-16" aria-hidden="true" />
 
-        {/* <ConnectionsForm /> */}
+        <ConnectionsForm />
       </div>
     </section>
   );

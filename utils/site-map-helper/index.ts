@@ -652,7 +652,6 @@ export async function discoverAndScrapeSitemap(domain: string, maxPages: number 
       const { data, error } = await serviceRoleClient
         .from('seo_crawls')
         .update({ 
-          scraped_pages: scrapedPages.length,
           website_site_map_valid: siteMapValid
         })
         .eq('user_id', userId)

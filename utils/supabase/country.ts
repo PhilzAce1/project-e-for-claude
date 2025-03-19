@@ -1,8 +1,10 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/components/ui/Toasts/use-toast';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 export const handleCountrySelect = async (userId: string, country: string, onSuccess?: () => void) => {
   const supabase = createClientComponentClient();
+  const { currentWebsite } = useWebsite();
   
   try {
     // First check if a record exists
@@ -22,7 +24,7 @@ export const handleCountrySelect = async (userId: string, country: string, onSuc
       const { error: updateError } = await supabase
         .from('business_information')
         .update({ target_country: country })
-        .eq('user_id', userId);
+        .eq('business_id', currentWebsite?.id);
       error = updateError;
     } else {
       // Insert new record

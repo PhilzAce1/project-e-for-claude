@@ -6,6 +6,7 @@ import { ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, XMar
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 import { useToast } from '@/components/ui/Toasts/use-toast';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface MonthlySearch {
   year: number;
@@ -46,6 +47,7 @@ export default function KeywordResearchContent({ user }: { user: any }) {
   const { toast } = useToast();
   const supabase = createClientComponentClient();
   const [seedKeywords, setSeedKeywords] = useState<SeedKeyword[]>([]);
+  const { currentWebsite } = useWebsite();
 
   const totalPages = Math.ceil((suggestions?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -332,7 +334,7 @@ export default function KeywordResearchContent({ user }: { user: any }) {
       const { data: keywords, error } = await supabase
         .from('seed_keyword_suggestions')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('business_id', currentWebsite?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/Toasts/use-toast';
 import { LoadingOverlay } from './LoadingOverlay';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { UrlModal } from './UrlModal';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 // Helper function to convert competition float to readable text
 const getCompetitionLevel = (competition: number): string => {
@@ -32,6 +33,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createClientComponentClient();
+  const { currentWebsite } = useWebsite();
 
   useEffect(() => {
     const checkExistingRecommendation = async () => {
@@ -43,7 +45,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           .from('content_recommendations')
           .select('*')
           .eq('keyword', contentRecommendation[0].keyword)
-          .eq('user_id', userId)
+          .eq('business_id', currentWebsite?.id)
           .single();
 
         if (error && error.code !== 'PGRST116') {
@@ -86,8 +88,10 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
       }
     };
 
-    checkExistingRecommendation();
-  }, [contentRecommendation, userId, supabase, toast]);
+    if(currentWebsite) {
+      checkExistingRecommendation();
+    }
+  }, [contentRecommendation, userId, supabase, toast, currentWebsite]);
 
   const handleCreateContent = (keyword: string) => {
     router.push(`/create-content/${encodeURIComponent(keyword)}`);
@@ -112,7 +116,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
         .update({ 
           content_completed: true
         })
-        .eq('user_id', userId)
+        .eq('business_id', currentWebsite?.id)
         .eq('keyword', contentRecommendation[0].keyword);
 
       if (keywordError) throw keywordError;

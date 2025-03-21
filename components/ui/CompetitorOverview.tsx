@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback, forwardRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/auth-helpers-nextjs';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface CompetitorMetrics {
   total_keywords: number;
@@ -22,13 +23,14 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
     const [metrics, setMetrics] = useState<CompetitorMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const supabase = createClientComponentClient();
+    const { currentWebsite } = useWebsite();
 
     const fetchMetrics = useCallback(async () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('business_information')
         .select('competitor_metrics')
-        .eq('user_id', user.id)
+        .eq('id', currentWebsite?.id)
         .single();
 
       if (error) {
@@ -37,9 +39,9 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
         return;
       }
       
-      setMetrics(data.competitor_metrics);
+      setMetrics(data.competitor_metrics);  
       setLoading(false);
-    }, [supabase, user.id]);
+    }, [supabase, currentWebsite]);
 
     React.useImperativeHandle(
       ref,
@@ -50,7 +52,9 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
     );
 
     useEffect(() => {
-      fetchMetrics();
+      if(currentWebsite) {
+        fetchMetrics();
+      }
 
       // Subscribe to changes
       const channel = supabase
@@ -61,7 +65,7 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
             event: 'UPDATE',
             schema: 'public',
             table: 'business_information',
-            filter: `user_id=eq.${user?.id}`
+            filter: `id=eq.${currentWebsite?.id}`
           },
           (payload) => {
             setMetrics(payload.new.competitor_metrics);
@@ -73,7 +77,7 @@ const CompetitorOverview = forwardRef<{ refresh: () => Promise<void> }, Competit
       return () => {
         channel.unsubscribe();
       };
-    }, [supabase, user.id, fetchMetrics, onRefreshRequest]);
+    }, [supabase, currentWebsite, fetchMetrics, onRefreshRequest]);
 
     if (loading) {
       return (

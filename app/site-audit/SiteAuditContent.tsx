@@ -41,6 +41,7 @@ export default function SiteAuditContent({ user, seoCrawlData }: {
                 body: JSON.stringify({
                     userId: user.id,
                     domain: seoCrawlData.domain,
+                    businessId: user.user_metadata?.selected_business_id,
                     createBusiness: false // We don't want to create a new business entry
                 })
             });

@@ -1,0 +1,51 @@
+-- Create new RPC for business_id with edge function trigger
+create or replace function public.get_user_content_recommendations_by_business(business_id_param uuid)
+returns table (
+    keyword text,
+    search_volume integer,
+    opportunity_score double precision,
+    content_type text,
+    main_intent text,
+    competitor_count integer,
+    suggestion_source text,
+    competition text,
+    cpc double precision
+) security definer
+set search_path = public
+language plpgsql as $$
+declare
+    v_first_keyword text;
+begin
+    -- Drop temp table if it exists
+    drop table if exists temp_recommendations;
+    
+    -- Create temporary table to store results
+    create temp table temp_recommendations as
+    select * from get_next_content_recommendation_by_business(business_id_param);
+    
+    -- -- Get the first keyword for the edge function
+    -- select temp_recommendations.keyword into v_first_keyword 
+    -- from temp_recommendations 
+    -- limit 1;
+
+    -- -- If we found a keyword, trigger the edge function
+    -- if v_first_keyword is not null then
+    --     perform net.http_post(
+    --         url := 'https://app.espy-go.com/api/get-detailed-content-recommendation',
+    --         headers := jsonb_build_object(
+    --             'Content-Type', 'application/json'
+    --         ),
+    --         body := jsonb_build_object(
+    --             'business_id', business_id_param,
+    --             'keyword', v_first_keyword
+    --         )
+    --     );
+    -- end if;
+
+    -- Return results from temporary table
+    return query select * from temp_recommendations;
+end;
+$$;
+
+-- Grant access to authenticated users
+grant execute on function public.get_user_content_recommendations_by_business(uuid) to authenticated; 

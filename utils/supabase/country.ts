@@ -1,10 +1,20 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/components/ui/Toasts/use-toast';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 export const handleCountrySelect = async (userId: string, country: string, onSuccess?: () => void) => {
   const supabase = createClientComponentClient();
   
   try {
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
+    const selectedBusinessId = user?.user_metadata?.selected_business_id;
+    if (!selectedBusinessId) {
+      throw new Error('No business selected');
+    }
+
     // First check if a record exists
     const { data: existingRecord, error: fetchError } = await supabase
       .from('business_information')
@@ -22,7 +32,7 @@ export const handleCountrySelect = async (userId: string, country: string, onSuc
       const { error: updateError } = await supabase
         .from('business_information')
         .update({ target_country: country })
-        .eq('user_id', userId);
+        .eq('id', selectedBusinessId);
       error = updateError;
     } else {
       // Insert new record
@@ -30,7 +40,8 @@ export const handleCountrySelect = async (userId: string, country: string, onSuc
         .from('business_information')
         .insert({ 
           user_id: userId,
-          target_country: country 
+          target_country: country,
+          id: selectedBusinessId
         });
       error = insertError;
     }

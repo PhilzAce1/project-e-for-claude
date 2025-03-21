@@ -7,6 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { LoadingOverlay } from './LoadingOverlay';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface OpportunitiesTableProps {
   opportunities: any;
@@ -21,7 +22,7 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createClientComponentClient();
-
+  const { currentWebsite } = useWebsite();
   useEffect(() => {
     setCurrentOpportunities(opportunities);
   }, [opportunities]);
@@ -69,7 +70,8 @@ const OpportunitiesTable = ({ opportunities, userId }: OpportunitiesTableProps) 
         .from('muted_keywords')
         .insert({ 
           user_id: userId,
-          keyword: keyword
+          keyword: keyword,
+          business_id: currentWebsite?.id
         });
 
       if (muteError) throw muteError;

@@ -55,14 +55,14 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ domain: cleanDomain, userId: user.id }),
+                    body: JSON.stringify({ domain: cleanDomain, userId: user.id, businessId: user.user_metadata?.selected_business_id }),
                 }),
                 fetch('/api/extract-business-information', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ domain: cleanDomain, userId: user.id  }),
+                    body: JSON.stringify({ domain: cleanDomain, userId: user.id, businessId: user.user_metadata?.selected_business_id }),
                 })
             ]);
 

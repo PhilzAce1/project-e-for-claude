@@ -43,7 +43,7 @@ export default async function SiteAuditIssuesPage({
     const { data, error } = await supabase
       .from('seo_crawls')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('business_id', user?.user_metadata?.selected_business_id)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
@@ -53,6 +53,8 @@ export default async function SiteAuditIssuesPage({
     } else {
       seoCrawlData = data;
     }
+
+    console.log('seoCrawlData', seoCrawlData);
   }
 
   if (!user) {

@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/Toasts/use-toast';
 import CompetitorKeywordList from '@/components/ui/CompetitorKeywordList';
 import CompetitorOverview from '@/components/ui/CompetitorOverview';
 import { CompetitorTitles } from '@/utils/helpers/ranking-data-types';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface CompetitorsContentProps {
   user: User;
@@ -39,7 +40,8 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const competitorOverviewRef = useRef<{ refresh: () => Promise<void> }>(null);
-  
+    const { currentWebsite } = useWebsite();
+
     const handleRefresh = () => {
       competitorOverviewRef.current?.refresh();
     };
@@ -50,14 +52,16 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
     };
   
     useEffect(() => {
-      fetchCompetitors();
-    }, []);
+      if(currentWebsite) {
+        fetchCompetitors();
+      }
+    }, [currentWebsite]);
   
     async function fetchCompetitors() {
       const { data: competitors, error } = await supabase
         .from('competitors')
         .select('id, domain')
-        .eq('user_id', user.id);
+        .eq('business_id', currentWebsite?.id);
   
       if (error) {
         // // console.error('Error fetching competitors:', error);
@@ -146,6 +150,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
             user_id: user.id,
             domain: competitor.domain,
             competitor_id: competitor.id.toString(),
+            business_id: currentWebsite?.id
           }),
         })
 
@@ -195,7 +200,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
         for (const competitor of normalizedCompetitors) {
           const { data, error } = await supabase
             .from('competitors')
-            .insert({ user_id: user.id, domain: competitor })
+            .insert({ user_id: user.id, domain: competitor, business_id: currentWebsite?.id })
             .select()
             .single();
   

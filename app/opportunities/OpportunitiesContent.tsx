@@ -6,6 +6,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ReactECharts from 'echarts-for-react';
 import OpportunitiesTable from '@/components/ui/OpportunitiesTable';
 import { NextContentRecommendation } from '@/components/ui/NextContentRecommendation';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface OpportunitiesContentProps {
   user: User;
@@ -68,10 +69,11 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
   const supabase = createClientComponentClient();
   const [rankingData, setRankingData] = useState<any>(null);
   const [contentRecommendations, setContentRecommendations] = useState<any>(null);
+  const { currentWebsite } = useWebsite();
   
   const fetchContentRecommendations = async () => {
     const { data: recommendations, error } = await supabase
-      .rpc('get_user_content_recommendations');
+      .rpc('get_user_content_recommendations_by_business', { business_id_param: currentWebsite?.id });
 
     if (error) {
       // console.error('Error fetching recommendations:', error);
@@ -85,7 +87,7 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
       const { data, error } = await supabase
         .from('business_information')
         .select('rankings_data')
-        .eq('user_id', user.id)
+        .eq('id', currentWebsite?.id)
         .single();
 
       if (error) {
@@ -96,8 +98,10 @@ export default function OpportunitiesContent({ user }: OpportunitiesContentProps
       fetchContentRecommendations();
     }
 
-    fetchData();
-  }, [user.id, supabase]);
+    if(currentWebsite) {
+      fetchData();
+    }
+  }, [user.id, supabase, currentWebsite]);
 
   const searchIntentData = rankingData ? [
     { 

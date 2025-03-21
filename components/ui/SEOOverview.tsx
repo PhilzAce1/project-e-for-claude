@@ -17,6 +17,7 @@ import ReactECharts from 'echarts-for-react'
 import CompetitorOverview from './CompetitorOverview'
 import { Metrics, RankingItem } from '@/utils/helpers/ranking-data-types'
 import { NextContentRecommendation } from './NextContentRecommendation'
+import { useWebsite } from '@/contexts/WebsiteContext'
 
 const tabs = [
   { 
@@ -157,6 +158,8 @@ export function SEOOverview({
   const [contentRecommendation, setContentRecommendation] = useState<any>(null)
   const [competitorMetrics, setCompetitorMetrics] = useState<any>(null)
   const [stats, setStats] = useState<any>(null)
+  const { currentWebsite } = useWebsite();
+
   const handleTabChange = (value: string) => {
     setCurrentTab(value)
     // Update tabs current state
@@ -231,7 +234,7 @@ export function SEOOverview({
 
   const fetchContentRecommendations = async () => {
     const { data: contentRecommendations, error: contentRecommendationsError } = await supabase
-      .rpc('get_user_content_recommendations');
+      .rpc('get_user_content_recommendations_by_business', { business_id_param: currentWebsite?.id });
     setContentRecommendation(contentRecommendations);
   };
 
@@ -242,7 +245,7 @@ export function SEOOverview({
           const { data: competitors, error } = await supabase
             .from('competitors')
             .select('domain, items, metrics, total_count')
-            .eq('user_id', user.id);
+            .eq('business_id', currentWebsite?.id);
 
           if (error) {
             // console.error('Error fetching competitor data:', error);
@@ -261,19 +264,21 @@ export function SEOOverview({
         }
       }
       
-      fetchContentRecommendations();
+      if(currentWebsite) {
+        fetchContentRecommendations();
+      }
 
       const { data, error } = await supabase
         .from('business_information')
         .select('competitor_metrics')
-        .eq('user_id', user.id)
+        .eq('id', currentWebsite?.id)
         .single();
 
       setCompetitorMetrics(data?.competitor_metrics);
     }
 
     fetchCompetitorData();
-  }, [currentTab, user.id, supabase]);
+  }, [currentTab, user.id, supabase, currentWebsite]);
 
   const getRankingDistribution = (keywordRankings: Metrics) => {
     const keys = ['pos_1',

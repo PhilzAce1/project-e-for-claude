@@ -8,11 +8,13 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { SEOOverview } from './ui/SEOOverview';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 export default function DashboardContent({ user, keywordRankings }: {
     user: User;
     keywordRankings: any;
 }) {
+    const { currentWebsite } = useWebsite();
     const router = useRouter();
     const pathname = usePathname();
     const supabase = createClientComponentClient()
@@ -39,11 +41,13 @@ export default function DashboardContent({ user, keywordRankings }: {
     ]
     useEffect(() => {
         async function fetchSEOAudit() {
+          if (!currentWebsite) return;
+          
           try {
             const { data: seoData, error } = await supabase
               .from('seo_crawls')
               .select('*')
-              .eq('user_id', user.id)
+              .eq('business_id', currentWebsite.id)
               .order('created_at', { ascending: false })
               .limit(1)
               .single();
@@ -53,13 +57,11 @@ export default function DashboardContent({ user, keywordRankings }: {
             setSeoAudit(seoData)
           } catch (error) {
             // console.error('Error fetching SEO audit:', error)
-          } finally {
-            // setLoading(false)
           }
         }
     
         fetchSEOAudit()
-      }, [supabase])
+    }, [supabase, currentWebsite])
     
 
     useEffect(() => {
@@ -146,12 +148,14 @@ export default function DashboardContent({ user, keywordRankings }: {
 
     useEffect(() => {
         const checkProfileCompletion = async () => {
+            if (!currentWebsite) return;
+
             try {
                 // Get latest business analysis
                 const { data: analysis, error: analysisError } = await supabase
                     .from('business_analyses')
                     .select('completion_status')
-                    .eq('user_id', user.id)
+                    .eq('business_id', currentWebsite.id)
                     .order('created_at', { ascending: false })
                     .limit(1)
                     .single();
@@ -170,7 +174,7 @@ export default function DashboardContent({ user, keywordRankings }: {
                 const { data: competitors, error: competitorsError } = await supabase
                     .from('competitors')
                     .select('domain')
-                    .eq('user_id', user.id);
+                    .eq('business_id', currentWebsite.id);
 
                 if (competitorsError) throw competitorsError;
                 setHasCompetitors(competitors && competitors.length > 0);
@@ -181,7 +185,7 @@ export default function DashboardContent({ user, keywordRankings }: {
         };
 
         checkProfileCompletion();
-    }, [supabase, user.id]);
+    }, [supabase, currentWebsite]);
 
     return (
         <>

@@ -10,6 +10,7 @@ import { CountrySelector } from './ui/CountrySelector';
 import { GlobeAltIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { priorityCountries, otherCountries } from '@/utils/countries';
 import { handleCountrySelect } from '@/utils/supabase/country';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface BusinessAnalysisProps {
   analysisId: string;
@@ -26,6 +27,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
   const [loading, setLoading] = useState(true);
   const [showCountrySelector, setShowCountrySelector] = useState(false);
   const [targetCountry, setTargetCountry] = useState<string | null>(null);
+  const { currentWebsite } = useWebsite();
   const supabase = createClientComponentClient<any>();
   const { toast } = useToast();
   const [confirmedSections, setConfirmedSections] = useState({
@@ -33,6 +35,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     critical: false,
     recommended: false
   });
+
   const [activeSection, setActiveSection] = useState<'verification' | 'critical' | 'recommended'>('verification');
 
   useEffect(() => {
@@ -46,6 +49,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
         supabase
           .from('business_information')
           .select('target_country')
+          .eq('id', currentWebsite?.id)
           .single()
       ]);
 
@@ -81,7 +85,9 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
       }
     };
 
-    fetchData();
+    if(currentWebsite) {
+      fetchData();
+    }
 
     // Set up real-time subscription
     const channel = supabase
@@ -122,7 +128,7 @@ export const BusinessAnalysis: React.FC<BusinessAnalysisProps> = ({ analysisId }
     return () => {
       channel.unsubscribe();
     };
-  }, [analysisId, supabase, toast]);
+  }, [analysisId, supabase, toast, currentWebsite]);
 
   const handleSubmit = async (formData: {
     verification_questions: any[];

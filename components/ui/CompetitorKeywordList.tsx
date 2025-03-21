@@ -19,6 +19,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "./AlertDialog"
+import { useWebsite } from '@/contexts/WebsiteContext'
 
 interface CompetitorKeywordListProps {
   competitors: CompetitorTitles[];
@@ -38,7 +39,8 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
     const [currentCompetitor, setCurrentCompetitor] = useState<Competitor | null>(null);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [updatedCompetitors, setUpdatedCompetitors] = useState<CompetitorTitles[]>(competitors);
-
+    const { currentWebsite } = useWebsite();
+    
     useEffect(() => {
         if (competitors && competitors.length > 0) {
             setSelected(competitors[0])
@@ -97,7 +99,7 @@ const CompetitorKeywordList = ({ competitors, userId }: CompetitorKeywordListPro
                 .from('competitors')
                 .delete()
                 .eq('id', selected.id)
-                .eq('user_id', userId);
+                .eq('business_id', currentWebsite?.id);
 
             if (error) {
                 // console.error('Supabase delete error:', error);

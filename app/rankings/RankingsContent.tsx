@@ -146,7 +146,8 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate, dom
         },
         body: JSON.stringify({ 
           user_id: user.id,
-          domain: domain
+          domain: domain,
+          business_id: currentWebsite?.id
         }),
       });
 

@@ -24,7 +24,7 @@ export default async function BusinessInformationPage() {
     const { data: currentWebsite } = await supabase
         .from('business_information')
         .select('*')
-        .eq('id', session?.user?.user_metadata?.selected_business_id)
+        .eq('id', user?.user_metadata?.selected_business_id)
         .single();
 
     if (!currentWebsite) {

@@ -150,6 +150,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
             user_id: user.id,
             domain: competitor.domain,
             competitor_id: competitor.id.toString(),
+            business_id: currentWebsite?.id
           }),
         })
 
@@ -199,7 +200,7 @@ export default function CompetitorsContent({ user }: CompetitorsContentProps) {
         for (const competitor of normalizedCompetitors) {
           const { data, error } = await supabase
             .from('competitors')
-            .insert({ user_id: user.id, domain: competitor })
+            .insert({ user_id: user.id, domain: competitor, business_id: currentWebsite?.id })
             .select()
             .single();
   

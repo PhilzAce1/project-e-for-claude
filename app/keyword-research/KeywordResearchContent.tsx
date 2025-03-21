@@ -218,7 +218,8 @@ export default function KeywordResearchContent({ user }: { user: any }) {
               competition_index: suggestion.competition_index || 0,
               cpc: suggestion.cpc || 0,
               monthly_searches: suggestion.monthly_searches || [],
-              created_at: new Date().toISOString()
+              created_at: new Date().toISOString(),
+              business_id: currentWebsite?.id
             })
             .select()
             .single()
@@ -275,7 +276,8 @@ export default function KeywordResearchContent({ user }: { user: any }) {
           competition_index: suggestion.competition_index || 0,
           cpc: suggestion.cpc || 0,
           monthly_searches: suggestion.monthly_searches || [],
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          business_id: currentWebsite?.id
         })
         .select()
         .single();

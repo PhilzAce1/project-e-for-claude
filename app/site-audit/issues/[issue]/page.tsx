@@ -53,6 +53,8 @@ export default async function SiteAuditIssuesPage({
     } else {
       seoCrawlData = data;
     }
+
+    console.log('seoCrawlData', seoCrawlData);
   }
 
   if (!user) {

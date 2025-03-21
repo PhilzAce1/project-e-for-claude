@@ -113,6 +113,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
           url,
           title,
           status: 'published',
+          business_id: currentWebsite?.id
         }).select();
 
       if (contentError) throw contentError;
@@ -164,7 +165,8 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
         .from('muted_keywords')
         .insert({ 
           user_id: user?.id,
-          keyword: decodedKeyword
+          keyword: decodedKeyword,
+          business_id: currentWebsite?.id
         });
 
       if (muteError) throw muteError;
@@ -201,7 +203,8 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
           status: 'pending',
           competition_level: keywordMetrics?.competition || null,
           search_volume: keywordMetrics?.search_volume || null,
-          search_intent: keywordMetrics?.main_intent || null
+          search_intent: keywordMetrics?.main_intent || null,
+          business_id: currentWebsite?.id
         });
 
       if (orderError) throw orderError;

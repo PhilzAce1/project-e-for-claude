@@ -106,6 +106,7 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
           url,
           title,
           status: 'published',
+          business_id: currentWebsite?.id
         }).select();
 
       if (contentError) throw contentError;
@@ -158,7 +159,8 @@ export const NextContentRecommendation = ({ contentRecommendation, userId, onUpd
         .from('muted_keywords')
         .insert({ 
           user_id: userId,
-          keyword: contentRecommendation[0].keyword
+          keyword: contentRecommendation[0].keyword,
+          business_id: currentWebsite?.id
         });
 
       if (muteError) throw muteError;

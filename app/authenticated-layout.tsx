@@ -77,11 +77,10 @@ export default function AuthenticatedLayout({
   };
   const checkExistingDomain = useCallback(async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
           const { data, error } = await supabase
               .from('business_information')
               .select('domain')
-              .eq('id', session?.user?.user_metadata?.selected_business_id)
+              .eq('id', user?.user_metadata?.selected_business_id)
               .single()
 
           if (error) throw error

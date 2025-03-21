@@ -7,7 +7,8 @@ import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries
 import { useWebsite } from '@/contexts/WebsiteContext';
 
 export default async function RankingsPage() {
-    const supabase = createServerComponentClient({ cookies });
+    const cookiesStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookiesStore as any });
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),

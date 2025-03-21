@@ -8,6 +8,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { Fragment } from 'react';
 import { getUserContent } from '@/utils/supabase/queries';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface YourContentContentProps {
   user: User;
@@ -32,6 +33,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createClientComponentClient();
+  const { currentWebsite } = useWebsite();
 
   useEffect(() => {
     async function fetchContent() {
@@ -90,7 +92,8 @@ export default function YourContentContent({ user }: YourContentContentProps) {
           status: 'published',
           site_indexed: false,
           sitemap_discovered: false,
-          sync_status: 'pending'
+          sync_status: 'pending',
+          business_id: currentWebsite?.id
         })
         .select()
         .single();
@@ -247,17 +250,6 @@ export default function YourContentContent({ user }: YourContentContentProps) {
 
 
         <div className="p-4 sm:p-6 lg:p-8 rounded-lg bg-white shadow mt-8 overflow-x-auto mb-8 relative">
-            <div className="absolute right-4 top-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsModalOpen(true);
-                }}
-                className="ml-3 inline-flex items-center rounded-md bg-orange-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-              >
-                Submit Content
-              </button>
-            </div>
           <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead>
               <tr>

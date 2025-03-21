@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import generateRankingsSummary from '@/utils/helpers/ranking-summary'
 import { Rankings } from '@/utils/helpers/ranking-data-types'
 import { getLocationCodeByCountry } from '@/utils/countries'
+import Error from 'next/error'
 
 const serviceRoleClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -188,7 +189,7 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ success: true, message: 'Rankings data updated successfully' })
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in POST handler:', error);
     // Log the full error object for debugging
     console.error('Full error details:', {

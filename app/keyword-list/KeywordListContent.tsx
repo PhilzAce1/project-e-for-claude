@@ -6,6 +6,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useToast } from '@/components/ui/Toasts/use-toast';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface MonthlySearch {
   year: number;
@@ -38,21 +39,23 @@ export default function KeywordListContent({ user }: { user: any }) {
   const { toast } = useToast();
   const supabase = createClientComponentClient();
   const router = useRouter();
-
+  const { currentWebsite } = useWebsite();
   const totalPages = Math.ceil((keywords?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
 
   useEffect(() => {
-    loadKeywords();
-  }, []);
+    if(currentWebsite) {
+      loadKeywords();
+    }
+  }, [currentWebsite]);
 
   const loadKeywords = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('keyword_suggestions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from('keyword_suggestions')
+          .select('*')
+          .eq('business_id', currentWebsite?.id)
+          .order('created_at', { ascending: false });
 
       if (error) throw error;
 

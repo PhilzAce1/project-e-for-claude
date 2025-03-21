@@ -10,6 +10,7 @@ import KeywordTable from '@/components/ui/KeywordTable';
 import { RankingItem } from '@/utils/helpers/ranking-data-types';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from '@/components/ui/Toasts/use-toast';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 const Doughnut = dynamic(() => import('react-chartjs-2').then((mod) => mod.Doughnut), {
   ssr: false,
@@ -61,19 +62,22 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate, dom
   const [hasCompetitors, setHasCompetitors] = useState(false);
   const supabase = createClientComponentClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
-
+  const { currentWebsite } = useWebsite();
+  
   useEffect(() => {
     const checkCompetitors = async () => {
       const { count } = await supabase
         .from('competitors')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .eq('business_id', currentWebsite?.id);
       
       setHasCompetitors(count ? count > 0 : false);
     };
 
-    checkCompetitors();
-  }, [user.id, supabase]);
+    if(currentWebsite) {
+      checkCompetitors();
+    }
+  }, [user.id, supabase, currentWebsite]);
 
   const {total_count, metrics, items} = rankingsData;
 
@@ -142,7 +146,8 @@ export default function RankingsContent({ user, rankingsData, lastCrawlDate, dom
         },
         body: JSON.stringify({ 
           user_id: user.id,
-          domain: domain
+          domain: domain,
+          business_id: currentWebsite?.id
         }),
       });
 

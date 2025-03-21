@@ -19,11 +19,23 @@ export default async function BusinessInformationPage() {
         redirect('/signin/password_signin');
     }
 
-    // Fetch the most recent analysis for this user
+    // Get the current website from the session
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data: currentWebsite } = await supabase
+        .from('business_information')
+        .select('*')
+        .eq('id', user?.user_metadata?.selected_business_id)
+        .single();
+
+    if (!currentWebsite) {
+        redirect('/');
+    }
+
+    // Fetch the most recent analysis for this business
     const { data: latestAnalysis, error } = await supabase
         .from('business_analyses')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('business_id', currentWebsite.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();

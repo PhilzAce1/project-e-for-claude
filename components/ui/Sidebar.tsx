@@ -9,6 +9,7 @@ import { Fragment } from 'react';
 import Logo from '@/components/icons/Logo';
 import { navigation } from '@/utils/helpers/navigation';
 import { classNames } from '@/utils/helpers';
+import WebsiteSwitcher from './WebsiteSwitcher';
 
 interface SidebarProps {
   user: any;
@@ -214,6 +215,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen }: SidebarPr
           <div className="flex mt-8 h-16 shrink-0 items-center">
             <Logo className="h-16 w-auto" />
           </div>
+          <WebsiteSwitcher />
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>

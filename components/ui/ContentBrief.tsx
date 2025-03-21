@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/Toasts/use-toast';
 import { LoadingOverlay } from './LoadingOverlay';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { UrlModal } from './UrlModal';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 // Helper function to convert competition float to readable text
 const getCompetitionLevel = (competition: number): string => {
@@ -31,6 +32,7 @@ export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) =
   const currentPath = usePathname();
   const { toast } = useToast();
   const supabase = createClientComponentClient();
+  const { currentWebsite } = useWebsite();
 
   useEffect(() => {
     const checkExistingRecommendation = async () => {
@@ -42,7 +44,7 @@ export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) =
           .from('content_recommendations')
           .select('*')
           .eq('keyword', keyword)
-          .eq('user_id', userId)
+          .eq('business_id', currentWebsite?.id)
           .single();
 
         if (error && error.code !== 'PGRST116') {
@@ -85,8 +87,10 @@ export const ContentBrief = ({ keyword, userId, onUpdate }: ContentBriefProps) =
       }
     };
 
-    checkExistingRecommendation();
-  }, [keyword, userId, supabase, toast]);
+    if(currentWebsite) {
+      checkExistingRecommendation();
+    }
+  }, [keyword, userId, supabase, toast, currentWebsite]);
 
 
 

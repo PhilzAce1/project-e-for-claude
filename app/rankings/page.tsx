@@ -4,9 +4,11 @@ import { redirect } from 'next/navigation';
 import RankingsContent from './RankingsContent';
 import AuthenticatedLayout from '../authenticated-layout';
 import { getProducts, getSubscriptions, getUser } from '@/utils/supabase/queries';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 export default async function RankingsPage() {
-    const supabase = createServerComponentClient({ cookies });
+    const cookiesStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookiesStore as any });
     const [user, products, subscription] = await Promise.all([
       getUser(supabase),
       getProducts(supabase),
@@ -21,7 +23,7 @@ export default async function RankingsPage() {
     const { data: rankingsData, error } = await supabase
         .from('business_information')
         .select('rankings_data, rankings_updated_at, domain')
-        .eq('user_id', user.id)
+        .eq('id ', user?.user_metadata?.selected_business_id)
         .single();
 
     if (error) {

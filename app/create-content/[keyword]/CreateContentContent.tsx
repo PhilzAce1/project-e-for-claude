@@ -7,6 +7,7 @@ import { UrlModal } from '@/components/ui/UrlModal';
 import { toast } from '@/components/ui/Toasts/use-toast';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface KeywordData {
   keyword: string;
@@ -35,6 +36,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
   const router = useRouter();
   const [userDetails, setUserDetails] = useState<any>(null);
   const [keywordMetrics, setKeywordMetrics] = useState<any>(null);
+  const { currentWebsite } = useWebsite();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -53,7 +55,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
       const { data, error } = await supabase
         .from('business_information')
         .select('rankings_data')
-        .eq('user_id', user.id)
+        .eq('id', currentWebsite?.id)
         .single();
 
       if (error) {
@@ -79,14 +81,16 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
       }
     }
 
-    fetchRankingData();
-  }, [supabase, user.id, decodedKeyword]);
+    if(currentWebsite) {
+      fetchRankingData();
+    }
+  }, [supabase, user.id, decodedKeyword, currentWebsite]);
 
   useEffect(() => {
     // Fetch keyword metrics from content_recommendations
     const fetchKeywordMetrics = async () => {
       const { data, error } = await supabase
-        .rpc('get_user_content_recommendations')
+        .rpc('get_user_content_recommendations_by_business', { business_id_param: currentWebsite?.id })
         .eq('keyword', decodedKeyword)
         .single();
 
@@ -109,6 +113,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
           url,
           title,
           status: 'published',
+          business_id: currentWebsite?.id
         }).select();
 
       if (contentError) throw contentError;
@@ -118,7 +123,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
         .update({ 
           content_completed: true
         })
-        .eq('user_id', user?.id)
+        .eq('business_id', currentWebsite?.id)
         .eq('keyword', decodedKeyword);
 
       if (keywordError) throw keywordError;
@@ -160,7 +165,8 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
         .from('muted_keywords')
         .insert({ 
           user_id: user?.id,
-          keyword: decodedKeyword
+          keyword: decodedKeyword,
+          business_id: currentWebsite?.id
         });
 
       if (muteError) throw muteError;
@@ -197,7 +203,8 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
           status: 'pending',
           competition_level: keywordMetrics?.competition || null,
           search_volume: keywordMetrics?.search_volume || null,
-          search_intent: keywordMetrics?.main_intent || null
+          search_intent: keywordMetrics?.main_intent || null,
+          business_id: currentWebsite?.id
         });
 
       if (orderError) throw orderError;

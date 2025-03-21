@@ -8,7 +8,7 @@ const serviceRoleClient = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-async function insertBusinessInformation(userId: string, domain: string) {
+async function insertBusinessInformation(userId: string, domain: string, businessId: string) {
     try {
         // First check if a record exists
         const { data: existingRecord, error: fetchError } = await serviceRoleClient
@@ -27,13 +27,14 @@ async function insertBusinessInformation(userId: string, domain: string) {
             const { data, error } = await serviceRoleClient
                 .from('business_information')
                 .update({ domain })
-                .eq('user_id', userId)
+                .eq('id', businessId)
                 .select();
             
             if (error) throw error;
             result = data;
             console.log('Business updated:', data);
         } else {
+            console.log('Business not found, inserting new record...')
             // Insert new record
             const { data, error } = await serviceRoleClient
                 .from('business_information')
@@ -45,8 +46,9 @@ async function insertBusinessInformation(userId: string, domain: string) {
             console.log('Business added:', data);
         }
 
+        console.log('Result:', result)
         // Call get-ranked-keywords endpoint
-        fetchRankedKeywords(userId, domain);
+        fetchRankedKeywords(userId, domain, result[0]?.id);
 
         return result;
     } catch (error) {
@@ -55,7 +57,7 @@ async function insertBusinessInformation(userId: string, domain: string) {
     }
 }
 
-async function fetchRankedKeywords(userId: string, domain: string) {
+async function fetchRankedKeywords(userId: string, domain: string, businessId: string) {
     try {
         // Remove http:// or https:// from the domain
         const cleanDomain = domain.replace(/^https?:\/\//, '')
@@ -65,7 +67,7 @@ async function fetchRankedKeywords(userId: string, domain: string) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ user_id: userId, domain: cleanDomain }),
+            body: JSON.stringify({ user_id: userId, domain: cleanDomain, business_id: businessId }),
         })
         console.log('Ranked keywords fetch triggered for:', cleanDomain)
     } catch (error) {
@@ -138,7 +140,7 @@ async function initiateLighthouseTask(domain: string) {
     }
 }
 
-async function recordSEOCrawl(userId: string, domain: string, externalJobId: string, lighthouseTaskId: string, updateOriginal: boolean) {
+async function recordSEOCrawl(userId: string, domain: string, externalJobId: string, lighthouseTaskId: string, updateOriginal: boolean, businessId: string) {
     if (updateOriginal) {
         const { data, error } = await serviceRoleClient
             .from('seo_crawls')
@@ -147,7 +149,7 @@ async function recordSEOCrawl(userId: string, domain: string, externalJobId: str
                 lighthouse_task_id: lighthouseTaskId,
                 updated_at: new Date().toISOString(),
             })
-            .eq('user_id', userId)
+            .eq('business_id', businessId)
             .eq('domain', domain)
             .select();
 
@@ -160,7 +162,8 @@ async function recordSEOCrawl(userId: string, domain: string, externalJobId: str
             user_id: userId, 
             domain: domain, 
             external_job_id: externalJobId,
-            lighthouse_task_id: lighthouseTaskId
+            lighthouse_task_id: lighthouseTaskId,
+            business_id: businessId
         }).select()
         if (error) throw error
         return data
@@ -186,11 +189,11 @@ function createAuthenticatedFetch(username: string, password: string) {
 
 export async function POST(request: Request) {
     try {
-        const { domain, userId, createBusiness = true } = await request.json()
+        const { domain, userId, createBusiness = true, businessId } = await request.json()
         
-        console.log('Inserting domain into database...')
+        console.log('Inserting domain into database...', createBusiness, businessId)
         if (createBusiness) {
-            await insertBusinessInformation(userId, domain)
+            await insertBusinessInformation(userId, domain, businessId)
         } else {
             const { data, error } = await serviceRoleClient
                 .from('seo_crawls')
@@ -198,7 +201,7 @@ export async function POST(request: Request) {
                     lighthouse_data: null,
                     scraped_pages: null 
                 })
-                .eq('user_id', userId)
+                .eq('business_id', businessId)
                 .eq('domain', domain)
                 .select();
             }
@@ -218,7 +221,7 @@ export async function POST(request: Request) {
             throw new Error('Failed to initiate Lighthouse task')
         }
 
-        const crawlData = await recordSEOCrawl(userId, domain, externalApiData.id, lighthouseTaskId, !createBusiness)
+        const crawlData = await recordSEOCrawl(userId, domain, externalApiData.id, lighthouseTaskId, !createBusiness, businessId)
 
         return NextResponse.json({ 
             message: 'SEO crawl and Lighthouse audit initiated successfully', 

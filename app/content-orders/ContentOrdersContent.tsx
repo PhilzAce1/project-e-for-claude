@@ -7,6 +7,7 @@ import { Menu, Transition } from '@headlessui/react'
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline'
 import { Fragment } from 'react'
 import { useRouter } from 'next/navigation'
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface ContentOrdersContentProps {
   user: User;
@@ -31,13 +32,14 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
   const router = useRouter();
+  const { currentWebsite } = useWebsite();
 
   useEffect(() => {
     async function fetchOrders() {
       const { data, error } = await supabase
         .from('content_orders')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('business_id', currentWebsite?.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -49,7 +51,9 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
       setLoading(false);
     }
 
-    fetchOrders();
+    if(currentWebsite) {
+      fetchOrders();
+    }
 
     // Subscribe to new orders
     const channel = supabase
@@ -60,7 +64,7 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
           event: '*',
           schema: 'public',
           table: 'content_orders',
-          filter: `user_id=eq.${user.id}`
+          filter: `business_id=eq.${currentWebsite?.id}`
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
@@ -73,7 +77,7 @@ export default function ContentOrdersContent({ user }: ContentOrdersContentProps
     return () => {
       channel.unsubscribe();
     };
-  }, [supabase, user.id]);
+  }, [supabase, user.id, currentWebsite]);
 
   if (loading) {
     return (

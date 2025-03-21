@@ -12,8 +12,7 @@ import posthog from 'posthog-js';
 import { useRouter, usePathname } from 'next/navigation';
 import ZeroStateHero from '@/components/ZeroStateHero';
 import TrialCountdown from '@/components/ui/TrialCountdown';
-import { useWebsite, WebsiteProvider } from '@/contexts/WebsiteContext';
-import WebsiteSwitcher from '@/components/ui/WebsiteSwitcher';
+import { WebsiteProvider } from '@/contexts/WebsiteContext';
 
 export default function AuthenticatedLayout({
   children,

@@ -4,9 +4,17 @@ import { useWebsite } from '@/contexts/WebsiteContext';
 
 export const handleCountrySelect = async (userId: string, country: string, onSuccess?: () => void) => {
   const supabase = createClientComponentClient();
-  const { currentWebsite } = useWebsite();
   
   try {
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+
+    const selectedBusinessId = user?.user_metadata?.selected_business_id;
+    if (!selectedBusinessId) {
+      throw new Error('No business selected');
+    }
+
     // First check if a record exists
     const { data: existingRecord, error: fetchError } = await supabase
       .from('business_information')
@@ -24,7 +32,7 @@ export const handleCountrySelect = async (userId: string, country: string, onSuc
       const { error: updateError } = await supabase
         .from('business_information')
         .update({ target_country: country })
-        .eq('business_id', currentWebsite?.id);
+        .eq('id', selectedBusinessId);
       error = updateError;
     } else {
       // Insert new record
@@ -33,7 +41,7 @@ export const handleCountrySelect = async (userId: string, country: string, onSuc
         .insert({ 
           user_id: userId,
           target_country: country,
-          business_id: currentWebsite?.id
+          id: selectedBusinessId
         });
       error = insertError;
     }

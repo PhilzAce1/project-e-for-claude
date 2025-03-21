@@ -135,7 +135,7 @@ export async function POST(req: Request) {
 
     if (!dataForSEOResponse.ok) {
       console.error('DataForSEO response not ok:', await dataForSEOResponse.text());
-      throw new Error('Failed to fetch data from DataForSEO')
+      throw new globalThis.Error('Failed to fetch data from DataForSEO')
     }
 
     const dataForSEOData = await dataForSEOResponse.json();

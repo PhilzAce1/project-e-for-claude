@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 
 interface Website {
   id: any;
@@ -24,13 +25,14 @@ export function WebsiteProvider({ children }: { children: React.ReactNode }) {
   const [websites, setWebsites] = useState<Website[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClientComponentClient();
-
+  const router = useRouter();
   const setCurrentWebsite = async (website: Website | null) => {
     setCurrentWebsiteState(website);
     if (website) {
       await supabase.auth.updateUser({
         data: { selected_business_id: website.id }
       });
+      router.refresh();
     }
   };
 

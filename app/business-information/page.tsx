@@ -39,7 +39,6 @@ export default async function BusinessInformationPage() {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-
     // if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
     //     // console.error('Error fetching analysis:', error);
     // }

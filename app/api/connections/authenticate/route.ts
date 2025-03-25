@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import { isGoogleServiceConnected, getAllGoogleConnections } from './utils';
 
+import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 // Environment variables
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -25,8 +26,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const supabase = createServerComponentClient({ cookies });
 
-    const supabase = createRouteHandlerClient({ cookies });
     const {
       data: { user },
       error: authError
@@ -236,4 +237,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

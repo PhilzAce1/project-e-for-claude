@@ -237,8 +237,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
               <div className="mt-4 border-t border-gray-200 pt-4">
                 <h2 className="text-lg font-bold">What is this?</h2>
                 <p className="text-sm text-gray-600 mb-2 w-2/3">
-                  When you publish content, we index it and add it to your
-                  content library.
+                  When you publish content, we index it and add it to your content library.
                 </p>
                 <p className="text-sm text-gray-600">
                   You can then use this content to create backlinks for your

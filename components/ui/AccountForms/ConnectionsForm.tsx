@@ -216,12 +216,11 @@ export default function ConnectionsForm() {
 
       if (!authResponse.ok) {
         const errorData = await authResponse.json();
-        console.log('Auth error:', errorData);
+        console.error('Auth error:', errorData);
         throw new Error(errorData.error || 'Failed to authenticate with Google');
       }
 
       const authData = await authResponse.json();
-      console.log('Auth response:', authData);
 
       // Store the tokens for later use during finalization
       if (authData.access_token && authData.refresh_token) {
@@ -237,7 +236,6 @@ export default function ConnectionsForm() {
       const accountsResponse = await fetch(
         `/api/connections/accounts?service=${service}&accessToken=${encodeURIComponent(authData.access_token)}&refreshToken=${encodeURIComponent(authData.refresh_token)}`,
       );
-      console.log('Accounts response:', accountsResponse);
 
       if (!accountsResponse.ok) {
         const errorData = await accountsResponse.json();
@@ -281,7 +279,6 @@ export default function ConnectionsForm() {
       propertyId: selection.propertyId || undefined,
     };
 
-    console.log('Body:', body);
     try {
       const response = await fetch('/api/connections/finalize', {
         method: 'POST',

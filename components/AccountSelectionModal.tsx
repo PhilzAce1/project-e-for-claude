@@ -54,7 +54,6 @@ export default function AccountSelectionModal({
   useEffect(() => {
     if (accounts && accounts.length > 0) {
       const firstAccountId = accounts[0].id || accounts[0].accountId || '';
-      console.log('firstAccountId', firstAccountId, accounts);
       setSelectedAccount(firstAccountId);
     }
   }, [accounts]);
@@ -147,10 +146,7 @@ export default function AccountSelectionModal({
   const handlePropertyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProperty(e.target.value);
   };
-  console.log('selectedAccount', selectedAccount);
-  console.log('selectedProperty', selectedProperty);
 
-  console.log(loading, submitting, !selectedAccount, !selectedProperty);
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>

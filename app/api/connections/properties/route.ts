@@ -98,8 +98,6 @@ export async function GET(req: Request) {
             ? accountId
             : `accounts/${accountId}`;
 
-          console.log('Fetching analytics properties for account:', formattedAccountId);
-
           const propertiesResponse = await analyticsAdmin.properties.list({
             auth: oauth2Client,
             // The filter format should be "parent:accounts/123456"
@@ -107,7 +105,6 @@ export async function GET(req: Request) {
           });
 
           properties = propertiesResponse.data.properties || [];
-          console.log('Found analytics properties:', properties);
           break;
         }
 

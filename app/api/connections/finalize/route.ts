@@ -28,7 +28,7 @@ interface FinalizeRequestBody {
 export async function POST(req: Request) {
   try {
     const body: FinalizeRequestBody = await req.json();
-    console.log('Received request body:', body);
+
     const { accessToken, refreshToken, service, accountId, propertyId } = body;
 
     if (!accessToken || !refreshToken || !service || !accountId) {
@@ -68,7 +68,6 @@ export async function POST(req: Request) {
       });
 
       const googleEmail = userInfo.data.email;
-      console.log('Google user info:', { email: googleEmail });
 
       // Get token expiry by requesting token info
       const tokenInfoResponse = await fetch(
@@ -90,7 +89,6 @@ export async function POST(req: Request) {
       // Add property ID if it exists
 
       const tableName = getTableName(service);
-      console.log('Using table:', tableName);
 
       try {
         // Store the selected account and property information
@@ -144,7 +142,6 @@ export async function POST(req: Request) {
 
         // Upsert the connection data
 
-        console.log('Connection data:', connectionData);
         const { error } = await supabase
           .from(tableName)
           .upsert(connectionData)
@@ -155,7 +152,6 @@ export async function POST(req: Request) {
           throw new Error(`Error storing ${service} connection: ${error.message}`);
         }
 
-        console.log('Connection stored successfully:', connectionData);
         return NextResponse.json({
           success: true,
           connection: connectionData,

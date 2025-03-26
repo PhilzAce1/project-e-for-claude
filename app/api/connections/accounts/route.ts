@@ -119,14 +119,11 @@ export async function GET(req: Request) {
             const accountId = account.name ? account.name.split('/').pop() : '';
             return {
               ...account,
-              // Add an explicit id field if it doesn't exist
               id: accountId || '',
-              // Ensure we have a displayName for the UI
               displayName: account.displayName || `Account ${accountId}` || 'Unknown Account',
             };
           });
 
-          console.log('Processed Google Analytics accounts:', accounts);
           break;
         }
 

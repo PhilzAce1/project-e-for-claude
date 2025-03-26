@@ -130,7 +130,6 @@ export async function POST(req: Request) {
               sites: data.siteEntry?.map((site) => site.siteUrl) || [],
             };
 
-            console.log('🔍 connectionData', connectionData);
             const { error, data: newConnection } = await supabase
               .from('gsc_connections')
               .upsert({
@@ -141,7 +140,6 @@ export async function POST(req: Request) {
               })
               .eq('user_id', user.id);
 
-            console.log('NEW CONNECTION', newConnection);
             if (error) {
               console.error('Error inserting GSC connection:', error);
             } else {

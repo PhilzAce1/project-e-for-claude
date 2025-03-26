@@ -240,8 +240,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                   When you publish content, we index it and add it to your content library.
                 </p>
                 <p className="text-sm text-gray-600">
-                  You can then use this content to create backlinks for your
-                  site.
+                  You can then use this content to create backlinks for your site.
                 </p>
               </div>
             </div>

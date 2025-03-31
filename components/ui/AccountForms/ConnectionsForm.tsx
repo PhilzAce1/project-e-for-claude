@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  GoogleTagManager,
-  GoogleSearchConsole,
-  GoogleAnalytics
-} from '@/components/icons/Google';
+import { GoogleTagManager, GoogleSearchConsole, GoogleAnalytics } from '@/components/icons/Google';
 import { toast } from '../Toasts/use-toast';
+import AccountSelectionModal, {
+  GoogleAccount,
+  AccountSelectionProps,
+} from '@/components/AccountSelectionModal';
 
-// Add Google OAuth types
+// Google OAuth types
 interface GoogleOAuthResponse {
   code: string;
   error?: string;
@@ -50,7 +50,7 @@ const ConnectionButton: React.FC<ConnectionButtonProps> = ({
   connecting,
   icon,
   connected,
-  onClick
+  onClick,
 }) => {
   return (
     <button
@@ -64,12 +64,8 @@ const ConnectionButton: React.FC<ConnectionButtonProps> = ({
     >
       {icon}
       <span className="text-sm font-medium text-gray-900">{title}</span>
-      {connecting && (
-        <span className="text-xs text-gray-500 mt-1">Connecting...</span>
-      )}
-      {connected && !connecting && (
-        <span className="text-xs text-green-600 mt-1">Connected</span>
-      )}
+      {connecting && <span className="text-xs text-gray-500 mt-1">Connecting...</span>}
+      {connected && !connecting && <span className="text-xs text-green-600 mt-1">Connected</span>}
     </button>
   );
 };
@@ -84,21 +80,22 @@ const googleServices: GoogleService[] = [
   {
     id: 'tagManager',
     title: 'Tag Manager',
-    icon: <GoogleTagManager className="w-8 h-8 mb-2" />
+    icon: <GoogleTagManager className="w-8 h-8 mb-2" />,
   },
   {
     id: 'searchConsole',
     title: 'Search Console',
-    icon: <GoogleSearchConsole className="w-11 h-11 mb-2" />
+    icon: <GoogleSearchConsole className="w-11 h-11 mb-2" />,
   },
   {
     id: 'analytics',
     title: 'Analytics',
-    icon: <GoogleAnalytics className="w-8 h-8 mb-2" />
-  }
+    icon: <GoogleAnalytics className="w-8 h-8 mb-2" />,
+  },
 ];
 
 export default function ConnectionsForm() {
+  // Connection states
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
   const [connections, setConnections] = useState<{
     searchConsole: any | null;
@@ -107,8 +104,23 @@ export default function ConnectionsForm() {
   }>({
     searchConsole: null,
     tagManager: null,
-    analytics: null
+    analytics: null,
   });
+
+  // Account selection states
+  const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
+  const [currentService, setCurrentService] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<GoogleAccount[]>([]);
+
+  // Store authentication tokens instead of the code
+  const [authTokens, setAuthTokens] = useState<{
+    accessToken: string | null;
+    refreshToken: string | null;
+  }>({
+    accessToken: null,
+    refreshToken: null,
+  });
+
   useEffect(() => {
     // Load Google API client
     const loadGoogleApi = async () => {
@@ -124,13 +136,18 @@ export default function ConnectionsForm() {
 
   useEffect(() => {
     const fetchConnections = async () => {
-      const response = await fetch('/api/connections');
-      const data = await response.json();
+      try {
+        const response = await fetch('/api/connections');
+        const data = await response.json();
 
-      if (data.success) {
-        setConnections(data.connections);
+        if (data.success) {
+          setConnections(data.connections);
+        }
+      } catch (error) {
+        console.error('Error fetching connections:', error);
       }
     };
+
     fetchConnections();
   }, []);
 
@@ -157,25 +174,149 @@ export default function ConnectionsForm() {
         ux_mode: 'popup',
         callback: (response) => {
           if (response.code) {
-            exchangeCodeForToken(
-              response.code,
-              service,
-              window.location.origin
-            );
+            setCurrentService(service);
+            fetchAccounts(response.code, service);
           } else if (response.error) {
             console.error('Google OAuth error:', response.error);
-            alert(`Failed to connect to ${service}: ${response.error}`);
+            toast({
+              title: 'Connection Failed',
+              variant: 'destructive',
+              description: `Failed to connect to ${service}: ${response.error}`,
+            });
             setIsConnecting(null);
           }
-        }
+        },
       });
 
       client.requestCode();
     } catch (error) {
       console.error(`Error initiating ${service} OAuth:`, error);
-      alert(
-        error instanceof Error ? error.message : 'Failed to connect to service'
+      toast({
+        title: 'Connection Failed',
+        variant: 'destructive',
+        description: error instanceof Error ? error.message : 'Failed to connect to service',
+      });
+      setIsConnecting(null);
+    }
+  };
+
+  const fetchAccounts = async (code: string, service: string) => {
+    try {
+      // First authenticate with Google to get the tokens
+      const authResponse = await fetch('/api/connections/authenticate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          service,
+          redirect_uri: window.location.origin,
+          storeConnection: false, // Don't store the connection yet
+        }),
+      });
+
+      if (!authResponse.ok) {
+        const errorData = await authResponse.json();
+        console.error('Auth error:', errorData);
+        throw new Error(errorData.error || 'Failed to authenticate with Google');
+      }
+
+      const authData = await authResponse.json();
+
+      // Store the tokens for later use during finalization
+      if (authData.access_token && authData.refresh_token) {
+        setAuthTokens({
+          accessToken: authData.access_token,
+          refreshToken: authData.refresh_token,
+        });
+      } else {
+        throw new Error('Failed to retrieve authentication tokens');
+      }
+
+      // Then fetch the accounts, passing the tokens directly
+      const accountsResponse = await fetch(
+        `/api/connections/accounts?service=${service}&accessToken=${encodeURIComponent(authData.access_token)}&refreshToken=${encodeURIComponent(authData.refresh_token)}`,
       );
+
+      if (!accountsResponse.ok) {
+        const errorData = await accountsResponse.json();
+        throw new Error(errorData.error || `Failed to fetch ${service} accounts`);
+      }
+
+      const accountsData = await accountsResponse.json();
+
+      if (accountsData.success && accountsData.accounts && accountsData.accounts.length > 0) {
+        setAccounts(accountsData.accounts);
+        setShowAccountModal(true);
+      } else {
+        toast({
+          title: 'No Accounts Found',
+          variant: 'destructive',
+          description: `No ${service} accounts found for this Google account.`,
+        });
+        setIsConnecting(null);
+      }
+    } catch (error) {
+      console.error(`Error fetching accounts for ${service}:`, error);
+      toast({
+        title: 'Connection Failed',
+        variant: 'destructive',
+        description:
+          error instanceof Error ? error.message : `Failed to retrieve accounts for ${service}`,
+      });
+      setIsConnecting(null);
+    }
+  };
+
+  const handleAccountSelect = async (selection: AccountSelectionProps) => {
+    if (!currentService || !authTokens.accessToken || !authTokens.refreshToken) return;
+
+    // Use tokens instead of auth code
+    const body = {
+      accessToken: authTokens.accessToken,
+      refreshToken: authTokens.refreshToken,
+      service: currentService,
+      accountId: selection.accountId,
+      propertyId: selection.propertyId || undefined,
+    };
+
+    try {
+      const response = await fetch('/api/connections/finalize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setConnections((prev) => ({
+          ...prev,
+          [currentService]: data.connection,
+        }));
+
+        toast({
+          title: 'Connection Successful',
+          description: `Successfully connected to ${currentService}`,
+        });
+      } else {
+        toast({
+          title: 'Connection Failed',
+          variant: 'destructive',
+          description: data.error || `Failed to connect to ${currentService}`,
+        });
+      }
+    } catch (error) {
+      console.error(`Error finalizing ${currentService} connection:`, error);
+      toast({
+        title: 'Connection Failed',
+        variant: 'destructive',
+        description:
+          error instanceof Error ? error.message : `Failed to connect to ${currentService}`,
+      });
+    } finally {
+      setShowAccountModal(false);
+      setCurrentService(null);
+      setAuthTokens({ accessToken: null, refreshToken: null });
       setIsConnecting(null);
     }
   };
@@ -193,66 +334,10 @@ export default function ConnectionsForm() {
     }
   };
 
-  const exchangeCodeForToken = async (
-    code: string,
-    service: string,
-    redirect_uri: string
-  ) => {
-    try {
-      const response = await fetch('/api/connections/authenticate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code,
-          service,
-          redirect_uri
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast({
-          title: 'Connection Failed',
-          variant: 'destructive',
-          description: `Failed to connect to ${service}`
-        });
-      }
-
-      if (data.success) {
-        setConnections((prev) => ({
-          ...prev,
-          [service]: true
-        }));
-        toast({
-          title: 'Connection Successful',
-          description: `Successfully connected to ${service}`
-        });
-      } else {
-        toast({
-          title: 'Connection Failed',
-          variant: 'destructive',
-          description: `Failed to connect to ${service}`
-        });
-      }
-    } catch (error) {
-      console.error(`Error exchanging code for ${service}:`, error);
-      toast({
-        title: 'Connection Failed',
-        variant: 'destructive',
-        description: `Failed to connect to ${service}`
-      });
-    } finally {
-      setIsConnecting(null);
-    }
-  };
-
   return (
     <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-3">
       <div>
-        <h2 className="text-base font-semibold leading-7 text-gray-900">
-          Connections
-        </h2>
+        <h2 className="text-base font-semibold leading-7 text-gray-900">Connections</h2>
         <p className="mt-1 text-sm leading-6 text-gray-600">
           Connect your Google services to enhance your SEO capabilities.
         </p>
@@ -260,26 +345,34 @@ export default function ConnectionsForm() {
 
       <div className="md:col-span-2">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {googleServices.map((service) => {
-            return (
-              <ConnectionButton
-                key={service.id}
-                disabled={isConnecting === service.id}
-                title={service.title}
-                connecting={
-                  isConnecting === service.id &&
-                  connections[service.id as keyof typeof connections] === null
-                }
-                icon={service.icon}
-                connected={
-                  !!connections[service.id as keyof typeof connections]
-                }
-                onClick={() => handleGoogleConnect(service.id)}
-              />
-            );
-          })}
+          {googleServices.map((service) => (
+            <ConnectionButton
+              key={service.id}
+              disabled={isConnecting !== null}
+              title={service.title}
+              connecting={isConnecting === service.id}
+              icon={service.icon}
+              connected={!!connections[service.id as keyof typeof connections]}
+              onClick={() => handleGoogleConnect(service.id)}
+            />
+          ))}
         </div>
       </div>
+
+      {showAccountModal && currentService && (
+        <AccountSelectionModal
+          isOpen={showAccountModal}
+          onClose={() => {
+            setShowAccountModal(false);
+            setIsConnecting(null);
+          }}
+          service={currentService}
+          accounts={accounts}
+          onAccountSelect={handleAccountSelect}
+          accessToken={authTokens.accessToken || undefined}
+          refreshToken={authTokens.refreshToken || undefined}
+        />
+      )}
     </div>
   );
 }

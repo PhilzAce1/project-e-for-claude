@@ -33,7 +33,7 @@ export default function AuthenticatedLayout({
   const [domain, setDomain] = useState('')
   const [existingDomain, setExistingDomain] = useState(false)
   const supabase = createClientComponentClient();
-
+  
   // Check if user has the base plan
   const hasPlan = subscription.length > 0;
 

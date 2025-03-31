@@ -38,6 +38,7 @@ export default function CreateContentContent({ user, keyword }: { user: User, ke
   const [keywordMetrics, setKeywordMetrics] = useState<any>(null);
   const { currentWebsite } = useWebsite();
 
+
   useEffect(() => {
     const fetchUserDetails = async () => {
       const { data: details } = await supabase

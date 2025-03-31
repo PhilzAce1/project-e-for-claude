@@ -66,7 +66,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setContent(prev => [payload.new as Content, ...prev]);
+            setContent((prev) => [payload.new as Content, ...prev]);
           }
         }
       )
@@ -85,7 +85,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       // First, insert the content record
       const { data, error } = await supabase
         .from('content')
-        .insert({ 
+        .insert({
           user_id: user.id,
           url: url,
           title: title,
@@ -104,14 +104,14 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       }
 
       // Add the new content to the start of the list
-      setContent(prev => [data, ...prev]);
+      setContent((prev) => [data, ...prev]);
       setIsModalOpen(false);
 
       // Trigger sitemap discovery and content sync
       const syncResponse = await fetch('/api/sitemap-sync', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           domain,
@@ -128,7 +128,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       const indexResponse = await fetch('/api/index-site', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           url,
@@ -159,7 +159,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       }
 
       // Remove the content from the local state
-      setContent(prev => prev.filter(item => item.id !== contentId));
+      setContent((prev) => prev.filter((item) => item.id !== contentId));
     } catch (error) {
       // console.error('Error removing content:', error);
       throw error;
@@ -168,12 +168,12 @@ export default function YourContentContent({ user }: YourContentContentProps) {
 
   const handleSyncSitemap = async (url: string) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const domain = new URL(url).hostname;
       const syncResponse = await fetch('/api/sitemap-sync', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           domain,
@@ -192,16 +192,15 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching content:', error);
-          throw error;
-        }
+      if (error) {
+        console.error('Error fetching content:', error);
+        throw error;
+      }
       setContent(data || []);
-
     } catch (error) {
       console.error('Error syncing sitemap:', error);
-    }finally {
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -220,7 +219,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
 
   return (
     <>
-      <UrlModal 
+      <UrlModal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
@@ -248,30 +247,50 @@ export default function YourContentContent({ user }: YourContentContentProps) {
           </div>
         </div>
 
-
         <div className="p-4 sm:p-6 lg:p-8 rounded-lg bg-white shadow mt-8 overflow-x-auto mb-8 relative">
           <table className="min-w-full divide-y divide-gray-300 text-center">
             <thead>
               <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3">
+                <th
+                  scope="col"
+                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3"
+                >
                   Title
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                >
                   URL
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                >
                   Status
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                >
                   Indexed
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                >
                   Sitemap Status
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                >
                   Last Sync
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-sm font-semibold text-gray-900">
+                <th
+                  scope="col"
+                  className="px-3 py-3.5 text-sm font-semibold text-gray-900"
+                >
                   Date
                 </th>
                 <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-3">
@@ -287,7 +306,12 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                     {item.url ? (
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-500">
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:text-indigo-500"
+                      >
                         View Content
                       </a>
                     ) : (
@@ -295,34 +319,45 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                     )}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                      item.status === 'published' 
-                        ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20' 
-                        : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                        item.status === 'published'
+                          ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
+                          : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
+                      }`}
+                    >
                       {item.status}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                      item.site_indexed 
-                        ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20' 
-                        : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                        item.site_indexed
+                          ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
+                          : 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
+                      }`}
+                    >
                       {item.site_indexed ? 'Indexed' : 'Pending'}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                     <div className="flex items-center gap-2">
-                      <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                        item.sync_status === 'synced'
-                          ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
-                          : item.sync_status === 'pending'
-                          ? 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
-                          : 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20'
-                      }`}>
-                        {item.sync_status === 'synced' ? 'Synced' : 
-                         item.sync_status === 'pending' ? 'Pending' : 'Error'}
+                      <span
+                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                          item.sitemap_discovered === true
+                            ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
+                            : item.sitemap_discovered === false
+                              ? 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
+                              : 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20'
+                        }`}
+                      >
+                        {item.sitemap_discovered ? (
+                          <span className="text-green-500">
+                            Sitemap Discovered
+                          </span>
+                        ) : (
+                          <span className="text-red-500">False</span>
+                        )}
                       </span>
                       <button
                         onClick={() => handleSyncSitemap(item.url)}
@@ -333,7 +368,9 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                    {item.last_sync ? new Date(item.last_sync).toLocaleDateString() : 'Never'}
+                    {item.last_sync
+                      ? new Date(item.last_sync).toLocaleDateString()
+                      : 'Never'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                     {new Date(item.created_at).toLocaleDateString()}
@@ -343,7 +380,10 @@ export default function YourContentContent({ user }: YourContentContentProps) {
                       <div>
                         <Menu.Button className="flex items-center rounded-full bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
                           <span className="sr-only">Open options</span>
-                          <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+                          <EllipsisVerticalIcon
+                            className="h-5 w-5"
+                            aria-hidden="true"
+                          />
                         </Menu.Button>
                       </div>
 
@@ -389,4 +429,4 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       </div>
     </>
   );
-} 
+}

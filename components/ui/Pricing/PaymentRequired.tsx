@@ -8,6 +8,7 @@ import Pricing from './Pricing';
 import { Tables } from '@/types_db';
 import { calculateTotalIssues } from '../SEOIssuesList';
 import { fetchContentRecommendations } from '@/utils/helpers/content-recommendations';
+import { useWebsite } from '@/contexts/WebsiteContext';
 
 interface PaymentRequiredProps {
   user: User;
@@ -32,6 +33,7 @@ export default function PaymentRequired({ user, children, products, subscription
   const [recommendationData, setRecommendationData] = useState<any>(null);
   const supabase = createClientComponentClient();
   type Product = Tables<'products'>;
+  const { currentWebsite } = useWebsite();
 
   useEffect(() => {
     async function checkPaymentStatus() {
@@ -74,7 +76,7 @@ export default function PaymentRequired({ user, children, products, subscription
         }
 
         // Fetch content recommendations
-        const recommendations = await fetchContentRecommendations(user.id);
+        const recommendations = await fetchContentRecommendations(currentWebsite?.id);
         setRecommendationData(recommendations);
         const hasActiveSubscription = subscription.filter((sub: { status: string; prices: { product_id: string; }; }) => (sub?.status === 'active' || sub?.status === 'trialing')).length > 0;
                 // Set payment required if analysis is complete, has competitors, but no subscription

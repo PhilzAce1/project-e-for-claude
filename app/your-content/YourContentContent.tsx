@@ -33,14 +33,13 @@ export default function YourContentContent({ user }: YourContentContentProps) {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createClientComponentClient();
-  const { currentWebsite } = useWebsite();
 
   useEffect(() => {
     async function fetchContent() {
       const { data, error } = await supabase
         .from('content')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('business_id', user.user_metadata.selected_business_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -62,7 +61,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
           event: '*',
           schema: 'public',
           table: 'content',
-          filter: `user_id=eq.${user.id}`
+          filter: `business_id=eq.${user.user_metadata.selected_business_id}`
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
@@ -75,7 +74,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
     return () => {
       channel.unsubscribe();
     };
-  }, [supabase, user.id]);
+  }, [supabase, user.id, user.user_metadata.selected_business_id]);
 
   const handleContentSubmit = async (url: string, title: string) => {
     try {
@@ -151,7 +150,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
         .from('content')
         .delete()
         .eq('id', contentId)
-        .eq('user_id', user.id);
+        .eq('business_id', currentWebsite?.id);
 
       if (error) {
         // console.error('Error removing content:', error);
@@ -189,7 +188,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
       const { data, error } = await supabase
         .from('content')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('business_id', currentWebsite?.id)
         .order('created_at', { ascending: false });
 
         if (error) {

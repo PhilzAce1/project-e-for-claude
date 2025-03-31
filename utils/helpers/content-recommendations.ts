@@ -1,5 +1,11 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+interface Website {
+  id: string;
+  name: string;
+  domain: string;
+  agency_id: string;
+}
 export const calculateContentRecommendations = (rankings: any) => {
   if (!rankings?.items) return 0;
 
@@ -17,7 +23,7 @@ export const calculateContentRecommendations = (rankings: any) => {
   }).length;
 };
 
-export const fetchContentRecommendations = async (userId: string) => {
+export const fetchContentRecommendations = async (currentWebsite: Website) => {
   const supabase = createClientComponentClient();
   
   try {
@@ -25,7 +31,7 @@ export const fetchContentRecommendations = async (userId: string) => {
     const { data: businessInfo, error: businessError } = await supabase
       .from('business_information')
       .select('rankings_data, target_country')
-      .eq('user_id', userId)
+      .eq('id', currentWebsite?.id)
       .single();
 
     if (businessError) throw businessError;
@@ -34,7 +40,7 @@ export const fetchContentRecommendations = async (userId: string) => {
     const { data: competitors, error: competitorsError } = await supabase
       .from('competitors')
       .select('items')
-      .eq('user_id', userId);
+      .eq('business_id', currentWebsite?.id);
 
     if (competitorsError) throw competitorsError;
 

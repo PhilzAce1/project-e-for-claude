@@ -48,7 +48,7 @@ export default function AuthenticatedLayout({
     const checkCountrySettings = async () => {
       const { data, error } = await supabase
         .from('business_information')
-        .select('target_country')
+        .select('id, target_country')
         .eq('id', user?.user_metadata?.selected_business_id)
         .single();
 
@@ -60,7 +60,7 @@ export default function AuthenticatedLayout({
         setCurrentCountry(data.target_country);
       }
 
-      if (!data?.target_country) {
+      if (data && !data?.target_country) {
         setShowCountrySelector(true);
       } else {
         setShowCountrySelector(false);
@@ -90,7 +90,7 @@ export default function AuthenticatedLayout({
       } catch (error) {
           // console.error('Error checking existing domain:', error)
       }
-  }, [supabase, user.id]);
+  }, [supabase, user.id, user?.user_metadata?.selected_business_id]);
 
   useEffect(() => {
       checkExistingDomain();

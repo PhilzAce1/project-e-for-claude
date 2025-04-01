@@ -43,10 +43,8 @@ export function WebsiteProvider({ children }: { children: React.ReactNode }) {
     // Get websites where user is the direct owner
     const { data: ownedWebsites } = await supabase
       .from('business_information')
-      .select('id, name, domain, agency_id')
+      .select('id,  domain, agency_id')
       .eq('user_id', userId);
-
-    console.log('user id', userId)
 
     // First get the agencies owned by the user
     const { data: agencies } = await supabase
@@ -60,9 +58,6 @@ export function WebsiteProvider({ children }: { children: React.ReactNode }) {
       .select('*')
       .in('agency_id', agencies?.map(agency => agency.id) || []);
       // .eq('agency_id', agencies?.[0]?.id)
-
-    console.log('Agencies found:', agencies);
-    console.log('Agency websites found:', agencyWebsites);
 
     const websiteList = [
       ...(ownedWebsites || []),

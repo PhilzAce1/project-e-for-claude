@@ -5,11 +5,13 @@ export const maxDuration = 300;
 
 export async function POST(request: Request) {
     try {
-        const { domain, userId } = await request.json();
+        const { domain, userId, businessId } = await request.json();
         
         if (!domain || !userId) {
             return NextResponse.json({ error: 'Domain and userId are required' }, { status: 400 });
         }
+
+        console.log('businessId', businessId);
 
         // Create the service role client
         const supabase = createClient(
@@ -39,7 +41,8 @@ export async function POST(request: Request) {
                 user_id: userId,
                 scrape_id: scrape.id,
                 status: 'pending',
-                progress: 'Initializing analysis...'
+                progress: 'Initializing analysis...',
+                business_id: businessId
             })
             .select()
             .single();

@@ -50,7 +50,7 @@ async function insertBusinessInformation(userId: string, domain: string, busines
         // Call get-ranked-keywords endpoint
         fetchRankedKeywords(userId, domain, result[0]?.id);
 
-        return result;
+        return result[0];
     } catch (error) {
         console.error('Error in insertBusinessInformation:', error);
         throw error;
@@ -190,10 +190,11 @@ function createAuthenticatedFetch(username: string, password: string) {
 export async function POST(request: Request) {
     try {
         const { domain, userId, createBusiness = true, businessId } = await request.json()
-        
+        let businessData;
         console.log('Inserting domain into database...', createBusiness, businessId)
         if (createBusiness) {
-            await insertBusinessInformation(userId, domain, businessId)
+            businessData = await insertBusinessInformation(userId, domain, businessId)
+            console.log('Business data:', businessData)
         } else {
             const { data, error } = await serviceRoleClient
                 .from('seo_crawls')
@@ -225,7 +226,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ 
             message: 'SEO crawl and Lighthouse audit initiated successfully', 
-            data: crawlData
+            data: {...crawlData, businessId: businessData?.id}
         }, { status: 200 })
     } catch (error) {
         console.error('Error in API route:', error)

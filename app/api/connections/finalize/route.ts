@@ -128,10 +128,11 @@ export async function POST(req: Request) {
             const analyticsAdmin = google.analyticsadmin('v1beta');
             // Validate the property exists if one was selected
             if (propertyId) {
-              await analyticsAdmin.properties.get({
+              const property = await analyticsAdmin.properties.get({
                 name: `properties/${propertyId}`,
                 auth: oauth2Client,
               });
+              connectionData.property_id = propertyId;
             }
             break;
           }

@@ -105,12 +105,6 @@ export async function GET(req: Request) {
             auth: oauth2Client,
           });
 
-          // For debugging
-          console.log(
-            'Google Analytics accounts raw response:',
-            JSON.stringify(response.data, null, 2),
-          );
-
           accounts = response.data.accounts || [];
 
           // Ensure each account has an id field for consistent handling in the UI

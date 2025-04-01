@@ -142,8 +142,6 @@ export async function POST(req: Request) {
 
             if (error) {
               console.error('Error inserting GSC connection:', error);
-            } else {
-              console.log('GSC connection inserted:', newConnection);
             }
             break;
           }

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-
+import { useWebsite } from '@/contexts/WebsiteContext';
 interface ZeroStateHeroProps {
   title: string;
   subtitle?: string;
@@ -29,7 +29,7 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
-
+    const { loadWebsites } = useWebsite();
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsSubmitting(true)
@@ -49,29 +49,28 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
             }
 
             // Call both APIs in parallel
-            const [seoCrawlResponse, businessAnalysisResponse] = await Promise.all([
-                fetch('/api/init-seo-crawl', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ domain: cleanDomain, userId: user.id, businessId: user.user_metadata?.selected_business_id }),
-                }),
-                fetch('/api/extract-business-information', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ domain: cleanDomain, userId: user.id, businessId: user.user_metadata?.selected_business_id }),
-                })
-            ]);
-
+            const seoCrawlResponse = await fetch('/api/init-seo-crawl', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ domain: cleanDomain, userId: user.id, businessId: user.user_metadata?.selected_business_id }),
+            })
             // Handle responses...
             if (!seoCrawlResponse.ok) {
                 const seoCrawlData = await seoCrawlResponse.json();
                 throw new Error(seoCrawlData.error || 'Failed to submit domain for SEO crawl');
             }
 
+            const seoCrawlData = await seoCrawlResponse.json();
+
+            const businessAnalysisResponse = await fetch('/api/extract-business-information', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ domain: cleanDomain, userId: user.id, businessId: seoCrawlData.data.businessId }),
+          })
             if (!businessAnalysisResponse.ok) {
                 const businessData = await businessAnalysisResponse.json();
                 throw new Error(businessData.error || 'Failed to start business analysis');
@@ -83,9 +82,10 @@ const ZeroStateHero: React.FC<ZeroStateHeroProps> = ({
             if (domainHandler) {
                 domainHandler(cleanDomain);
             }
-
             // Reset form
             setDomain('');
+
+            await loadWebsites();
 
             // Redirect to business information page
             router.push(`/business-information?id=${businessData.data.analysisId}`);

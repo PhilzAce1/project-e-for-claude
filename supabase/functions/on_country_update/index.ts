@@ -51,7 +51,7 @@ serve(async (req) => {
     const { data: competitors, error: competitorsError } = await supabaseClient
       .from('competitors')
       .select('id, domain')
-      .eq('user_id', record.user_id);
+      .eq('business_id', record.business_id);
 
     if (competitorsError) {
       console.error('Error fetching competitors:', competitorsError);

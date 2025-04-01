@@ -40,8 +40,7 @@ export const handleCountrySelect = async (userId: string, country: string, onSuc
         .from('business_information')
         .insert({ 
           user_id: userId,
-          target_country: country,
-          id: selectedBusinessId
+          target_country: country
         });
       error = insertError;
     }

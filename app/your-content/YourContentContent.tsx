@@ -33,7 +33,7 @@ export default function YourContentContent({ user }: YourContentContentProps) {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createClientComponentClient();
-
+  const { currentWebsite } = useWebsite();
   useEffect(() => {
     async function fetchContent() {
       const { data, error } = await supabase

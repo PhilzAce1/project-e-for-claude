@@ -6,11 +6,12 @@ import { cookies } from 'next/headers';
 import SubscriptionPricing from '@/components/ui/SubscriptionPricing';
 
 export default async function ContentPricingPage({ params }: any) {
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createServerComponentClient({ cookies: () => cookieStore as any });
   const [user, products, subscription] = await Promise.all([
     getUser(supabase),
     getProducts(supabase),
-    getSubscriptions(supabase)
+    getSubscriptions(supabase),
   ]);
 
   if (!user) {
@@ -18,12 +19,13 @@ export default async function ContentPricingPage({ params }: any) {
   }
 
   return (
-    <AuthenticatedLayout user={user} products={products} subscription={subscription} disableZeroStateForm={true}>
-      <SubscriptionPricing 
-        user={user}
-        products={products || []}
-        subscription={subscription}
-      />
+    <AuthenticatedLayout
+      user={user}
+      products={products}
+      subscription={subscription}
+      disableZeroStateForm={true}
+    >
+      <SubscriptionPricing user={user} products={products || []} subscription={subscription} />
     </AuthenticatedLayout>
   );
-} 
+}

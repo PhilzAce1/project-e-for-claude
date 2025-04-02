@@ -4,12 +4,10 @@ import Stripe from 'stripe';
 import { stripe } from '@/utils/stripe/config';
 import { createClient } from '@/utils/supabase/server';
 import { createOrRetrieveCustomer } from '@/utils/supabase/admin';
-import {
-  getURL,
-  getErrorRedirect,
-  calculateTrialEndUnixTimestamp
-} from '@/utils/helpers';
+import { getURL, getErrorRedirect, calculateTrialEndUnixTimestamp } from '@/utils/helpers';
 import { Tables } from '@/types_db';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 type Price = Tables<'prices'>;
 
@@ -20,14 +18,14 @@ type CheckoutResponse = {
 
 export async function checkoutWithStripe(
   price: Price & { metadata?: any },
-  redirectPath: string = '/payment-complete'
+  redirectPath: string = '/payment-complete',
 ): Promise<CheckoutResponse> {
   try {
     // Get the user from Supabase auth
     const supabase = await createClient();
     const {
       error,
-      data: { user }
+      data: { user },
     } = await supabase.auth.getUser();
 
     if (error || !user) {
@@ -40,7 +38,7 @@ export async function checkoutWithStripe(
     try {
       customer = await createOrRetrieveCustomer({
         uuid: user?.id || '',
-        email: user?.email || ''
+        email: user?.email || '',
       });
     } catch (err) {
       console.error('Customer error:', err);
@@ -53,25 +51,25 @@ export async function checkoutWithStripe(
       billing_address_collection: 'required',
       customer,
       customer_update: {
-        address: 'auto'
+        address: 'auto',
       },
       line_items: [
         {
           price: price.id,
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ],
       metadata: price.metadata || {},
       cancel_url: getURL(),
-      success_url: getURL('/payment-complete')
+      success_url: getURL('/payment-complete'),
     };
 
     console.log(price);
 
-    if(price.product_id === 'prod_RJ6CHDZl8mv1QM') {
+    if (price.product_id === 'prod_RJ6CHDZl8mv1QM') {
       params.subscription_data = {
-        trial_period_days: 7
-      }
+        trial_period_days: 7,
+      };
     }
 
     // Create a checkout session in Stripe
@@ -99,16 +97,16 @@ export async function checkoutWithStripe(
         errorRedirect: getErrorRedirect(
           redirectPath,
           error.message,
-          'Please try again later or contact a system administrator.'
-        )
+          'Please try again later or contact a system administrator.',
+        ),
       };
     } else {
       return {
         errorRedirect: getErrorRedirect(
           redirectPath,
           'An unknown error occurred.',
-          'Please try again later or contact a system administrator.'
-        )
+          'Please try again later or contact a system administrator.',
+        ),
       };
     }
   }
@@ -116,10 +114,11 @@ export async function checkoutWithStripe(
 
 export async function createStripePortal(currentPath: string) {
   try {
-    const supabase = await createClient();
+    const cookieStore = await cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore as any });
     const {
       error,
-      data: { user }
+      data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
@@ -130,11 +129,11 @@ export async function createStripePortal(currentPath: string) {
     }
 
     let customer;
-    
+
     try {
       customer = await createOrRetrieveCustomer({
         uuid: user.id || '',
-        email: user.email || ''
+        email: user.email || '',
       });
     } catch (err) {
       console.error(err);
@@ -148,7 +147,7 @@ export async function createStripePortal(currentPath: string) {
     try {
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
-        return_url: getURL('/account')
+        return_url: getURL('/account'),
       });
       if (!url) {
         throw new Error('Could not create billing portal');
@@ -164,13 +163,13 @@ export async function createStripePortal(currentPath: string) {
       return getErrorRedirect(
         currentPath,
         error.message,
-        'Please try again later or contact a system administrator.'
+        'Please try again later or contact a system administrator.',
       );
     } else {
       return getErrorRedirect(
         currentPath,
         'An unknown error occurred.',
-        'Please try again later or contact a system administrator.'
+        'Please try again later or contact a system administrator.',
       );
     }
   }

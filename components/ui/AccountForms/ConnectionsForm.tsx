@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { GoogleTagManager, GoogleSearchConsole, GoogleAnalytics } from '@/components/icons/Google';
-import { toast } from '../Toasts/use-toast';
+import { toast } from '@/components/ui/Toasts/use-toast';
+
 import AccountSelectionModal, {
   GoogleAccount,
   AccountSelectionProps,
 } from '@/components/AccountSelectionModal';
+import DisconnectModal from './DisconnectModal';
 
 // Google OAuth types
 interface GoogleOAuthResponse {
@@ -42,6 +44,14 @@ interface ConnectionButtonProps {
   icon: React.ReactNode;
   connected: boolean;
   onClick: () => void;
+  id: string;
+  setConnections: Dispatch<
+    SetStateAction<{
+      searchConsole: any | null;
+      tagManager: any | null;
+      analytics: any | null;
+    }>
+  >;
 }
 
 const ConnectionButton: React.FC<ConnectionButtonProps> = ({
@@ -51,22 +61,75 @@ const ConnectionButton: React.FC<ConnectionButtonProps> = ({
   icon,
   connected,
   onClick,
+  id,
+  setConnections,
 }) => {
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleDisconnect = async (serviceId: string, title: string, onClick: () => void) => {
+    setShowConfirmModal(false);
+    try {
+      const response = await fetch('/api/connections/disconnect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ service: serviceId }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setConnections((prev) => ({
+          ...prev,
+          [serviceId]: null,
+        }));
+        toast({
+          title: 'Disconnected',
+          description: `Successfully disconnected from ${title}`,
+          variant: 'default',
+        });
+      } else {
+        throw new Error(data.error || 'Failed to disconnect');
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      toast({
+        title: 'Disconnection Failed',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const confirmDisconnect = () => {
+    setShowConfirmModal(true);
+  };
+
   return (
-    <button
-      onClick={onClick}
-      disabled={connected || disabled}
-      className={`flex flex-col items-center justify-center p-4 rounded-lg border ${
-        connected
-          ? 'border-green-500 bg-green-50'
-          : 'border-gray-300 hover:border-orange-500 hover:bg-orange-50'
-      } transition-colors`}
-    >
-      {icon}
-      <span className="text-sm font-medium text-gray-900">{title}</span>
-      {connecting && <span className="text-xs text-gray-500 mt-1">Connecting...</span>}
-      {connected && !connecting && <span className="text-xs text-green-600 mt-1">Connected</span>}
-    </button>
+    <>
+      <button
+        onClick={() => {
+          return connected ? confirmDisconnect() : onClick();
+        }}
+        disabled={disabled}
+        className={`flex flex-col items-center justify-center p-4 rounded-lg border ${
+          connected
+            ? 'border-green-500 bg-green-50'
+            : 'border-gray-300 hover:border-orange-500 hover:bg-orange-50'
+        } transition-colors`}
+      >
+        {icon}
+        <span className="text-sm font-medium text-gray-900">{title}</span>
+        {connecting && <span className="text-xs text-gray-500 mt-1">Connecting...</span>}
+        {connected && !connecting && <span className="text-xs text-green-600 mt-1">Connected</span>}
+      </button>
+
+      <DisconnectModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        service={id}
+        onDisconnect={() => handleDisconnect(id, title, onClick)}
+      />
+    </>
   );
 };
 
@@ -354,6 +417,8 @@ export default function ConnectionsForm() {
               icon={service.icon}
               connected={!!connections[service.id as keyof typeof connections]}
               onClick={() => handleGoogleConnect(service.id)}
+              id={service.id}
+              setConnections={setConnections}
             />
           ))}
         </div>

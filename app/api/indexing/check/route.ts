@@ -1,26 +1,24 @@
 import { NextResponse } from 'next/server';
 import {
   createClientComponentClient,
-  createRouteHandlerClient
+  createRouteHandlerClient,
 } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
 async function checkUrlIndexStatus(url: string, accessToken: string) {
-  const endpoint =
-    'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect';
+  const endpoint = 'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect';
 
-  console.log('accessToken', new URL(url).origin, accessToken);
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         inspectionUrl: url,
-        siteUrl: new URL(url).origin + '/' // Make sure to include trailing slash
-      })
+        siteUrl: new URL(url).origin + '/', // Make sure to include trailing slash
+      }),
     });
 
     if (!response.ok) {
@@ -32,7 +30,7 @@ async function checkUrlIndexStatus(url: string, accessToken: string) {
         // Handle non-JSON responses (like HTML error pages)
         const errorText = await response.text();
         throw new Error(
-          `URL Inspection API error (${response.status}): ${errorText.substring(0, 200)}`
+          `URL Inspection API error (${response.status}): ${errorText.substring(0, 200)}`,
         );
       }
     }
@@ -41,7 +39,7 @@ async function checkUrlIndexStatus(url: string, accessToken: string) {
     return {
       url,
       isIndexed: data.inspectionResult?.indexStatusResult?.isIndexed ?? false,
-      lastModified: data.inspectionResult?.indexStatusResult?.lastCrawlTime
+      lastModified: data.inspectionResult?.indexStatusResult?.lastCrawlTime,
     };
   } catch (error) {
     console.error('Error checking URL index status:', error);
@@ -53,7 +51,7 @@ export async function POST(req: Request) {
   try {
     const supabase = createClientComponentClient({
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!
+      supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
     });
     // Get authenticated user
     const { user_id } = await req.json();
@@ -66,10 +64,7 @@ export async function POST(req: Request) {
       .single();
 
     if (gscError || !gscConnection) {
-      return NextResponse.json(
-        { error: 'No valid GSC connection found' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No valid GSC connection found' }, { status: 400 });
     }
 
     // Get content URLs that haven't been checked or are not indexed
@@ -81,25 +76,20 @@ export async function POST(req: Request) {
       .limit(10); // Process in batches to respect API quotas
 
     if (contentError) {
-      return NextResponse.json(
-        { error: 'Failed to fetch content URLs' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to fetch content URLs' }, { status: 500 });
     }
 
     if (!contentUrls || contentUrls.length === 0) {
       return NextResponse.json({
         success: true,
         message: 'No URLs to check',
-        results: []
+        results: [],
       });
     }
 
     // Check indexing status for each URL
     const results = await Promise.allSettled(
-      contentUrls.map(({ url }) =>
-        checkUrlIndexStatus(url, gscConnection.access_token)
-      )
+      contentUrls.map(({ url }) => checkUrlIndexStatus(url, gscConnection.access_token)),
     );
 
     // Update database with results
@@ -109,7 +99,7 @@ export async function POST(req: Request) {
           return {
             id: contentUrls[index].id,
             site_indexed: result.value.isIndexed,
-            last_modified: result.value.lastModified
+            last_modified: result.value.lastModified,
           };
         }
         return null;
@@ -118,9 +108,7 @@ export async function POST(req: Request) {
 
     // Batch update the content table
     if (updates.length > 0) {
-      const { error: updateError } = await supabase
-        .from('content')
-        .upsert(updates);
+      const { error: updateError } = await supabase.from('content').upsert(updates);
 
       if (updateError) {
         console.error('Error updating content index status:', updateError);
@@ -134,17 +122,17 @@ export async function POST(req: Request) {
         status: result.status,
         ...(result.status === 'fulfilled'
           ? { data: result.value }
-          : { error: result.reason.message })
-      }))
+          : { error: result.reason.message }),
+      })),
     });
   } catch (error) {
     console.error('Error in index check route:', error);
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

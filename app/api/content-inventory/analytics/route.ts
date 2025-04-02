@@ -5,8 +5,8 @@ import {
   createServerComponentClient,
 } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { AnalyticsIntegration } from '../../../../utils/AnalyticsIntegration';
-import { getGoogleConnection } from '../../../../utils/googleAuth';
+import { AnalyticsIntegration } from '@/utils/AnalyticsIntegration';
+import { getGoogleConnection } from '@/utils/googleAuth';
 
 interface UpdateAnalyticsRequestBody {
   days?: number;

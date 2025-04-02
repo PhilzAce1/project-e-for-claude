@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { google } from 'googleapis';
 import { cookies } from 'next/headers';
-import { refreshGoogleToken, getGoogleConnection } from '../../../../utils/googleAuth';
+import { refreshGoogleToken, getGoogleConnection } from '@/utils/googleAuth';
 
 interface KeywordData {
   keyword: string;

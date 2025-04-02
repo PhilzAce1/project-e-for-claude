@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { GoogleTagManager, GoogleSearchConsole, GoogleAnalytics } from '@/components/icons/Google';
-import { toast } from '../Toasts/use-toast';
+import { toast } from '@/components/ui/Toasts/use-toast';
+
 import AccountSelectionModal, {
   GoogleAccount,
   AccountSelectionProps,

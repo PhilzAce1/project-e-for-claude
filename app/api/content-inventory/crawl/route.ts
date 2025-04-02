@@ -5,7 +5,7 @@ import {
   createServerComponentClient,
 } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { ContentCrawler } from '../../../../utils/ContentCrawler';
+import { ContentCrawler } from '@/utils/ContentCrawler';
 
 interface CrawlRequestBody {
   siteUrl: string;

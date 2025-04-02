@@ -5,7 +5,7 @@ import {
   createServerComponentClient,
 } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { KeywordClusterer } from '../../../utils/KeywordClusterer';
+import { KeywordClusterer } from '@/utils/KeywordClusterer';
 
 interface ClusteringRequestBody {
   siteUrl: string;

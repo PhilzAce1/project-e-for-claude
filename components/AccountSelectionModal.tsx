@@ -86,6 +86,7 @@ export default function AccountSelectionModal({
             data.properties[0].id ||
             data.properties[0].propertyId ||
             data.properties[0].containerId ||
+            data.properties[0].name.split('/')[1] ||
             '';
           setSelectedProperty(firstPropertyId);
         } else {
@@ -217,10 +218,22 @@ export default function AccountSelectionModal({
                         onChange={handlePropertyChange}
                         className="block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500 sm:text-sm"
                       >
-                        {properties.map((property) => (
+                        {properties.map((property, index) => (
                           <option
-                            key={property.id || property.propertyId || property.containerId}
-                            value={property.id || property.propertyId || property.containerId}
+                            key={
+                              property.id ||
+                              property.propertyId ||
+                              property.containerId ||
+                              property.name?.split('/')[1] ||
+                              index
+                            }
+                            value={
+                              property.id ||
+                              property.propertyId ||
+                              property.containerId ||
+                              property.name?.split('/')[1] ||
+                              ''
+                            }
                           >
                             {getPropertyName(property)}
                           </option>
@@ -256,7 +269,7 @@ export default function AccountSelectionModal({
                     onClick={handleSubmit}
                     disabled={loading || submitting || !selectedAccount}
                   >
-                    Connect
+                    {loading ? 'Connecting...' : 'Connect'}
                   </Button>
                 </div>
               </Dialog.Panel>

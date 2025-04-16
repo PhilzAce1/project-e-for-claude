@@ -17,14 +17,25 @@ export async function GET(request: NextRequest) {
         getErrorRedirect(
           `${requestUrl.origin}/signin/password_signin`,
           error.name,
-          "Sorry, we weren't able to log you in. Please try again."
-        )
+          "Sorry, we weren't able to log you in. Please try again.",
+        ),
       );
     }
 
     // If the exchange was successful, the user is now signed in
     if (data.session) {
-      // Redirect to the dashboard or home page
+      // Check if user was just created (within the last minute)
+      if (data.user && data.user.created_at) {
+        const createdAt = new Date(data.user.created_at);
+        const now = new Date();
+        const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000);
+
+        if (createdAt > oneMinuteAgo) {
+          // This is a new user, redirect to welcome page
+          return NextResponse.redirect(`${requestUrl.origin}/welcome`);
+        }
+      }
+      // Redirect to the dashboard for existing users
       return NextResponse.redirect(`${requestUrl.origin}/`);
     }
   }
